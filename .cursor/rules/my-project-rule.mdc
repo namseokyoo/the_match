@@ -1,0 +1,176 @@
+# The Match - Tournament Management Service Rules
+
+## Project Overview
+The Match is a comprehensive tournament and league management platform that enables users to create brackets, manage teams, and organize various sports competitions. The service supports both individual and organizational user management with match history and performance tracking.
+
+## Technical Stack & Architecture
+- **Frontend**: Next.js 14 + TypeScript + Tailwind CSS
+- **Backend**: Next.js API Routes + Supabase
+- **Database**: Supabase (PostgreSQL) - Free tier: 500MB, 2 databases
+- **Authentication**: Supabase Auth (built-in social providers)
+- **Storage**: Supabase Storage (1GB free) + Cloudinary backup strategy
+- **Deployment**: Vercel (Free tier with custom domain)
+- **Mobile-First**: Responsive design with mobile optimization priority
+
+## Cost Optimization Strategy
+- **Phase 1 (MVP)**: 100% free tier services
+  - Supabase free: 500MB DB, 1GB storage, 50MB file uploads
+  - Vercel free: 100GB bandwidth, unlimited static sites
+  - Next.js built-in optimizations
+- **Phase 2 (Growth)**: Gradual paid tier adoption
+  - Supabase Pro: $25/month for 8GB DB, 100GB storage
+  - Cloudinary for advanced image processing
+  - Custom domain and enhanced features
+- **Migration Strategy**: Database and storage designed for easy migration to AWS/GCP
+
+## Media & Content Management
+- **Image Storage**: Supabase Storage with automatic resizing
+- **File Types**: Profile images, team logos, match photos
+- **Upload Limits**: 50MB per file (Supabase free tier)
+- **CDN**: Supabase built-in CDN for global distribution
+- **Backup Strategy**: Cloudinary integration for seamless migration
+- **Social Features**: Image galleries, match highlights, team showcases
+
+## Future Business Features (Consideration)
+- **Payment Integration**: Stripe for tournament fees
+- **Premium Features**: Advanced analytics, custom branding
+- **Subscription Model**: Monthly/yearly plans for organizers
+- **API Monetization**: Third-party integrations
+
+## Development Standards
+
+### Code Style
+- Use TypeScript for all new code
+- Follow ESLint and Prettier configurations
+- Use meaningful variable and function names
+- Implement proper error handling
+- Add JSDoc comments for complex functions
+- Use async/await instead of promises where possible
+
+### Component Architecture
+- Use functional components with hooks
+- Implement proper prop types and interfaces
+- Create reusable UI components in `/components/ui`
+- Separate business logic from presentation
+- Use compound components for complex UI elements
+
+### Mobile-First Development
+- Design for mobile screens first (320px+)
+- Use responsive breakpoints: mobile (320px), tablet (768px), desktop (1024px)
+- Implement touch-friendly interactions
+- Optimize for thumb navigation
+- Test on actual mobile devices
+
+### Database & API Design
+- Use RESTful API principles
+- Implement proper pagination for large datasets
+- Use database transactions for multi-step operations
+- Create proper indexes for query optimization
+- Implement soft deletes for important data
+
+### Tournament Management Specific Rules
+- Support multiple tournament formats: single elimination, double elimination, round robin, league
+- Allow flexible team/player configurations
+- Implement bracket generation algorithms
+- Support real-time updates during matches
+- Enable tournament scheduling and notifications
+
+### File Organization
+```
+src/
+├── app/              # Next.js 13+ app directory
+├── components/       # Reusable components
+│   ├── ui/          # Base UI components
+│   ├── tournament/  # Tournament-specific components
+│   └── team/        # Team management components
+├── lib/             # Utility functions and configurations
+├── hooks/           # Custom React hooks
+├── types/           # TypeScript type definitions
+├── utils/           # Helper functions
+└── styles/          # Global styles
+```
+
+### Security & Performance
+- Implement proper authentication and authorization
+- Validate all user inputs
+- Use environment variables for sensitive data
+- Implement rate limiting for API endpoints
+- Optimize images and assets
+- Use caching strategies appropriately
+
+### Testing
+- Write unit tests for utility functions
+- Implement integration tests for API endpoints
+- Test responsive design across devices
+- Perform accessibility testing
+
+### Development Workflow
+- Use feature branches for development
+- Write clear commit messages
+- Implement proper error logging
+- Use development log for tracking progress
+- Regular code reviews and refactoring
+
+### Development Log & Reflection Process
+- **Daily Log Updates**: Record all development activities in `dev-log.md`
+- **Self-Reflection**: After each major task, conduct self-reflection and document:
+  - What went well (🟢)
+  - What needs improvement (🔴)
+  - Action items for next development cycle (🔵)
+  - Technical considerations and lessons learned
+- **Continuous Improvement**: Before starting new tasks, review previous reflections:
+  - Check previous improvement points
+  - Avoid repeating same mistakes
+  - Apply learned best practices
+  - Reference technical solutions from past work
+- **Quality Assurance**: Use reflection insights to improve code quality, development speed, and decision-making
+- **Progress Tracking**: Maintain clear visibility of project progress through structured logging
+
+### Git & GitHub Management
+- **Branch Strategy**:
+  - `main`: Production-ready code only
+  - `develop`: Development branch for integration
+  - `feature/*`: Individual feature branches
+  - `hotfix/*`: Emergency fixes for production
+- **Commit Convention**:
+  - `feat:` New features
+  - `fix:` Bug fixes
+  - `docs:` Documentation changes
+  - `style:` Code style changes
+  - `refactor:` Code refactoring
+  - `test:` Test additions or modifications
+  - `chore:` Build process or auxiliary tool changes
+- **Pull Request Process**:
+  - Create PR from feature branch to develop
+  - Require code review before merging
+  - Use squash and merge for clean history
+  - Delete feature branches after merge
+- **Release Process**:
+  - Merge develop to main for releases
+  - Tag releases with semantic versioning
+  - Deploy from main branch only
+
+## Business Logic Rules
+- Support multiple sport types and categories
+- Allow custom tournament rules and scoring
+- Implement user roles: admin, organizer, participant
+- Support both public and private tournaments
+- Enable tournament registration and management
+- Track player/team statistics and history
+
+## UI/UX Guidelines
+- Follow modern design principles
+- Implement consistent color scheme and typography
+- Use intuitive navigation patterns
+- Provide clear feedback for user actions
+- Implement loading states and error messages
+- Design for accessibility (WCAG 2.1 AA)
+
+## Data Management
+- Implement proper data validation
+- Use optimistic updates for better UX
+- Implement offline capabilities where possible
+- Regular data backups and migration strategies
+- GDPR compliance for user data
+alwaysApply: true
+---
