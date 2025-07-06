@@ -30,7 +30,7 @@ export const useAuth = (): UseAuthReturn => {
         }
 
         // 현재 세션 확인
-        const getSession = async () => {
+        const getCurrentSession = async () => {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
                 setSession(session);
@@ -43,12 +43,13 @@ export const useAuth = (): UseAuthReturn => {
             }
         };
 
-        getSession();
+        getCurrentSession();
 
-        // Auth state 변화 감지
+        // 인증 상태 변화 감지
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('Auth state changed:', event, session?.user?.id);
             setSession(session);
             setUser(session?.user ?? null);
             setLoading(false);
@@ -84,39 +85,50 @@ export const useAuth = (): UseAuthReturn => {
     };
 
     const signIn = async (email: string, password: string) => {
-        setLoading(true);
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
+            if (error) throw error;
 
-        setLoading(false);
-        return { error };
+            return { data, error: null };
+        } catch (error) {
+            console.error('Sign in error:', error);
+            return { data: null, error };
+        }
     };
 
     const signUp = async (email: string, password: string, metadata?: Record<string, any>) => {
-        setLoading(true);
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: metadata,
+                },
+            });
 
-        const { error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: metadata,
-            },
-        });
+            if (error) throw error;
 
-        setLoading(false);
-        return { error };
+            return { data, error: null };
+        } catch (error) {
+            console.error('Sign up error:', error);
+            return { data: null, error };
+        }
     };
 
     const signOut = async () => {
-        setLoading(true);
+        try {
+            const { error } = await supabase.auth.signOut();
+            if (error) throw error;
 
-        const { error } = await supabase.auth.signOut();
-
-        setLoading(false);
-        return { error };
+            return { error: null };
+        } catch (error) {
+            console.error('Sign out error:', error);
+            return { error };
+        }
     };
 
     const signInWithGoogle = async () => {
