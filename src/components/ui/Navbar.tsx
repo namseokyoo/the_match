@@ -26,10 +26,16 @@ const SimpleNavbar = () => {
                     {/* 메뉴 */}
                     <div className="flex items-center space-x-4">
                         <Link
-                            href="/tournaments"
+                            href="/matches"
                             className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                         >
-                            토너먼트
+                            경기
+                        </Link>
+                        <Link
+                            href="/teams"
+                            className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                        >
+                            팀
                         </Link>
 
                         {loading ? (
@@ -41,10 +47,16 @@ const SimpleNavbar = () => {
                                     {user?.email?.split('@')[0] || '사용자'}님
                                 </span>
                                 <Link
-                                    href="/tournaments/create"
+                                    href="/teams/create"
+                                    className="bg-match-blue hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                                >
+                                    팀 생성
+                                </Link>
+                                <Link
+                                    href="/matches/create"
                                     className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                                 >
-                                    토너먼트 생성
+                                    경기 생성
                                 </Link>
                                 <button
                                     onClick={handleSignOut}

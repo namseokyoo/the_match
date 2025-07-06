@@ -14,30 +14,21 @@ module.exports = {
                 "2xl": "1400px",
             },
         },
-            extend: {
-      colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        // Custom brand colors for The Match
-        match: {
-          blue: "#2563eb",
-          purple: "#7c3aed",
-          green: "#059669",
-          orange: "#ea580c",
-          red: "#dc2626",
-          gray: "#6b7280",
-        },
+        extend: {
+            colors: {
+                border: "hsl(var(--border))",
+                input: "hsl(var(--input))",
+                ring: "hsl(var(--ring))",
+                background: "hsl(var(--background))",
+                foreground: "hsl(var(--foreground))",
+                primary: {
+                    DEFAULT: "hsl(var(--primary))",
+                    foreground: "hsl(var(--primary-foreground))",
+                },
+                secondary: {
+                    DEFAULT: "hsl(var(--secondary))",
+                    foreground: "hsl(var(--secondary-foreground))",
+                },
                 destructive: {
                     DEFAULT: "hsl(var(--destructive))",
                     foreground: "hsl(var(--destructive-foreground))",
@@ -61,10 +52,11 @@ module.exports = {
                 // The Match specific colors
                 match: {
                     blue: "#2563eb",
-                    green: "#16a34a",
+                    purple: "#7c3aed",
+                    green: "#059669",
                     orange: "#ea580c",
-                    purple: "#9333ea",
                     red: "#dc2626",
+                    gray: "#6b7280",
                 },
             },
             borderRadius: {

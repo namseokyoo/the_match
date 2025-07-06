@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Tournament, TournamentType, TournamentStatus } from '@/types';
-import { TournamentCard } from './TournamentCard';
+import { Match, MatchType, MatchStatus } from '@/types';
+import { MatchCard } from './MatchCard';
 import { Button, Input } from '@/components/ui';
 import { debounce } from '@/lib/utils';
 
-interface TournamentListProps {
-    tournaments: Tournament[];
+interface MatchListProps {
+    matches: Match[];
     loading?: boolean;
     error?: string | null;
     currentUserId?: string;
@@ -17,31 +17,31 @@ interface TournamentListProps {
 
 interface FilterOptions {
     search: string;
-    type: TournamentType | 'all';
-    status: TournamentStatus | 'all';
-    myTournaments: boolean;
+    type: MatchType | 'all';
+    status: MatchStatus | 'all';
+    myMatches: boolean;
 }
 
 const statusOptions = [
     { value: 'all', label: '전체 상태' },
-    { value: TournamentStatus.DRAFT, label: '준비중' },
-    { value: TournamentStatus.REGISTRATION, label: '등록중' },
-    { value: TournamentStatus.IN_PROGRESS, label: '진행중' },
-    { value: TournamentStatus.COMPLETED, label: '완료' },
-    { value: TournamentStatus.CANCELLED, label: '취소' },
+    { value: MatchStatus.DRAFT, label: '준비중' },
+    { value: MatchStatus.REGISTRATION, label: '등록중' },
+    { value: MatchStatus.IN_PROGRESS, label: '진행중' },
+    { value: MatchStatus.COMPLETED, label: '완료' },
+    { value: MatchStatus.CANCELLED, label: '취소' },
 ];
 
 const typeOptions = [
     { value: 'all', label: '전체 유형' },
-    { value: TournamentType.SINGLE_ELIMINATION, label: '단일 토너먼트' },
-    { value: TournamentType.DOUBLE_ELIMINATION, label: '더블 토너먼트' },
-    { value: TournamentType.ROUND_ROBIN, label: '리그전' },
-    { value: TournamentType.SWISS, label: '스위스' },
-    { value: TournamentType.LEAGUE, label: '리그' },
+    { value: MatchType.SINGLE_ELIMINATION, label: '단일 토너먼트' },
+    { value: MatchType.DOUBLE_ELIMINATION, label: '더블 토너먼트' },
+    { value: MatchType.ROUND_ROBIN, label: '리그전' },
+    { value: MatchType.SWISS, label: '스위스' },
+    { value: MatchType.LEAGUE, label: '리그' },
 ];
 
-export const TournamentList: React.FC<TournamentListProps> = ({
-    tournaments,
+export const MatchList: React.FC<MatchListProps> = ({
+    matches,
     loading = false,
     error = null,
     currentUserId,
@@ -54,39 +54,39 @@ export const TournamentList: React.FC<TournamentListProps> = ({
         search: '',
         type: 'all',
         status: 'all',
-        myTournaments: false,
+        myMatches: false,
     });
 
-    const [filteredTournaments, setFilteredTournaments] = useState<Tournament[]>([]);
+    const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
     const [sortBy, setSortBy] = useState<'created_at' | 'start_date' | 'title'>('created_at');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-    // 토너먼트 필터링 및 정렬
+    // 경기 필터링 및 정렬
     useEffect(() => {
-        let filtered = [...tournaments];
+        let filtered = [...matches];
 
         // 검색 필터
         if (filters.search.trim()) {
             const searchTerm = filters.search.toLowerCase();
-            filtered = filtered.filter(tournament =>
-                tournament.title.toLowerCase().includes(searchTerm) ||
-                tournament.description?.toLowerCase().includes(searchTerm)
+            filtered = filtered.filter(match =>
+                match.title.toLowerCase().includes(searchTerm) ||
+                match.description?.toLowerCase().includes(searchTerm)
             );
         }
 
         // 타입 필터
         if (filters.type !== 'all') {
-            filtered = filtered.filter(tournament => tournament.type === filters.type);
+            filtered = filtered.filter(match => match.type === filters.type);
         }
 
         // 상태 필터
         if (filters.status !== 'all') {
-            filtered = filtered.filter(tournament => tournament.status === filters.status);
+            filtered = filtered.filter(match => match.status === filters.status);
         }
 
-        // 내 토너먼트 필터
-        if (filters.myTournaments && currentUserId) {
-            filtered = filtered.filter(tournament => tournament.creator_id === currentUserId);
+        // 내 경기 필터
+        if (filters.myMatches && currentUserId) {
+            filtered = filtered.filter(match => match.creator_id === currentUserId);
         }
 
         // 정렬
@@ -109,8 +109,8 @@ export const TournamentList: React.FC<TournamentListProps> = ({
             }
         });
 
-        setFilteredTournaments(filtered);
-    }, [tournaments, filters, sortBy, sortOrder, currentUserId]);
+        setFilteredMatches(filtered);
+    }, [matches, filters, sortBy, sortOrder, currentUserId]);
 
     // 검색 디바운스
     const debouncedSearchChange = debounce((value: string) => {
@@ -121,21 +121,12 @@ export const TournamentList: React.FC<TournamentListProps> = ({
         setFilters(prev => ({ ...prev, [key]: value }));
     };
 
-    const handleSortChange = (newSortBy: typeof sortBy) => {
-        if (newSortBy === sortBy) {
-            setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-        } else {
-            setSortBy(newSortBy);
-            setSortOrder('desc');
-        }
-    };
-
     const clearFilters = () => {
         setFilters({
             search: '',
             type: 'all',
             status: 'all',
-            myTournaments: false,
+            myMatches: false,
         });
     };
 
@@ -167,7 +158,7 @@ export const TournamentList: React.FC<TournamentListProps> = ({
                     <div>
                         <Input
                             type="text"
-                            placeholder="토너먼트 제목 또는 설명 검색..."
+                            placeholder="경기 제목 또는 설명 검색..."
                             defaultValue={filters.search}
                             onChange={(value) => debouncedSearchChange(value)}
                             className="w-full"
@@ -202,25 +193,23 @@ export const TournamentList: React.FC<TournamentListProps> = ({
                             ))}
                         </select>
 
-                        {/* 내 토너먼트 필터 */}
-                        {currentUserId && (
-                            <label className="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    checked={filters.myTournaments}
-                                    onChange={(e) => handleFilterChange('myTournaments', e.target.checked)}
-                                    className="rounded border-gray-300 text-match-blue focus:ring-match-blue"
-                                />
-                                <span className="text-sm font-medium">내 토너먼트</span>
-                            </label>
-                        )}
+                        {/* 내 경기 필터 */}
+                        <label className="flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                checked={filters.myMatches}
+                                onChange={(e) => handleFilterChange('myMatches', e.target.checked)}
+                                className="rounded border-gray-300 text-match-blue focus:ring-match-blue"
+                            />
+                            <span className="text-sm text-gray-700">내 경기만</span>
+                        </label>
 
                         {/* 필터 초기화 */}
                         <Button
                             variant="outline"
                             size="sm"
                             onClick={clearFilters}
-                            className="w-full"
+                            className="whitespace-nowrap"
                         >
                             필터 초기화
                         </Button>
@@ -228,68 +217,39 @@ export const TournamentList: React.FC<TournamentListProps> = ({
                 </div>
             </div>
 
-            {/* 정렬 및 결과 카운트 */}
-            <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                    총 {filteredTournaments.length}개의 토너먼트
-                </div>
-
-                <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">정렬:</span>
-                    <select
-                        value={`${sortBy}-${sortOrder}`}
-                        onChange={(e) => {
-                            const [newSortBy, newSortOrder] = e.target.value.split('-');
-                            setSortBy(newSortBy as typeof sortBy);
-                            setSortOrder(newSortOrder as typeof sortOrder);
-                        }}
-                        className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent"
-                    >
-                        <option value="created_at-desc">최신 생성순</option>
-                        <option value="created_at-asc">오래된 생성순</option>
-                        <option value="start_date-desc">시작일 (늦은 순)</option>
-                        <option value="start_date-asc">시작일 (빠른 순)</option>
-                        <option value="title-asc">제목 (가나다순)</option>
-                        <option value="title-desc">제목 (역순)</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* 토너먼트 목록 */}
+            {/* 경기 목록 */}
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* 로딩 스켈레톤 */}
                     {[...Array(6)].map((_, i) => (
                         <div key={i} className="animate-pulse">
                             <div className="bg-gray-200 rounded-lg h-64"></div>
                         </div>
                     ))}
                 </div>
-            ) : filteredTournaments.length === 0 ? (
+            ) : filteredMatches.length === 0 ? (
                 <div className="text-center py-12">
                     <div className="text-gray-500 mb-4">
                         <svg className="w-12 h-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
-                        <p className="text-lg font-semibold">토너먼트가 없습니다</p>
+                        <p className="text-lg font-semibold">경기가 없습니다</p>
                         <p className="text-gray-600">
-                            {filters.search || filters.type !== 'all' || filters.status !== 'all' || filters.myTournaments
-                                ? '검색 조건에 맞는 토너먼트가 없습니다.'
-                                : '아직 생성된 토너먼트가 없습니다.'}
+                            {matches.length === 0
+                                ? "아직 생성된 경기가 없습니다."
+                                : "검색 조건에 맞는 경기가 없습니다."}
                         </p>
                     </div>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredTournaments.map((tournament) => (
-                        <TournamentCard
-                            key={tournament.id}
-                            tournament={tournament}
+                    {filteredMatches.map((match) => (
+                        <MatchCard
+                            key={match.id}
+                            match={match}
                             onView={onView}
                             onEdit={onEdit}
                             onDelete={onDelete}
-                            showActions={true}
-                            isOwner={currentUserId === tournament.creator_id}
+                            isOwner={currentUserId === match.creator_id}
                         />
                     ))}
                 </div>
@@ -298,4 +258,4 @@ export const TournamentList: React.FC<TournamentListProps> = ({
     );
 };
 
-export default TournamentList; 
+export default MatchList; 

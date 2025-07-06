@@ -1,39 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Button, Input } from '@/components/ui';
-import { Tournament, TournamentType, TournamentStatus, CreateTournamentForm } from '@/types';
+import { Match, MatchType, MatchStatus, CreateMatchForm } from '@/types';
 
-interface TournamentFormProps {
-    tournament?: Tournament;
-    onSubmit: (data: CreateTournamentForm) => Promise<void>;
+interface MatchFormProps {
+    match?: Match;
+    onSubmit: (data: CreateMatchForm) => Promise<void>;
     onCancel?: () => void;
     isLoading?: boolean;
     mode?: 'create' | 'edit';
 }
 
-// 토너먼트 타입 옵션
-const tournamentTypeOptions = [
-    { value: TournamentType.SINGLE_ELIMINATION, label: '단일 토너먼트' },
-    { value: TournamentType.DOUBLE_ELIMINATION, label: '더블 토너먼트' },
-    { value: TournamentType.ROUND_ROBIN, label: '리그전' },
-    { value: TournamentType.SWISS, label: '스위스' },
-    { value: TournamentType.LEAGUE, label: '리그' },
+// 경기 타입 옵션
+const matchTypeOptions = [
+    { value: MatchType.SINGLE_ELIMINATION, label: '단일 토너먼트' },
+    { value: MatchType.DOUBLE_ELIMINATION, label: '더블 토너먼트' },
+    { value: MatchType.ROUND_ROBIN, label: '리그전' },
+    { value: MatchType.SWISS, label: '스위스' },
+    { value: MatchType.LEAGUE, label: '리그' },
 ];
 
-export const TournamentForm: React.FC<TournamentFormProps> = ({
-    tournament,
+export const MatchForm: React.FC<MatchFormProps> = ({
+    match,
     onSubmit,
     onCancel,
     isLoading = false,
     mode = 'create',
 }) => {
-    const [formData, setFormData] = useState<CreateTournamentForm>({
-        title: tournament?.title || '',
-        description: tournament?.description || '',
-        type: tournament?.type || TournamentType.SINGLE_ELIMINATION,
-        max_participants: tournament?.max_participants || undefined,
-        registration_deadline: tournament?.registration_deadline || '',
-        start_date: tournament?.start_date || '',
-        end_date: tournament?.end_date || '',
+    const [formData, setFormData] = useState<CreateMatchForm>({
+        title: match?.title || '',
+        description: match?.description || '',
+        type: match?.type || MatchType.SINGLE_ELIMINATION,
+        max_participants: match?.max_participants || undefined,
+        registration_deadline: match?.registration_deadline || '',
+        start_date: match?.start_date || '',
+        end_date: match?.end_date || '',
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -44,7 +44,7 @@ export const TournamentForm: React.FC<TournamentFormProps> = ({
 
         // 필수 필드 검증
         if (!formData.title.trim()) {
-            newErrors.title = '토너먼트 제목을 입력해주세요.';
+            newErrors.title = '경기 제목을 입력해주세요.';
         } else if (formData.title.length < 2) {
             newErrors.title = '제목은 최소 2글자 이상이어야 합니다.';
         } else if (formData.title.length > 100) {
@@ -89,7 +89,7 @@ export const TournamentForm: React.FC<TournamentFormProps> = ({
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleInputChange = (field: keyof CreateTournamentForm, value: string | number) => {
+    const handleInputChange = (field: keyof CreateMatchForm, value: string | number) => {
         setFormData(prev => ({ ...prev, [field]: value }));
 
         // 해당 필드 에러 제거
@@ -126,7 +126,7 @@ export const TournamentForm: React.FC<TournamentFormProps> = ({
         <Card className="w-full max-w-2xl mx-auto">
             <CardHeader>
                 <CardTitle className="text-xl font-bold">
-                    {mode === 'create' ? '새 토너먼트 만들기' : '토너먼트 수정'}
+                    {mode === 'create' ? '새 경기 만들기' : '경기 수정'}
                 </CardTitle>
             </CardHeader>
 
@@ -135,14 +135,14 @@ export const TournamentForm: React.FC<TournamentFormProps> = ({
                     {/* 제목 */}
                     <div>
                         <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                            토너먼트 제목 *
+                            경기 제목 *
                         </label>
                         <Input
                             id="title"
                             type="text"
                             value={formData.title}
                             onChange={(value) => handleInputChange('title', value)}
-                            placeholder="토너먼트 제목을 입력하세요"
+                            placeholder="경기 제목을 입력하세요"
                             disabled={isLoading}
                             className={errors.title ? 'border-red-500' : ''}
                         />
@@ -158,7 +158,7 @@ export const TournamentForm: React.FC<TournamentFormProps> = ({
                             id="description"
                             value={formData.description || ''}
                             onChange={(e) => handleInputChange('description', e.target.value)}
-                            placeholder="토너먼트에 대한 설명을 입력하세요"
+                            placeholder="경기에 대한 설명을 입력하세요"
                             disabled={isLoading}
                             rows={3}
                             className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent resize-vertical ${errors.description ? 'border-red-500' : ''
@@ -167,19 +167,19 @@ export const TournamentForm: React.FC<TournamentFormProps> = ({
                         {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
                     </div>
 
-                    {/* 토너먼트 타입 */}
+                    {/* 경기 타입 */}
                     <div>
                         <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-                            토너먼트 유형 *
+                            경기 유형 *
                         </label>
                         <select
                             id="type"
                             value={formData.type}
-                            onChange={(e) => handleInputChange('type', e.target.value as TournamentType)}
+                            onChange={(e) => handleInputChange('type', e.target.value as MatchType)}
                             disabled={isLoading}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent"
                         >
-                            {tournamentTypeOptions.map((option) => (
+                            {matchTypeOptions.map((option) => (
                                 <option key={option.value} value={option.value}>
                                     {option.label}
                                 </option>
@@ -255,17 +255,15 @@ export const TournamentForm: React.FC<TournamentFormProps> = ({
                         </div>
                     </div>
 
-                    {/* 액션 버튼 */}
-                    <div className="flex gap-3 pt-4">
+                    {/* 버튼 */}
+                    <div className="flex gap-3 pt-6">
                         <Button
                             type="submit"
                             disabled={isLoading}
-                            loading={isLoading}
                             className="flex-1"
                         >
-                            {mode === 'create' ? '토너먼트 만들기' : '수정 완료'}
+                            {isLoading ? '저장 중...' : mode === 'create' ? '경기 생성' : '변경 사항 저장'}
                         </Button>
-
                         {onCancel && (
                             <Button
                                 type="button"
@@ -284,4 +282,4 @@ export const TournamentForm: React.FC<TournamentFormProps> = ({
     );
 };
 
-export default TournamentForm; 
+export default MatchForm; 

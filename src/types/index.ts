@@ -26,8 +26,8 @@ export interface Profile {
     updated_at: string;
 }
 
-// Tournament types
-export enum TournamentType {
+// Match types (기존 Tournament에서 변경)
+export enum MatchType {
     SINGLE_ELIMINATION = 'single_elimination',
     DOUBLE_ELIMINATION = 'double_elimination',
     ROUND_ROBIN = 'round_robin',
@@ -35,7 +35,7 @@ export enum TournamentType {
     LEAGUE = 'league',
 }
 
-export enum TournamentStatus {
+export enum MatchStatus {
     DRAFT = 'draft',
     REGISTRATION = 'registration',
     IN_PROGRESS = 'in_progress',
@@ -43,12 +43,12 @@ export enum TournamentStatus {
     CANCELLED = 'cancelled',
 }
 
-export interface Tournament {
+export interface Match {
     id: string;
     title: string;
     description?: string;
-    type: TournamentType;
-    status: TournamentStatus;
+    type: MatchType;
+    status: MatchStatus;
     creator_id: string;
     max_participants?: number;
     registration_deadline?: string;
@@ -67,9 +67,15 @@ export interface Team {
     logo_url?: string;
     description?: string;
     captain_id?: string;
-    tournament_id?: string;
+    match_id?: string; // tournament_id에서 match_id로 변경
     created_at: string;
     updated_at: string;
+}
+
+export interface CreateTeamForm {
+    name: string;
+    description?: string;
+    logo_url?: string;
 }
 
 export interface Player {
@@ -85,8 +91,8 @@ export interface Player {
     updated_at: string;
 }
 
-// Match types
-export enum MatchStatus {
+// Game types (기존 Match에서 변경)
+export enum GameStatus {
     SCHEDULED = 'scheduled',
     IN_PROGRESS = 'in_progress',
     COMPLETED = 'completed',
@@ -94,26 +100,26 @@ export enum MatchStatus {
     POSTPONED = 'postponed',
 }
 
-export interface Match {
+export interface GameResult {
     id: string;
-    tournament_id: string;
+    match_id: string; // tournament_id에서 match_id로 변경
     round?: number;
-    match_number?: number;
+    game_number?: number; // match_number에서 game_number로 변경
     team1_id?: string;
     team2_id?: string;
     scheduled_at?: string;
     started_at?: string;
     completed_at?: string;
-    status: MatchStatus;
+    status: GameStatus;
     venue?: string;
     notes?: string;
     created_at: string;
     updated_at: string;
 }
 
-export interface MatchResult {
+export interface GameDetail {
     id: string;
-    match_id: string;
+    game_id: string; // match_id에서 game_id로 변경
     winner_id?: string;
     team1_score?: number;
     team2_score?: number;
@@ -133,9 +139,9 @@ export enum MediaType {
 export interface Media {
     id: string;
     user_id: string;
-    tournament_id?: string;
+    match_id?: string; // tournament_id에서 match_id로 변경
     team_id?: string;
-    match_id?: string;
+    game_id?: string; // match_id에서 game_id로 변경
     type: MediaType;
     url: string;
     thumbnail_url?: string;
@@ -149,14 +155,14 @@ export interface Media {
 // Bracket types
 export interface BracketNode {
     id: string;
-    tournament_id: string;
+    match_id: string; // tournament_id에서 match_id로 변경
     round: number;
     position: number;
     team1_id?: string;
     team2_id?: string;
     winner_id?: string;
-    match_id?: string;
-    parent_match_id?: string;
+    game_id?: string; // match_id에서 game_id로 변경
+    parent_game_id?: string; // parent_match_id에서 parent_game_id로 변경
     created_at: string;
     updated_at: string;
 }
@@ -168,10 +174,10 @@ export enum UserRole {
     PARTICIPANT = 'participant',
 }
 
-export interface UserTournament {
+export interface UserMatch {
     id: string;
     user_id: string;
-    tournament_id: string;
+    match_id: string; // tournament_id에서 match_id로 변경
     role: UserRole;
     team_id?: string;
     joined_at: string;
@@ -198,10 +204,10 @@ export interface PaginatedResponse<T = any> {
 }
 
 // Form types
-export interface CreateTournamentForm {
+export interface CreateMatchForm {
     title: string;
     description?: string;
-    type: TournamentType;
+    type: MatchType;
     max_participants?: number;
     registration_deadline?: string;
     start_date?: string;
@@ -222,7 +228,7 @@ export interface CreatePlayerForm {
     jersey_number?: number;
 }
 
-// Component props types
+// Component prop types
 export interface BaseComponentProps {
     className?: string;
     children?: React.ReactNode;

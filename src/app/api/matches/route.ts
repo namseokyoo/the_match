@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
-import { TournamentType, TournamentStatus, CreateTournamentForm } from '@/types';
+import { MatchType, MatchStatus, CreateMatchForm } from '@/types';
 
 // Supabase 클라이언트 생성 (서버용)
 const supabaseAdmin = createClient(
@@ -9,19 +9,19 @@ const supabaseAdmin = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// GET /api/tournaments - 토너먼트 목록 조회
+// GET /api/matches - 경기 목록 조회
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '10');
-        const status = searchParams.get('status') as TournamentStatus | null;
-        const type = searchParams.get('type') as TournamentType | null;
+        const status = searchParams.get('status');
+        const type = searchParams.get('type');
         const search = searchParams.get('search');
         const creatorId = searchParams.get('creator_id');
 
         let query = supabaseAdmin
-            .from('tournaments')
+            .from('tournaments') // DB 테이블명은 일단 유지 (추후 마이그레이션)
             .select('*');
 
         // 필터 적용
@@ -49,19 +49,19 @@ export async function GET(request: NextRequest) {
             .order('created_at', { ascending: false })
             .range(from, to);
 
-        const { data: tournaments, error, count } = await query;
+        const { data: matches, error, count } = await query;
 
         if (error) {
-            console.error('토너먼트 목록 조회 오류:', error);
+            console.error('경기 목록 조회 오류:', error);
             return NextResponse.json(
-                { error: '토너먼트 목록을 불러오는 중 오류가 발생했습니다.' },
+                { error: '경기 목록을 불러오는 중 오류가 발생했습니다.' },
                 { status: 500 }
             );
         }
 
         // 전체 개수 조회 (페이지네이션용)
         let countQuery = supabaseAdmin
-            .from('tournaments')
+            .from('tournaments') // DB 테이블명은 일단 유지
             .select('id', { count: 'exact', head: true });
 
         if (status && status !== 'all') {
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            data: tournaments,
+            data: matches,
             pagination: {
                 page,
                 limit,
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('토너먼트 목록 조회 오류:', error);
+        console.error('경기 목록 조회 오류:', error);
         return NextResponse.json(
             { error: '서버 오류가 발생했습니다.' },
             { status: 500 }
@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST /api/tournaments - 토너먼트 생성
+// POST /api/matches - 경기 생성
 export async function POST(request: NextRequest) {
     try {
         const authHeader = request.headers.get('authorization');
@@ -124,10 +124,10 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const body: CreateTournamentForm = await request.json();
+        const body: CreateMatchForm = await request.json();
 
         // 입력값 검증
-        const validationErrors = validateTournamentData(body);
+        const validationErrors = validateMatchData(body);
         if (validationErrors.length > 0) {
             return NextResponse.json(
                 { error: '입력값이 올바르지 않습니다.', details: validationErrors },
@@ -135,12 +135,12 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 토너먼트 생성 데이터 준비
-        const tournamentData = {
+        // 경기 생성 데이터 준비
+        const matchData = {
             title: body.title.trim(),
             description: body.description?.trim() || null,
             type: body.type,
-            status: TournamentStatus.DRAFT,
+            status: MatchStatus.DRAFT,
             creator_id: user.id,
             max_participants: body.max_participants || null,
             registration_deadline: body.registration_deadline || null,
@@ -150,28 +150,28 @@ export async function POST(request: NextRequest) {
             settings: {},
         };
 
-        const { data: tournament, error } = await supabaseAdmin
-            .from('tournaments')
-            .insert([tournamentData])
+        const { data: match, error } = await supabaseAdmin
+            .from('tournaments') // DB 테이블명은 일단 유지
+            .insert([matchData])
             .select()
             .single();
 
         if (error) {
-            console.error('토너먼트 생성 오류:', error);
+            console.error('경기 생성 오류:', error);
             return NextResponse.json(
-                { error: '토너먼트 생성 중 오류가 발생했습니다.' },
+                { error: '경기 생성 중 오류가 발생했습니다.' },
                 { status: 500 }
             );
         }
 
         return NextResponse.json({
             success: true,
-            data: tournament,
-            message: '토너먼트가 성공적으로 생성되었습니다.',
+            data: match,
+            message: '경기가 성공적으로 생성되었습니다.',
         }, { status: 201 });
 
     } catch (error) {
-        console.error('토너먼트 생성 오류:', error);
+        console.error('경기 생성 오류:', error);
         return NextResponse.json(
             { error: '서버 오류가 발생했습니다.' },
             { status: 500 }
@@ -179,8 +179,8 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// 토너먼트 데이터 검증 함수
-function validateTournamentData(data: CreateTournamentForm): string[] {
+// 경기 데이터 검증 함수
+function validateMatchData(data: CreateMatchForm): string[] {
     const errors: string[] = [];
 
     // 제목 검증
@@ -197,9 +197,9 @@ function validateTournamentData(data: CreateTournamentForm): string[] {
         errors.push('설명은 500글자를 초과할 수 없습니다.');
     }
 
-    // 토너먼트 타입 검증
-    if (!data.type || !Object.values(TournamentType).includes(data.type)) {
-        errors.push('올바른 토너먼트 유형을 선택해주세요.');
+    // 경기 타입 검증
+    if (!data.type || !Object.values(MatchType).includes(data.type)) {
+        errors.push('올바른 경기 유형을 선택해주세요.');
     }
 
     // 최대 참가팀 수 검증

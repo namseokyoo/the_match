@@ -93,10 +93,10 @@ export const useAuth = (): UseAuthReturn => {
 
             if (error) throw error;
 
-            return { data, error: null };
+            return { error: null };
         } catch (error) {
             console.error('Sign in error:', error);
-            return { data: null, error };
+            return { error };
         }
     };
 
@@ -112,10 +112,10 @@ export const useAuth = (): UseAuthReturn => {
 
             if (error) throw error;
 
-            return { data, error: null };
+            return { error: null };
         } catch (error) {
             console.error('Sign up error:', error);
-            return { data: null, error };
+            return { error };
         }
     };
 
