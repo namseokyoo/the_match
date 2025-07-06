@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Navbar from '@/components/ui/Navbar';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -74,9 +75,13 @@ export default function RootLayout({
             <body className={inter.className}>
                 <div className="min-h-screen bg-background font-sans antialiased">
                     <div className="relative flex min-h-screen flex-col">
-                        <div className="flex-1">
+                        {/* 네비게이션 바 - 임시 비활성화 */}
+                        <Navbar />
+
+                        {/* 메인 콘텐츠 */}
+                        <main className="flex-1">
                             {children}
-                        </div>
+                        </main>
                     </div>
                 </div>
             </body>
