@@ -1,6 +1,36 @@
+'use client';
+
 import { Trophy, Users, Calendar, BarChart3 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Home() {
+    const router = useRouter();
+    const { user } = useAuth();
+
+    // 토너먼트 생성 페이지로 이동
+    const handleCreateTournament = () => {
+        if (!user) {
+            router.push('/login');
+        } else {
+            router.push('/tournaments/create');
+        }
+    };
+
+    // 토너먼트 목록 페이지로 이동
+    const handleViewTournaments = () => {
+        router.push('/tournaments');
+    };
+
+    // 시작하기 버튼 (회원가입 또는 토너먼트 페이지로)
+    const handleGetStarted = () => {
+        if (!user) {
+            router.push('/signup');
+        } else {
+            router.push('/tournaments');
+        }
+    };
+
     return (
         <div className="flex min-h-screen flex-col">
             {/* Hero Section */}
@@ -20,11 +50,17 @@ export default function Home() {
                         경기 결과를 추적하는 모바일 최적화 플랫폼
                     </p>
                     <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-                        <button className="touch-target rounded-lg bg-white px-8 py-3 font-semibold text-match-blue transition-all hover:bg-white/90 hover:shadow-lg">
+                        <button
+                            onClick={handleCreateTournament}
+                            className="touch-target rounded-lg bg-white px-8 py-3 font-semibold text-match-blue transition-all hover:bg-white/90 hover:shadow-lg"
+                        >
                             토너먼트 생성하기
                         </button>
-                        <button className="touch-target rounded-lg border-2 border-white px-8 py-3 font-semibold text-white transition-all hover:bg-white hover:text-match-blue">
-                            데모 보기
+                        <button
+                            onClick={handleViewTournaments}
+                            className="touch-target rounded-lg border-2 border-white px-8 py-3 font-semibold text-white transition-all hover:bg-white hover:text-match-blue"
+                        >
+                            토너먼트 보기
                         </button>
                     </div>
                 </div>
@@ -86,8 +122,11 @@ export default function Home() {
                     <p className="mb-8 text-xl text-gray-600">
                         무료로 The Match를 체험해보고 토너먼트 관리의 새로운 경험을 만나보세요
                     </p>
-                    <button className="touch-target rounded-lg bg-match-blue px-8 py-3 font-semibold text-white transition-all hover:bg-match-blue/90 hover:shadow-lg">
-                        무료로 시작하기
+                    <button
+                        onClick={handleGetStarted}
+                        className="touch-target rounded-lg bg-match-blue px-8 py-3 font-semibold text-white transition-all hover:bg-match-blue/90 hover:shadow-lg"
+                    >
+                        {user ? '토너먼트 보기' : '무료로 시작하기'}
                     </button>
                 </div>
             </section>

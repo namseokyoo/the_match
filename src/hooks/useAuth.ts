@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { supabase, hasValidSupabaseConfig } from '@/lib/supabase';
 
 interface UseAuthReturn {
     user: User | null;
@@ -13,6 +13,8 @@ interface UseAuthReturn {
     signOut: () => Promise<{ error: AuthError | null }>;
     signInWithGoogle: () => Promise<{ error: AuthError | null }>;
     resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+    isAuthenticated: boolean;
+    hasValidConfig: boolean;
 }
 
 export const useAuth = (): UseAuthReturn => {
@@ -21,23 +23,29 @@ export const useAuth = (): UseAuthReturn => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Get initial session
-        const getInitialSession = async () => {
-            const { data: { session }, error } = await supabase.auth.getSession();
+        // Supabase 설정이 유효하지 않으면 로딩만 false로 설정
+        if (!hasValidSupabaseConfig()) {
+            setLoading(false);
+            return;
+        }
 
-            if (error) {
-                console.error('Error getting session:', error);
-            } else {
+        // 현재 세션 확인
+        const getSession = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
                 setSession(session);
                 setUser(session?.user ?? null);
+            } catch (error) {
+                console.error('Error getting session:', error);
+                setUser(null);
+            } finally {
+                setLoading(false);
             }
-
-            setLoading(false);
         };
 
-        getInitialSession();
+        getSession();
 
-        // Listen for auth changes
+        // Auth state 변화 감지
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -142,5 +150,7 @@ export const useAuth = (): UseAuthReturn => {
         signOut,
         signInWithGoogle,
         resetPassword,
+        isAuthenticated: !!user,
+        hasValidConfig: hasValidSupabaseConfig(),
     };
 }; 
