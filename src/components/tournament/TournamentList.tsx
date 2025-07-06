@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tournament, TournamentType, TournamentStatus } from '@/types';
 import { TournamentCard } from './TournamentCard';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { Button, Input } from '@/components/ui';
 import { debounce } from '@/lib/utils';
 
 interface TournamentListProps {

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { TournamentList } from '@/components/tournament';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui';
 import { Tournament } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 

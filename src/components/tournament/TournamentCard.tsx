@@ -1,6 +1,5 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle, Button } from '@/components/ui';
 import { Tournament, TournamentType, TournamentStatus } from '@/types';
 import { formatDate } from '@/lib/utils';
 
