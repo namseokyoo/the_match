@@ -1,31 +1,32 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-        'Missing Supabase environment variables. Please check your .env.local file.\n' +
-        'Required variables:\n' +
-        '- NEXT_PUBLIC_SUPABASE_URL\n' +
-        '- NEXT_PUBLIC_SUPABASE_ANON_KEY'
-    );
-}
-
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true,
-    },
-});
+// 안전한 기본값을 사용하여 클라이언트 생성
+export const supabase = createClient<Database>(
+    supabaseUrl || 'https://placeholder.supabase.co',
+    supabaseAnonKey || 'placeholder-key',
+    {
+        auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: true,
+        },
+    }
+);
 
 export default supabase;
 
 // 환경 변수 존재 여부 확인 함수
 export const hasValidSupabaseConfig = () => {
-    return !!(supabaseUrl && supabaseAnonKey);
+    return !!(
+        process.env.NEXT_PUBLIC_SUPABASE_URL &&
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+        process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co' &&
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== 'placeholder-key'
+    );
 };
 
 // Auth helper functions
