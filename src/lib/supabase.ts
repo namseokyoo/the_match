@@ -17,6 +17,9 @@ export const supabase = createClient<Database>(
     }
 );
 
+// createClient 함수도 export
+export { createClient };
+
 export default supabase;
 
 // 환경 변수 존재 여부 확인 함수

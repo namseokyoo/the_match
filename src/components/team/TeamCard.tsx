@@ -23,14 +23,14 @@ export const TeamCard: React.FC<TeamCardProps> = ({
 }) => {
     const playerCount = players.length;
     const captainInfo = players.find(p => p.id === team.captain_id);
-    
+
     const handleClick = (e: React.MouseEvent) => {
         if (onClick) {
             e.preventDefault();
             onClick();
         }
     };
-    
+
     const cardContent = (
         <Card className={`hover:shadow-lg transition-shadow duration-200 cursor-pointer ${className}`}>
             <div className="p-6">
@@ -49,7 +49,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                                 {team.name.charAt(0).toUpperCase()}
                             </div>
                         )}
-                        
+
                         <div>
                             <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
                                 {team.name}
@@ -61,7 +61,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                             )}
                         </div>
                     </div>
-                    
+
                     {/* 선수 수 */}
                     <div className="text-right">
                         <div className="text-sm text-gray-500">선수</div>
@@ -70,24 +70,14 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                         </div>
                     </div>
                 </div>
-                
+
                 {/* 팀 설명 */}
                 {team.description && (
                     <p className="text-gray-700 text-sm mb-4 line-clamp-2">
                         {team.description}
                     </p>
                 )}
-                
-                {/* 토너먼트 정보 (선택적) */}
-                {showTournament && team.tournament && (
-                    <div className="mb-4 p-2 bg-gray-50 rounded-lg">
-                        <div className="text-xs text-gray-500 mb-1">참가 토너먼트</div>
-                        <div className="text-sm font-medium text-gray-900">
-                            {team.tournament.title}
-                        </div>
-                    </div>
-                )}
-                
+
                 {/* 선수 목록 미리보기 */}
                 {playerCount > 0 && (
                     <div className="mb-4">
@@ -114,7 +104,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                         </div>
                     </div>
                 )}
-                
+
                 {/* 팀 정보 푸터 */}
                 <div className="flex items-center justify-between text-xs text-gray-500">
                     <span>생성일: {formatDate(team.created_at)}</span>
@@ -125,7 +115,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
             </div>
         </Card>
     );
-    
+
     if (onClick) {
         return (
             <div onClick={handleClick}>
@@ -133,7 +123,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
             </div>
         );
     }
-    
+
     return (
         <Link href={`/teams/${team.id}`} className="block">
             {cardContent}

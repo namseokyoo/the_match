@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Team, CreateTeamForm, Tournament } from '@/types';
+import { Team, CreateTeamForm, Match } from '@/types';
 import { Button, Input, Card } from '@/components/ui';
 
 interface TeamFormProps {
     team?: Team;
-    tournaments?: Tournament[];
+    matches?: Match[];
     loading?: boolean;
     onSubmit: (data: CreateTeamForm & { match_id?: string }) => Promise<void>;
     onCancel?: () => void;
@@ -14,7 +14,7 @@ interface TeamFormProps {
 
 export const TeamForm: React.FC<TeamFormProps> = ({
     team,
-    tournaments = [],
+    matches = [],
     loading = false,
     onSubmit,
     onCancel,
@@ -191,7 +191,7 @@ export const TeamForm: React.FC<TeamFormProps> = ({
                     </div>
 
                     {/* 경기 선택 */}
-                    {tournaments.length > 0 && (
+                    {matches.length > 0 && (
                         <div>
                             <label htmlFor="match_id" className="block text-sm font-medium text-gray-700 mb-2">
                                 참가할 경기
@@ -204,9 +204,9 @@ export const TeamForm: React.FC<TeamFormProps> = ({
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                             >
                                 <option value="">경기를 선택하세요 (선택사항)</option>
-                                {tournaments.map((tournament) => (
-                                    <option key={tournament.id} value={tournament.id}>
-                                        {tournament.title}
+                                {matches.map((match) => (
+                                    <option key={match.id} value={match.id}>
+                                        {match.title}
                                     </option>
                                 ))}
                             </select>

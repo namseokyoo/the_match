@@ -196,7 +196,18 @@ export const MatchForm: React.FC<MatchFormProps> = ({
                             id="max_participants"
                             type="number"
                             value={formData.max_participants?.toString() || ''}
-                            onChange={(value) => handleInputChange('max_participants', value ? parseInt(value) : undefined)}
+                            onChange={(value) => {
+                                const numValue = value ? parseInt(value) : undefined;
+                                setFormData(prev => ({ ...prev, max_participants: numValue }));
+                                // 에러 제거
+                                if (errors.max_participants) {
+                                    setErrors(prev => {
+                                        const newErrors = { ...prev };
+                                        delete newErrors.max_participants;
+                                        return newErrors;
+                                    });
+                                }
+                            }}
                             placeholder="예: 16"
                             disabled={isLoading}
                             className={errors.max_participants ? 'border-red-500' : ''}

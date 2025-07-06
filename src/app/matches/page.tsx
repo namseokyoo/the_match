@@ -11,7 +11,7 @@ export default function MatchesPage() {
     const [matches, setMatches] = useState<Match[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { user, loading: authLoading } = useAuth();
+    const { user, getAccessToken, loading: authLoading } = useAuth();
     const router = useRouter();
 
     // 경기 목록 조회
@@ -61,10 +61,16 @@ export default function MatchesPage() {
         if (!confirmDelete) return;
 
         try {
+            const token = await getAccessToken();
+            if (!token) {
+                alert('인증 토큰을 가져올 수 없습니다.');
+                return;
+            }
+
             const response = await fetch(`/api/matches/${id}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${user.access_token}`,
+                    'Authorization': `Bearer ${token}`,
                 },
             });
 

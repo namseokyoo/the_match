@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Team, Player, Tournament } from '@/types';
+import { Team, Player, Match } from '@/types';
 import { Button, Card } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
 
 interface TeamDetailProps {
     team: Team;
     players?: Player[];
-    tournament?: Tournament;
+    match?: Match;
     currentUserId?: string;
     loading?: boolean;
     onEdit?: (id: string) => void;
@@ -22,7 +22,7 @@ interface TeamDetailProps {
 export const TeamDetail: React.FC<TeamDetailProps> = ({
     team,
     players = [],
-    tournament,
+    match,
     currentUserId,
     loading = false,
     onEdit,
@@ -33,10 +33,10 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
     isOwner = false,
 }) => {
     const [expandedPlayer, setExpandedPlayer] = useState<string | null>(null);
-    
+
     const playerCount = players.length;
     const captainInfo = players.find(p => p.id === team.captain_id);
-    
+
     // 선수 위치별 그룹핑
     const playersByPosition = players.reduce((acc, player) => {
         const position = player.position || '포지션 미정';
@@ -46,12 +46,12 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
         acc[position].push(player);
         return acc;
     }, {} as Record<string, Player[]>);
-    
+
     // 선수 세부 정보 토글
     const togglePlayerDetails = (playerId: string) => {
         setExpandedPlayer(expandedPlayer === playerId ? null : playerId);
     };
-    
+
     return (
         <div className="space-y-6">
             {/* 팀 헤더 */}
@@ -70,7 +70,7 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                                 {team.name.charAt(0).toUpperCase()}
                             </div>
                         )}
-                        
+
                         <div className="flex-1">
                             <h1 className="text-3xl font-bold text-gray-900 mb-2">
                                 {team.name}
@@ -86,7 +86,7 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                             </div>
                         </div>
                     </div>
-                    
+
                     {/* 액션 버튼 */}
                     {isOwner && (
                         <div className="flex gap-2 mt-4 md:mt-0">
@@ -109,7 +109,7 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                         </div>
                     )}
                 </div>
-                
+
                 {/* 팀 설명 */}
                 {team.description && (
                     <div className="mt-4 pt-4 border-t border-gray-200">
@@ -117,7 +117,7 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                     </div>
                 )}
             </div>
-            
+
             {/* 팀 정보 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* 기본 정보 */}
@@ -152,31 +152,31 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                         </div>
                     </div>
                 </Card>
-                
-                {/* 토너먼트 정보 */}
-                {tournament && (
+
+                {/* 매치 정보 */}
+                {match && (
                     <Card>
                         <div className="p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">참가 토너먼트</h3>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">참가 매치</h3>
                             <div className="space-y-3">
                                 <div className="flex justify-between">
-                                    <span className="text-gray-600">토너먼트명</span>
-                                    <span className="font-medium">{tournament.title}</span>
+                                    <span className="text-gray-600">매치명</span>
+                                    <span className="font-medium">{match.title}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">상태</span>
-                                    <span className="font-medium">{tournament.status}</span>
+                                    <span className="font-medium">{match.status}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">형식</span>
-                                    <span className="font-medium">{tournament.type}</span>
+                                    <span className="font-medium">{match.type}</span>
                                 </div>
                             </div>
                         </div>
                     </Card>
                 )}
             </div>
-            
+
             {/* 선수 목록 */}
             <Card>
                 <div className="p-6">
@@ -195,7 +195,7 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                             </Button>
                         )}
                     </div>
-                    
+
                     {playerCount === 0 ? (
                         <div className="text-center py-8">
                             <div className="text-gray-500 mb-2">
@@ -248,7 +248,7 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                                                             )}
                                                         </div>
                                                     </div>
-                                                    
+
                                                     {isOwner && (
                                                         <div className="flex items-center space-x-1">
                                                             <button
@@ -281,7 +281,7 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                                                         </div>
                                                     )}
                                                 </div>
-                                                
+
                                                 {/* 선수 상세 정보 (확장 시) */}
                                                 {expandedPlayer === player.id && (
                                                     <div className="mt-3 pt-3 border-t border-gray-100 text-sm">

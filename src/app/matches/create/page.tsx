@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function CreateMatchPage() {
     const [isLoading, setIsLoading] = useState(false);
-    const { user, loading: authLoading } = useAuth();
+    const { user, getAccessToken, loading: authLoading } = useAuth();
     const router = useRouter();
 
     // 경기 생성 핸들러
@@ -22,11 +22,17 @@ export default function CreateMatchPage() {
         try {
             setIsLoading(true);
 
+            const token = await getAccessToken();
+            if (!token) {
+                alert('인증 토큰을 가져올 수 없습니다.');
+                return;
+            }
+
             const response = await fetch('/api/matches', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user.access_token}`,
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify(formData),
             });

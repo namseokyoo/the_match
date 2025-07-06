@@ -235,6 +235,7 @@ export interface BaseComponentProps {
 }
 
 export interface ButtonProps extends BaseComponentProps {
+    type?: 'button' | 'submit' | 'reset';
     variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
     size?: 'sm' | 'md' | 'lg';
     disabled?: boolean;
@@ -243,6 +244,7 @@ export interface ButtonProps extends BaseComponentProps {
 }
 
 export interface InputProps extends BaseComponentProps {
+    id?: string;
     type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
     placeholder?: string;
     value?: string;
@@ -257,4 +259,38 @@ export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 export type DeepPartial<T> = {
     [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-}; 
+};
+
+// Participant types (경기 참가 관련)
+export enum ParticipantStatus {
+    PENDING = 'pending',
+    APPROVED = 'approved',
+    REJECTED = 'rejected',
+}
+
+export interface MatchParticipant {
+    id: string;
+    match_id: string;
+    team_id: string;
+    status: ParticipantStatus;
+    applied_at: string;
+    responded_at?: string;
+    response_by?: string;
+    notes?: string;
+    created_at: string;
+    updated_at: string;
+
+    // 조인된 데이터
+    team?: Team;
+    match?: Match;
+    responder?: User;
+}
+
+export interface ApplyToMatchForm {
+    notes?: string;
+}
+
+export interface ParticipantResponse {
+    status: ParticipantStatus.APPROVED | ParticipantStatus.REJECTED;
+    notes?: string;
+} 

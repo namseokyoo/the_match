@@ -2,40 +2,56 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Tournament, CreateTeamForm } from '@/types';
+import { Match, CreateTeamForm } from '@/types';
 import { TeamForm } from '@/components/team';
 import { useAuth } from '@/hooks/useAuth';
-import { createClient } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export default function CreateTeamPage() {
-    const [tournaments, setTournaments] = useState<Tournament[]>([]);
+    const [tournaments, setTournaments] = useState<Match[]>([]);
     const [loading, setLoading] = useState(false);
     const [tournamentsLoading, setTournamentsLoading] = useState(true);
 
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
-    const supabase = createClient();
 
-    // 토너먼트 목록 조회 (팀이 참가할 수 있는 토너먼트들)
+    // 매치 목록 조회 (팀이 참가할 수 있는 매치들)
     const fetchTournaments = async () => {
         try {
             setTournamentsLoading(true);
 
             const { data, error } = await supabase
-                .from('tournaments')
-                .select('id, title, status, type')
+                .from('matches')
+                .select('id, title, status, type, creator_id, created_at, updated_at')
                 .in('status', ['draft', 'registration'])
                 .order('created_at', { ascending: false })
                 .limit(50);
 
             if (error) {
-                console.error('Tournaments fetch error:', error);
+                console.error('Matches fetch error:', error);
                 setTournaments([]);
             } else {
-                setTournaments(data || []);
+                // 타입 변환
+                const matches: Match[] = (data || []).map((item: any) => ({
+                    id: item.id,
+                    title: item.title,
+                    status: item.status,
+                    type: item.type,
+                    creator_id: item.creator_id,
+                    created_at: item.created_at,
+                    updated_at: item.updated_at,
+                    description: undefined,
+                    max_participants: undefined,
+                    registration_deadline: undefined,
+                    start_date: undefined,
+                    end_date: undefined,
+                    rules: undefined,
+                    settings: undefined,
+                }));
+                setTournaments(matches);
             }
         } catch (error) {
-            console.error('Tournaments fetch error:', error);
+            console.error('Matches fetch error:', error);
             setTournaments([]);
         } finally {
             setTournamentsLoading(false);
@@ -56,7 +72,7 @@ export default function CreateTeamPage() {
 
     // 팀 생성 핸들러
     const handleCreateTeam = async (formData: CreateTeamForm & { match_id?: string }) => {
-        if (!user || !user.session) {
+        if (!user) {
             alert('로그인이 필요합니다.');
             router.push('/login');
             return;
@@ -171,7 +187,7 @@ export default function CreateTeamPage() {
 
                 {/* 팀 생성 폼 */}
                 <TeamForm
-                    tournaments={tournaments}
+                    matches={tournaments}
                     loading={loading || tournamentsLoading}
                     onSubmit={handleCreateTeam}
                     onCancel={handleCancel}

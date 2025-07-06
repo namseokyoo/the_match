@@ -13,6 +13,7 @@ interface UseAuthReturn {
     signOut: () => Promise<{ error: AuthError | null }>;
     signInWithGoogle: () => Promise<{ error: AuthError | null }>;
     resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+    getAccessToken: () => Promise<string | null>;
     isAuthenticated: boolean;
     hasValidConfig: boolean;
 }
@@ -55,7 +56,7 @@ export const useAuth = (): UseAuthReturn => {
             setLoading(false);
 
             // Handle profile creation on sign up
-            if (event === 'SIGNED_UP' && session?.user) {
+            if (event === 'SIGNED_IN' && session?.user && !user) {
                 await createUserProfile(session.user);
             }
         });
@@ -96,7 +97,7 @@ export const useAuth = (): UseAuthReturn => {
             return { error: null };
         } catch (error) {
             console.error('Sign in error:', error);
-            return { error };
+            return { error: error as AuthError };
         }
     };
 
@@ -115,7 +116,7 @@ export const useAuth = (): UseAuthReturn => {
             return { error: null };
         } catch (error) {
             console.error('Sign up error:', error);
-            return { error };
+            return { error: error as AuthError };
         }
     };
 
@@ -127,7 +128,7 @@ export const useAuth = (): UseAuthReturn => {
             return { error: null };
         } catch (error) {
             console.error('Sign out error:', error);
-            return { error };
+            return { error: error as AuthError };
         }
     };
 
@@ -153,6 +154,20 @@ export const useAuth = (): UseAuthReturn => {
         return { error };
     };
 
+    const getAccessToken = async (): Promise<string | null> => {
+        try {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error || !session) {
+                console.error('Error getting session for access token:', error);
+                return null;
+            }
+            return session.access_token;
+        } catch (error) {
+            console.error('Error getting access token:', error);
+            return null;
+        }
+    };
+
     return {
         user,
         session,
@@ -162,6 +177,7 @@ export const useAuth = (): UseAuthReturn => {
         signOut,
         signInWithGoogle,
         resetPassword,
+        getAccessToken,
         isAuthenticated: !!user,
         hasValidConfig: hasValidSupabaseConfig(),
     };
