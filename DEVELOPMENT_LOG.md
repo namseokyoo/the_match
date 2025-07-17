@@ -272,3 +272,12 @@
 - `MatchDetail` - 경기 상세 정보
 - `TeamCard` - 팀 카드
 - `MatchForm` - 경기 생성/수정 폼 
+
+## 2024-06-08
+- 메인화면(page.tsx)에서 모든 '토너먼트' 용어를 '경기'로 변경
+- 버튼, 안내문구, 주석, 변수명, 라우팅(/tournaments → /matches, /tournaments/create → /matches/create) 일괄 수정
+- QA 시나리오에 따라 용어 일관성 및 라우팅 문제 우선 해결
+- 팀 목록에서 직접 삭제/수정 기능 제공 (TeamList/TeamCard/TeamsPage)
+- 팀 카드에 소유자만 삭제/수정 버튼 노출, 클릭 시 핸들러 동작
+- 삭제 성공 시 fetchTeams로 목록 즉시 갱신
+- QA 시나리오에 따라 데이터 동기화 및 UX 개선 

@@ -8,26 +8,26 @@ export default function Home() {
     const router = useRouter();
     const { user } = useAuth();
 
-    // 토너먼트 생성 페이지로 이동
-    const handleCreateTournament = () => {
+    // 경기 생성 페이지로 이동
+    const handleCreateMatch = () => {
         if (!user) {
             router.push('/login');
         } else {
-            router.push('/tournaments/create');
+            router.push('/matches/create');
         }
     };
 
-    // 토너먼트 목록 페이지로 이동
-    const handleViewTournaments = () => {
-        router.push('/tournaments');
+    // 경기 목록 페이지로 이동
+    const handleViewMatches = () => {
+        router.push('/matches');
     };
 
-    // 시작하기 버튼 (회원가입 또는 토너먼트 페이지로)
+    // 시작하기 버튼 (회원가입 또는 경기 페이지로)
     const handleGetStarted = () => {
         if (!user) {
             router.push('/signup');
         } else {
-            router.push('/tournaments');
+            router.push('/matches');
         }
     };
 
@@ -43,7 +43,7 @@ export default function Home() {
                         The Match
                     </h1>
                     <p className="mb-8 text-xl text-white/90 md:text-2xl">
-                        토너먼트 관리의 새로운 기준
+                        경기 관리의 새로운 기준
                     </p>
                     <p className="mb-8 max-w-2xl text-lg text-white/80 md:text-xl">
                         다양한 스포츠 경기의 대진표를 쉽게 생성하고, 팀을 관리하며,
@@ -51,16 +51,16 @@ export default function Home() {
                     </p>
                     <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
                         <button
-                            onClick={handleCreateTournament}
+                            onClick={handleCreateMatch}
                             className="touch-target rounded-lg bg-white px-8 py-3 font-semibold text-match-blue transition-all hover:bg-white/90 hover:shadow-lg"
                         >
-                            토너먼트 생성하기
+                            경기 생성하기
                         </button>
                         <button
-                            onClick={handleViewTournaments}
+                            onClick={handleViewMatches}
                             className="touch-target rounded-lg border-2 border-white px-8 py-3 font-semibold text-white transition-all hover:bg-white hover:text-match-blue"
                         >
-                            토너먼트 보기
+                            경기 보기
                         </button>
                     </div>
                 </div>
@@ -77,9 +77,9 @@ export default function Home() {
                             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-match-blue/10">
                                 <Trophy className="h-8 w-8 text-match-blue" />
                             </div>
-                            <h3 className="mb-2 text-xl font-semibold">토너먼트 생성</h3>
+                            <h3 className="mb-2 text-xl font-semibold">경기 생성</h3>
                             <p className="text-gray-600">
-                                다양한 형식의 토너먼트를 쉽게 생성하고 관리하세요
+                                다양한 형식의 경기를 쉽게 생성하고 관리하세요
                             </p>
                         </div>
                         <div className="text-center">
@@ -120,13 +120,13 @@ export default function Home() {
                         지금 시작하세요
                     </h2>
                     <p className="mb-8 text-xl text-gray-600">
-                        무료로 The Match를 체험해보고 토너먼트 관리의 새로운 경험을 만나보세요
+                        무료로 The Match를 체험해보고 경기 관리의 새로운 경험을 만나보세요
                     </p>
                     <button
                         onClick={handleGetStarted}
                         className="touch-target rounded-lg bg-match-blue px-8 py-3 font-semibold text-white transition-all hover:bg-match-blue/90 hover:shadow-lg"
                     >
-                        {user ? '토너먼트 보기' : '무료로 시작하기'}
+                        {user ? '경기 보기' : '무료로 시작하기'}
                     </button>
                 </div>
             </section>

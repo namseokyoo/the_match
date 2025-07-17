@@ -15,6 +15,9 @@ interface TeamListProps {
     onSearch?: (query: string) => void;
     onLoadMore?: () => void;
     onTeamClick?: (team: Team) => void;
+    onEdit?: (team: Team) => void;
+    onDelete?: (team: Team) => void;
+    currentUserId?: string;
     emptyMessage?: string;
     className?: string;
 }
@@ -29,16 +32,19 @@ export const TeamList: React.FC<TeamListProps> = ({
     onSearch,
     onLoadMore,
     onTeamClick,
+    onEdit,
+    onDelete,
+    currentUserId,
     emptyMessage = '등록된 팀이 없습니다.',
     className = '',
 }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
-    
+
     // 검색 핸들러
     const handleSearch = async (query: string) => {
         setSearchQuery(query);
-        
+
         if (onSearch) {
             setIsSearching(true);
             try {
@@ -48,33 +54,33 @@ export const TeamList: React.FC<TeamListProps> = ({
             }
         }
     };
-    
+
     // 검색 디바운싱
     const handleSearchChange = (value: string) => {
         setSearchQuery(value);
-        
+
         // 디바운싱을 위한 타이머
         const timeoutId = setTimeout(() => {
             handleSearch(value);
         }, 300);
-        
+
         return () => clearTimeout(timeoutId);
     };
-    
+
     // 더 보기 핸들러
     const handleLoadMore = async () => {
         if (onLoadMore && !loading) {
             await onLoadMore();
         }
     };
-    
+
     // 팀 클릭 핸들러
     const handleTeamClick = (team: Team) => {
         if (onTeamClick) {
             onTeamClick(team);
         }
     };
-    
+
     return (
         <div className={`space-y-6 ${className}`}>
             {/* 검색 바 */}
@@ -102,7 +108,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                             </Button>
                         )}
                     </div>
-                    
+
                     {/* 검색 상태 표시 */}
                     {isSearching && (
                         <div className="mt-2 text-sm text-gray-500">
@@ -111,7 +117,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                     )}
                 </div>
             )}
-            
+
             {/* 팀 목록 */}
             <div className="space-y-4">
                 {/* 로딩 상태 */}
@@ -121,22 +127,22 @@ export const TeamList: React.FC<TeamListProps> = ({
                         <span className="ml-2 text-gray-600">팀 목록을 불러오는 중...</span>
                     </div>
                 )}
-                
+
                 {/* 빈 상태 */}
                 {!loading && teams.length === 0 && (
                     <div className="text-center py-12">
                         <div className="mx-auto max-w-md">
-                            <svg 
-                                className="w-20 h-20 mx-auto text-gray-400 mb-4" 
-                                fill="none" 
-                                viewBox="0 0 24 24" 
+                            <svg
+                                className="w-20 h-20 mx-auto text-gray-400 mb-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
                                 stroke="currentColor"
                             >
-                                <path 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round" 
-                                    strokeWidth={1} 
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM9 3a2 2 0 11-4 0 2 2 0 014 0z" 
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={1}
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM9 3a2 2 0 11-4 0 2 2 0 014 0z"
                                 />
                             </svg>
                             <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -146,7 +152,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                         </div>
                     </div>
                 )}
-                
+
                 {/* 팀 카드 그리드 */}
                 {teams.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -157,12 +163,15 @@ export const TeamList: React.FC<TeamListProps> = ({
                                 players={players[team.id] || []}
                                 showTournament={showTournament}
                                 onClick={onTeamClick ? () => handleTeamClick(team) : undefined}
+                                onEdit={onEdit ? () => onEdit(team) : undefined}
+                                onDelete={onDelete ? () => onDelete(team) : undefined}
+                                isOwner={currentUserId === team.captain_id}
                             />
                         ))}
                     </div>
                 )}
             </div>
-            
+
             {/* 페이지네이션 */}
             {pagination && teams.length > 0 && (
                 <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
@@ -179,7 +188,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                             </span>
                             번째
                         </div>
-                        
+
                         {/* 더 보기 버튼 */}
                         {pagination.hasNext && onLoadMore && (
                             <Button
@@ -193,7 +202,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                             </Button>
                         )}
                     </div>
-                    
+
                     {/* 페이지 정보 바 */}
                     <div className="mt-2">
                         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -210,7 +219,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                     </div>
                 </div>
             )}
-            
+
             {/* 로딩 상태 (추가 로드 시) */}
             {loading && teams.length > 0 && (
                 <div className="flex items-center justify-center py-4">

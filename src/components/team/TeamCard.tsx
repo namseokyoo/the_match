@@ -11,6 +11,9 @@ interface TeamCardProps {
     players?: Player[];
     showTournament?: boolean;
     onClick?: () => void;
+    onEdit?: () => void;
+    onDelete?: () => void;
+    isOwner?: boolean;
     className?: string;
 }
 
@@ -19,6 +22,9 @@ export const TeamCard: React.FC<TeamCardProps> = ({
     players = [],
     showTournament = false,
     onClick,
+    onEdit,
+    onDelete,
+    isOwner = false,
     className = '',
 }) => {
     const playerCount = players.length;
@@ -105,12 +111,30 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                     </div>
                 )}
 
-                {/* 팀 정보 푸터 */}
-                <div className="flex items-center justify-between text-xs text-gray-500">
+                {/* 팀 정보 푸터 + 소유자만 삭제/수정 버튼 */}
+                <div className="flex items-center justify-between text-xs text-gray-500 mt-4">
                     <span>생성일: {formatDate(team.created_at)}</span>
-                    {team.updated_at !== team.created_at && (
-                        <span>수정: {formatDate(team.updated_at)}</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {team.updated_at !== team.created_at && (
+                            <span>수정: {formatDate(team.updated_at)}</span>
+                        )}
+                        {isOwner && (
+                            <>
+                                <button
+                                    className="ml-2 px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200"
+                                    onClick={e => { e.stopPropagation(); if (onEdit) onEdit(); }}
+                                >
+                                    수정
+                                </button>
+                                <button
+                                    className="ml-1 px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
+                                    onClick={e => { e.stopPropagation(); if (onDelete) onDelete(); }}
+                                >
+                                    삭제
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </Card>

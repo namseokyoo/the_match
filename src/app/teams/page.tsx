@@ -14,45 +14,45 @@ export default function TeamsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    
+
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
-    
+
     // 팀 목록 조회
     const fetchTeams = async (page = 1, search = '', reset = false) => {
         try {
             setLoading(true);
-            
+
             const params = new URLSearchParams({
                 page: page.toString(),
                 limit: '12',
             });
-            
+
             if (search.trim()) {
                 params.append('search', search.trim());
             }
-            
+
             const response = await fetch(`/api/teams?${params}`);
             const data = await response.json();
-            
+
             if (!response.ok) {
                 throw new Error(data.error || '팀 목록을 불러오는데 실패했습니다.');
             }
-            
+
             if (reset) {
                 setTeams(data.data || []);
             } else {
                 setTeams(prev => [...prev, ...(data.data || [])]);
             }
-            
+
             setPagination(data.pagination);
-            
+
             // 팀별 선수 정보 조회
             const teamIds = data.data?.map((team: Team) => team.id) || [];
             if (teamIds.length > 0) {
                 await fetchPlayersForTeams(teamIds, reset);
             }
-            
+
             setError(null);
         } catch (err) {
             console.error('Teams fetch error:', err);
@@ -61,12 +61,12 @@ export default function TeamsPage() {
             setLoading(false);
         }
     };
-    
+
     // 팀별 선수 정보 조회
     const fetchPlayersForTeams = async (teamIds: string[], reset = false) => {
         try {
             const playersData: Record<string, Player[]> = {};
-            
+
             // 각 팀의 선수 정보를 병렬로 조회
             await Promise.all(
                 teamIds.map(async (teamId) => {
@@ -82,7 +82,7 @@ export default function TeamsPage() {
                     }
                 })
             );
-            
+
             if (reset) {
                 setPlayers(playersData);
             } else {
@@ -92,30 +92,30 @@ export default function TeamsPage() {
             console.error('Players fetch error:', error);
         }
     };
-    
+
     // 컴포넌트 마운트 시 데이터 로드
     useEffect(() => {
         fetchTeams(1, '', true);
     }, []);
-    
+
     // 검색 핸들러
     const handleSearch = async (query: string) => {
         setSearchQuery(query);
         await fetchTeams(1, query, true);
     };
-    
+
     // 더 보기 핸들러
     const handleLoadMore = async () => {
         if (pagination?.hasNext) {
             await fetchTeams(pagination.page + 1, searchQuery, false);
         }
     };
-    
+
     // 팀 클릭 핸들러
     const handleTeamClick = (team: Team) => {
         router.push(`/teams/${team.id}`);
     };
-    
+
     // 팀 생성 페이지로 이동
     const handleCreateTeam = () => {
         if (!user) {
@@ -124,7 +124,34 @@ export default function TeamsPage() {
         }
         router.push('/teams/create');
     };
-    
+
+    // 팀 삭제 핸들러
+    const handleDeleteTeam = async (team: Team) => {
+        if (!user) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+        const confirmDelete = window.confirm(`정말로 "${team.name}" 팀을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`);
+        if (!confirmDelete) return;
+        try {
+            const response = await fetch(`/api/teams/${team.id}`, { method: 'DELETE' });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || '팀 삭제에 실패했습니다.');
+            }
+            alert(`${team.name} 팀이 성공적으로 삭제되었습니다.`);
+            await fetchTeams(1, searchQuery, true);
+        } catch (error) {
+            console.error('팀 삭제 오류:', error);
+            alert(error instanceof Error ? error.message : '팀 삭제 중 오류가 발생했습니다.');
+        }
+    };
+
+    // 팀 수정 핸들러
+    const handleEditTeam = (team: Team) => {
+        router.push(`/teams/${team.id}/edit`);
+    };
+
     // 로딩 상태 (인증 확인 중)
     if (authLoading) {
         return (
@@ -133,7 +160,7 @@ export default function TeamsPage() {
             </div>
         );
     }
-    
+
     // 오류 발생 시
     if (error && teams.length === 0) {
         return (
@@ -161,7 +188,7 @@ export default function TeamsPage() {
             </div>
         );
     }
-    
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -174,7 +201,7 @@ export default function TeamsPage() {
                                 등록된 모든 팀을 확인하고 관리하세요
                             </p>
                         </div>
-                        
+
                         <div className="mt-4 sm:mt-0">
                             <Button
                                 variant="primary"
@@ -186,7 +213,7 @@ export default function TeamsPage() {
                         </div>
                     </div>
                 </div>
-                
+
                 {/* 통계 정보 */}
                 {pagination && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -209,7 +236,7 @@ export default function TeamsPage() {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <div className="flex items-center">
                                 <div className="flex-shrink-0">
@@ -229,7 +256,7 @@ export default function TeamsPage() {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <div className="flex items-center">
                                 <div className="flex-shrink-0">
@@ -243,7 +270,7 @@ export default function TeamsPage() {
                                             평균 선수 수
                                         </dt>
                                         <dd className="text-lg font-medium text-gray-900">
-                                            {teams.length > 0 
+                                            {teams.length > 0
                                                 ? Math.round(Object.values(players).reduce((acc, teamPlayers) => acc + teamPlayers.length, 0) / teams.length * 10) / 10
                                                 : 0
                                             }명
@@ -254,19 +281,22 @@ export default function TeamsPage() {
                         </div>
                     </div>
                 )}
-                
+
                 {/* 팀 목록 */}
                 <TeamList
                     teams={teams}
                     players={players}
-                    pagination={pagination || undefined}
+                    pagination={pagination!}
                     loading={loading}
                     searchable={true}
                     onSearch={handleSearch}
                     onLoadMore={handleLoadMore}
                     onTeamClick={handleTeamClick}
+                    onEdit={handleEditTeam}
+                    onDelete={handleDeleteTeam}
+                    currentUserId={user?.id}
                     emptyMessage={
-                        searchQuery 
+                        searchQuery
                             ? `"${searchQuery}"에 대한 검색 결과가 없습니다.`
                             : '아직 등록된 팀이 없습니다. 첫 번째 팀을 만들어보세요!'
                     }
