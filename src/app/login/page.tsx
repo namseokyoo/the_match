@@ -21,7 +21,7 @@ export default function LoginPage() {
     // Redirect if already logged in
     useEffect(() => {
         if (user && !loading) {
-            router.push('/dashboard');
+            router.push('/tournaments');
         }
     }, [user, loading, router]);
 
@@ -49,7 +49,7 @@ export default function LoginPage() {
         if (error) {
             setError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
         } else {
-            router.push('/dashboard');
+            router.push('/tournaments');
         }
 
         setIsLoading(false);

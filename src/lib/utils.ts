@@ -5,8 +5,14 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: Date | string): string {
+export function formatDate(date: Date | string | null | undefined): string {
+    if (!date) return '-';
+
     const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+    // Invalid Date 체크
+    if (isNaN(dateObj.getTime())) return '-';
+
     return dateObj.toLocaleDateString('ko-KR', {
         year: 'numeric',
         month: 'long',
@@ -14,16 +20,28 @@ export function formatDate(date: Date | string): string {
     });
 }
 
-export function formatTime(date: Date | string): string {
+export function formatTime(date: Date | string | null | undefined): string {
+    if (!date) return '-';
+
     const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+    // Invalid Date 체크
+    if (isNaN(dateObj.getTime())) return '-';
+
     return dateObj.toLocaleTimeString('ko-KR', {
         hour: '2-digit',
         minute: '2-digit',
     });
 }
 
-export function formatDateTime(date: Date | string): string {
+export function formatDateTime(date: Date | string | null | undefined): string {
+    if (!date) return '-';
+
     const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+    // Invalid Date 체크
+    if (isNaN(dateObj.getTime())) return '-';
+
     return dateObj.toLocaleString('ko-KR', {
         year: 'numeric',
         month: 'long',

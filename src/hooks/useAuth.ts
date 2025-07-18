@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { supabase, hasValidSupabaseConfig } from '@/lib/supabase';
 
 interface UseAuthReturn {
     user: User | null;
@@ -13,6 +13,9 @@ interface UseAuthReturn {
     signOut: () => Promise<{ error: AuthError | null }>;
     signInWithGoogle: () => Promise<{ error: AuthError | null }>;
     resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+    getAccessToken: () => Promise<string | null>;
+    isAuthenticated: boolean;
+    hasValidConfig: boolean;
 }
 
 export const useAuth = (): UseAuthReturn => {
@@ -21,32 +24,39 @@ export const useAuth = (): UseAuthReturn => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Get initial session
-        const getInitialSession = async () => {
-            const { data: { session }, error } = await supabase.auth.getSession();
+        // Supabase 설정이 유효하지 않으면 로딩만 false로 설정
+        if (!hasValidSupabaseConfig()) {
+            setLoading(false);
+            return;
+        }
 
-            if (error) {
-                console.error('Error getting session:', error);
-            } else {
+        // 현재 세션 확인
+        const getCurrentSession = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
                 setSession(session);
                 setUser(session?.user ?? null);
+            } catch (error) {
+                console.error('Error getting session:', error);
+                setUser(null);
+            } finally {
+                setLoading(false);
             }
-
-            setLoading(false);
         };
 
-        getInitialSession();
+        getCurrentSession();
 
-        // Listen for auth changes
+        // 인증 상태 변화 감지
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('Auth state changed:', event, session?.user?.id);
             setSession(session);
             setUser(session?.user ?? null);
             setLoading(false);
 
             // Handle profile creation on sign up
-            if (event === 'SIGNED_UP' && session?.user) {
+            if (event === 'SIGNED_IN' && session?.user && !user) {
                 await createUserProfile(session.user);
             }
         });
@@ -76,39 +86,50 @@ export const useAuth = (): UseAuthReturn => {
     };
 
     const signIn = async (email: string, password: string) => {
-        setLoading(true);
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
+            if (error) throw error;
 
-        setLoading(false);
-        return { error };
+            return { error: null };
+        } catch (error) {
+            console.error('Sign in error:', error);
+            return { error: error as AuthError };
+        }
     };
 
     const signUp = async (email: string, password: string, metadata?: Record<string, any>) => {
-        setLoading(true);
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: metadata,
+                },
+            });
 
-        const { error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: metadata,
-            },
-        });
+            if (error) throw error;
 
-        setLoading(false);
-        return { error };
+            return { error: null };
+        } catch (error) {
+            console.error('Sign up error:', error);
+            return { error: error as AuthError };
+        }
     };
 
     const signOut = async () => {
-        setLoading(true);
+        try {
+            const { error } = await supabase.auth.signOut();
+            if (error) throw error;
 
-        const { error } = await supabase.auth.signOut();
-
-        setLoading(false);
-        return { error };
+            return { error: null };
+        } catch (error) {
+            console.error('Sign out error:', error);
+            return { error: error as AuthError };
+        }
     };
 
     const signInWithGoogle = async () => {
@@ -133,6 +154,20 @@ export const useAuth = (): UseAuthReturn => {
         return { error };
     };
 
+    const getAccessToken = async (): Promise<string | null> => {
+        try {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error || !session) {
+                console.error('Error getting session for access token:', error);
+                return null;
+            }
+            return session.access_token;
+        } catch (error) {
+            console.error('Error getting access token:', error);
+            return null;
+        }
+    };
+
     return {
         user,
         session,
@@ -142,5 +177,8 @@ export const useAuth = (): UseAuthReturn => {
         signOut,
         signInWithGoogle,
         resetPassword,
+        getAccessToken,
+        isAuthenticated: !!user,
+        hasValidConfig: hasValidSupabaseConfig(),
     };
 }; 

@@ -1,25 +1,65 @@
 import { createClient } from '@supabase/supabase-js';
-import { Database } from '@/types/supabase';
+import type { Database } from '@/types/supabase';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables');
-}
-
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true,
-    },
-    global: {
-        headers: {
-            'X-Client-Info': 'the-match-web',
+// 안전한 기본값을 사용하여 클라이언트 생성
+export const supabase = createClient<Database>(
+    supabaseUrl || 'https://placeholder.supabase.co',
+    supabaseAnonKey || 'placeholder-key',
+    {
+        auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: true,
         },
-    },
-});
+    }
+);
+
+// createClient 함수도 export
+export { createClient };
+
+export default supabase;
+
+// 환경 변수 존재 여부 확인 함수
+export const hasValidSupabaseConfig = () => {
+    return !!(
+        process.env.NEXT_PUBLIC_SUPABASE_URL &&
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+        process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co' &&
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== 'placeholder-key'
+    );
+};
+
+// Auth helper functions
+export const signUp = async (email: string, password: string) => {
+    if (!hasValidSupabaseConfig()) {
+        throw new Error('Supabase가 설정되지 않았습니다. 환경 변수를 확인하세요.');
+    }
+    return supabase.auth.signUp({ email, password });
+};
+
+export const signIn = async (email: string, password: string) => {
+    if (!hasValidSupabaseConfig()) {
+        throw new Error('Supabase가 설정되지 않았습니다. 환경 변수를 확인하세요.');
+    }
+    return supabase.auth.signInWithPassword({ email, password });
+};
+
+export const signOut = async () => {
+    if (!hasValidSupabaseConfig()) {
+        throw new Error('Supabase가 설정되지 않았습니다. 환경 변수를 확인하세요.');
+    }
+    return supabase.auth.signOut();
+};
+
+export const getCurrentUser = async () => {
+    if (!hasValidSupabaseConfig()) {
+        return { data: { user: null }, error: null };
+    }
+    return supabase.auth.getUser();
+};
 
 // Helper functions for common database operations
 export const db = {
