@@ -14,10 +14,7 @@ export async function GET(request: NextRequest) {
         // 쿼리 빌딩
         let query = supabase
             .from('teams')
-            .select(`
-                *,
-                players:players(*)
-            `)
+            .select('*')
             .order('created_at', { ascending: false });
 
         // 토너먼트별 필터링
