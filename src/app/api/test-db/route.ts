@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// 서버 전용 Supabase 클라이언트 (Service Role Key 사용)
+const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function GET() {
     try {
@@ -14,7 +20,7 @@ export async function GET() {
 
         // 1단계: 기본 연결 테스트
         console.log('Testing basic connection...');
-        const { data: connectionTest, error: connectionError } = await supabase
+        const { data: connectionTest, error: connectionError } = await supabaseAdmin
             .from('profiles')
             .select('count')
             .limit(1);
@@ -34,7 +40,7 @@ export async function GET() {
 
         // 2단계: 테이블 존재 확인
         console.log('Testing table existence...');
-        const { data: tableTest, error: tableError } = await supabase
+        const { data: tableTest, error: tableError } = await supabaseAdmin
             .from('matches')
             .select('count')
             .limit(1);
@@ -54,7 +60,7 @@ export async function GET() {
 
         // 3단계: 팀 테이블 확인
         console.log('Testing teams table...');
-        const { data: teamsTest, error: teamsError } = await supabase
+        const { data: teamsTest, error: teamsError } = await supabaseAdmin
             .from('teams')
             .select('count')
             .limit(1);

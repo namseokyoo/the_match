@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Team, Player, Match } from '@/types';
+import { Team, Player } from '@/types';
 import { TeamDetail } from '@/components/team';
 import { Button } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,7 +11,6 @@ import { supabase } from '@/lib/supabase';
 export default function TeamDetailPage() {
     const [team, setTeam] = useState<Team | null>(null);
     const [players, setPlayers] = useState<Player[]>([]);
-    const [match, setMatch] = useState<Match | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -74,7 +73,7 @@ export default function TeamDetailPage() {
         if (teamId) {
             fetchTeam();
         }
-    }, [teamId]);
+    }, [teamId, fetchTeam]);
 
     // 팀 수정 페이지로 이동
     const handleEdit = () => {
@@ -117,13 +116,13 @@ export default function TeamDetailPage() {
     };
 
     // 선수 추가 (임시 - 추후 구현)
-    const handleAddPlayer = (teamId: string) => {
+    const handleAddPlayer = () => {
         // TODO: 선수 추가 모달 또는 페이지로 이동
         alert('선수 추가 기능은 곧 구현됩니다.');
     };
 
     // 선수 수정 (임시 - 추후 구현)
-    const handleEditPlayer = (playerId: string) => {
+    const handleEditPlayer = () => {
         // TODO: 선수 수정 모달 또는 페이지로 이동
         alert('선수 수정 기능은 곧 구현됩니다.');
     };
