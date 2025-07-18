@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { MatchType, MatchStatus, CreateMatchForm } from '@/types';
-
-// Supabase 클라이언트 생성 (서버용)
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 // GET /api/matches - 경기 목록 조회
 export async function GET(request: NextRequest) {
@@ -19,8 +13,8 @@ export async function GET(request: NextRequest) {
         const search = searchParams.get('search');
         const creatorId = searchParams.get('creator_id');
 
-        let query = supabaseAdmin
-            .from('tournaments') // DB 테이블명은 일단 유지 (추후 마이그레이션)
+        let query = supabase
+            .from('matches')
             .select('*');
 
         // 필터 적용
@@ -59,8 +53,8 @@ export async function GET(request: NextRequest) {
         }
 
         // 전체 개수 조회 (페이지네이션용)
-        let countQuery = supabaseAdmin
-            .from('tournaments') // DB 테이블명은 일단 유지
+        let countQuery = supabase
+            .from('matches')
             .select('id', { count: 'exact', head: true });
 
         if (status && status !== 'all') {
@@ -105,20 +99,12 @@ export async function GET(request: NextRequest) {
 // POST /api/matches - 경기 생성
 export async function POST(request: NextRequest) {
     try {
-        const authHeader = request.headers.get('authorization');
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return NextResponse.json(
-                { error: '인증이 필요합니다.' },
-                { status: 401 }
-            );
-        }
-
-        const token = authHeader.split(' ')[1];
-        const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+        // 현재 사용자 확인
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
             return NextResponse.json(
-                { error: '유효하지 않은 인증 토큰입니다.' },
+                { error: '로그인이 필요합니다.' },
                 { status: 401 }
             );
         }
@@ -149,8 +135,8 @@ export async function POST(request: NextRequest) {
             settings: {},
         };
 
-        const { data: match, error } = await supabaseAdmin
-            .from('tournaments') // DB 테이블명은 일단 유지
+        const { data: match, error } = await supabase
+            .from('matches')
             .insert([matchData])
             .select()
             .single();

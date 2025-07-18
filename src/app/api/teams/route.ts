@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     try {
         // URL 파라미터 파싱
         const { searchParams } = new URL(request.url);
-        const tournamentId = searchParams.get('tournament_id');
+        const matchId = searchParams.get('match_id');
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '10');
         const search = searchParams.get('search');
@@ -14,12 +14,15 @@ export async function GET(request: NextRequest) {
         // 쿼리 빌딩
         let query = supabase
             .from('teams')
-            .select('*')
+            .select(`
+                *,
+                players:players(*)
+            `)
             .order('created_at', { ascending: false });
 
-        // 토너먼트별 필터링
-        if (tournamentId) {
-            query = query.eq('tournament_id', tournamentId);
+        // 매치별 필터링
+        if (matchId) {
+            query = query.eq('match_id', matchId);
         }
 
         // 검색 필터링
@@ -72,7 +75,7 @@ export async function POST(request: NextRequest) {
     try {
         // 요청 본문 파싱
         const body = await request.json();
-        const { name, description, logo_url, tournament_id, captain_id } = body;
+        const { name, description, logo_url, match_id, captain_id } = body;
 
         // 필수 필드 검증
         if (!name) {
@@ -92,18 +95,18 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 동일한 토너먼트 내에서 팀 이름 중복 체크
-        if (tournament_id) {
+        // 동일한 매치 내에서 팀 이름 중복 체크
+        if (match_id) {
             const { data: existingTeams } = await supabase
                 .from('teams')
                 .select('id')
-                .eq('tournament_id', tournament_id)
+                .eq('match_id', match_id)
                 .eq('name', name)
                 .limit(1);
 
             if (existingTeams && existingTeams.length > 0) {
                 return NextResponse.json(
-                    { error: '이미 동일한 이름의 팀이 해당 토너먼트에 존재합니다.' },
+                    { error: '이미 동일한 이름의 팀이 해당 매치에 존재합니다.' },
                     { status: 409 }
                 );
             }
@@ -116,7 +119,7 @@ export async function POST(request: NextRequest) {
                 name,
                 description,
                 logo_url,
-                tournament_id,
+                match_id,
                 captain_id: captain_id || user.id,
             })
             .select()
