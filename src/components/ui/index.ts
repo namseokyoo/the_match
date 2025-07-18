@@ -2,10 +2,11 @@
 export { default as Button } from './Button';
 export { default as Input } from './Input';
 export {
-    default as Card,
+    Card,
     CardHeader,
     CardTitle,
     CardDescription,
     CardContent,
     CardFooter
-} from './Card'; 
+} from './Card';
+export { default as Notification } from './Notification'; 
