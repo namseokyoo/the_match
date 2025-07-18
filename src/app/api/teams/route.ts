@@ -4,69 +4,50 @@ import { supabase } from '@/lib/supabase';
 // GET /api/teams - 팀 목록 조회
 export async function GET(request: NextRequest) {
     try {
-        // URL 파라미터 파싱
-        const { searchParams } = new URL(request.url);
-        const matchId = searchParams.get('match_id');
-        const page = parseInt(searchParams.get('page') || '1');
-        const limit = parseInt(searchParams.get('limit') || '10');
-        const search = searchParams.get('search');
+        console.log('Teams API called');
+        
+        // 환경변수 확인
+        const envCheck = {
+            SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING',
+            SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'
+        };
+        
+        console.log('Environment check:', envCheck);
 
-        // 쿼리 빌딩
-        let query = supabase
+        // 가장 간단한 쿼리부터 시작
+        console.log('Executing basic teams query...');
+        const { data: teams, error } = await supabase
             .from('teams')
-            .select(`
-                *,
-                players:players(*)
-            `)
-            .order('created_at', { ascending: false });
-
-        // 매치별 필터링
-        if (matchId) {
-            query = query.eq('match_id', matchId);
-        }
-
-        // 검색 필터링
-        if (search) {
-            query = query.ilike('name', `%${search}%`);
-        }
-
-        // 페이지네이션
-        const offset = (page - 1) * limit;
-        query = query.range(offset, offset + limit - 1);
-
-        const { data: teams, error, count } = await query;
+            .select('*')
+            .limit(10);
 
         if (error) {
             console.error('Teams fetch error:', error);
-            return NextResponse.json(
-                { error: '팀 목록을 불러오는데 실패했습니다.' },
-                { status: 500 }
-            );
+            return NextResponse.json({
+                success: false,
+                error: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code,
+                envCheck
+            }, { status: 500 });
         }
 
-        // 페이지네이션 정보 계산
-        const totalPages = Math.ceil((count || 0) / limit);
-        const hasNext = page < totalPages;
-        const hasPrev = page > 1;
+        console.log('Teams query successful, found:', teams?.length || 0, 'teams');
 
         return NextResponse.json({
             success: true,
-            data: teams,
-            pagination: {
-                page,
-                limit,
-                total: count || 0,
-                totalPages,
-                hasNext,
-                hasPrev,
-            },
+            data: teams || [],
+            count: teams?.length || 0,
+            envCheck
         });
     } catch (error) {
         console.error('Teams API error:', error);
-        return NextResponse.json(
-            { error: '서버 오류가 발생했습니다.' },
-            { status: 500 }
-        );
+        return NextResponse.json({
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined
+        }, { status: 500 });
     }
 }
 
