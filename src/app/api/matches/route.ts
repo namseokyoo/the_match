@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
 
         const { data: match, error } = await supabase
             .from('matches')
-            .insert([matchData])
+            .insert(matchData)
             .select()
             .single();
 
