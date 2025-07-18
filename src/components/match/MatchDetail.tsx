@@ -3,7 +3,7 @@
 import React from 'react';
 import { Match } from '@/types';
 import { Card } from '@/components/ui';
-import { formatDate, formatTime } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import JoinMatchButton from './JoinMatchButton';
 
 interface MatchDetailProps {

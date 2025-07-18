@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Button, Input } from '@/components/ui';
-import { Match, MatchType, MatchStatus, CreateMatchForm } from '@/types';
+import { Match, MatchType, CreateMatchForm } from '@/types';
 
 interface MatchFormProps {
     match?: Match;
-    onSubmit: (data: CreateMatchForm) => Promise<void>;
+    onSubmit: (formData: CreateMatchForm) => Promise<void>;
     onCancel?: () => void;
     isLoading?: boolean;
     mode?: 'create' | 'edit';

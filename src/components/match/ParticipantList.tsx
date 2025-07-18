@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { MatchParticipant, ParticipantStatus } from '@/types';
 import ParticipantCard from './ParticipantCard';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,7 +31,7 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
     const [filter, setFilter] = useState<'all' | ParticipantStatus>('all');
 
     // 참가자 목록 불러오기
-    const fetchParticipants = async () => {
+    const fetchParticipants = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -51,7 +51,7 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
         } finally {
             setLoading(false);
         }
-    };
+    }, [matchId]);
 
     // 참가 신청 승인
     const handleApprove = async (teamId: string) => {
@@ -186,7 +186,7 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
         if (matchId) {
             fetchParticipants();
         }
-    }, [matchId]);
+    }, [matchId, fetchParticipants]);
 
     // 필터링된 참가자 목록
     const filteredParticipants = participants.filter(participant => {

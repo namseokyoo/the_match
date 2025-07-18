@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { MatchParticipant, ParticipantStatus } from '@/types';
 import { Card } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
@@ -55,9 +56,11 @@ const ParticipantCard: React.FC<ParticipantCardProps> = ({
                 <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
                         {participant.team?.logo_url ? (
-                            <img
+                            <Image
                                 src={participant.team.logo_url}
                                 alt={`${participant.team.name} 로고`}
+                                width={40}
+                                height={40}
                                 className="w-10 h-10 rounded-full object-cover"
                             />
                         ) : (

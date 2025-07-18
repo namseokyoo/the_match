@@ -10,7 +10,6 @@ interface TeamListProps {
     players?: Record<string, Player[]>; // team_id를 키로 하는 선수 목록
     pagination?: PaginatedResponse['pagination'];
     loading?: boolean;
-    showTournament?: boolean;
     searchable?: boolean;
     onSearch?: (query: string) => void;
     onLoadMore?: () => void;
@@ -27,7 +26,6 @@ export const TeamList: React.FC<TeamListProps> = ({
     players = {},
     pagination,
     loading = false,
-    showTournament = false,
     searchable = true,
     onSearch,
     onLoadMore,
@@ -161,7 +159,6 @@ export const TeamList: React.FC<TeamListProps> = ({
                                 key={team.id}
                                 team={team}
                                 players={players[team.id] || []}
-                                showTournament={showTournament}
                                 onClick={onTeamClick ? () => handleTeamClick(team) : undefined}
                                 onEdit={onEdit ? () => onEdit(team) : undefined}
                                 onDelete={onDelete ? () => onDelete(team) : undefined}

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 import { MatchType, MatchStatus, CreateMatchForm } from '@/types';
 
@@ -49,7 +48,7 @@ export async function GET(request: NextRequest) {
             .order('created_at', { ascending: false })
             .range(from, to);
 
-        const { data: matches, error, count } = await query;
+        const { data: matches, error } = await query;
 
         if (error) {
             console.error('경기 목록 조회 오류:', error);

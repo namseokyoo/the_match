@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Team, Player } from '@/types';
 import { Card } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
@@ -9,7 +10,6 @@ import { formatDate } from '@/lib/utils';
 interface TeamCardProps {
     team: Team;
     players?: Player[];
-    showTournament?: boolean;
     onClick?: () => void;
     onEdit?: () => void;
     onDelete?: () => void;
@@ -20,7 +20,6 @@ interface TeamCardProps {
 export const TeamCard: React.FC<TeamCardProps> = ({
     team,
     players = [],
-    showTournament = false,
     onClick,
     onEdit,
     onDelete,
@@ -45,9 +44,11 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                     <div className="flex items-center space-x-3">
                         {/* 팀 로고 */}
                         {team.logo_url ? (
-                            <img
+                            <Image
                                 src={team.logo_url}
                                 alt={`${team.name} 로고`}
+                                width={48}
+                                height={48}
                                 className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                             />
                         ) : (

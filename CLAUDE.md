@@ -298,3 +298,251 @@ For critical production issues:
 - **Code Review**: Focus on logic, security, performance, and maintainability
 - **Conflicts**: Resolve conflicts promptly, prefer rebase over merge
 - **Documentation**: Update README and CLAUDE.md when adding features
+
+## AI Collaboration with Gemini CLI
+
+### Strategic AI Consultation Approach
+This project integrates with Gemini CLI for **strategic AI consultation** rather than continuous collaboration. Use Gemini CLI selectively for critical decision points and complex problem-solving to maximize development efficiency.
+
+### Setting Up Gemini CLI
+To enhance development productivity, this project integrates with Gemini CLI for AI-assisted analysis and problem-solving.
+
+#### Installation and Setup
+```bash
+# Install Gemini CLI (if not already installed)
+npm install -g @google-ai/generativelanguage
+
+# Verify installation
+gemini --version
+
+# Set up authentication (follow official Google AI documentation)
+# Configure API key in your environment
+```
+
+#### When to Use Gemini CLI
+**Use strategically for high-impact decisions:**
+
+**✅ Recommended Use Cases:**
+- Complex architectural decisions (server/client component patterns, state management)
+- Performance optimization strategies (when facing specific bottlenecks)
+- Advanced technical problem-solving (unusual errors, complex integrations)
+- Code review of critical components before major releases
+- Technology stack decisions (choosing libraries, frameworks)
+
+**❌ Avoid Using For:**
+- Simple syntax questions (use documentation instead)
+- Basic debugging (try direct problem-solving first)
+- Routine development tasks (standard CRUD operations)
+- Frequent consultation on minor decisions
+
+#### Usage Patterns
+Use Gemini CLI for strategic development consultation in these scenarios:
+
+**1. Technical Analysis and Discussion**
+```bash
+echo "How can I improve React component performance in this Next.js app?" | gemini
+echo "What are the best practices for Supabase Row Level Security?" | gemini
+echo "How to optimize TypeScript types for better performance?" | gemini
+```
+
+**2. Code Review and Error Analysis**
+```bash
+# Analyze build errors
+echo "I'm getting this TypeScript error: [paste error here]. How to fix it?" | gemini
+
+# Performance optimization consultation
+echo "This React component is re-rendering too often. What optimization techniques should I apply?" | gemini
+
+# Architecture decisions
+echo "Should I use React Server Components or Client Components for this feature?" | gemini
+```
+
+**3. Problem-Solving Workflow**
+```bash
+# Before implementing complex features
+echo "I need to implement real-time match updates. What's the best approach with Supabase?" | gemini
+
+# When debugging issues
+echo "My useEffect is causing infinite loops. What are the common causes and solutions?" | gemini
+
+# For code quality improvements
+echo "How can I improve the type safety of this API endpoint?" | gemini
+```
+
+### Strategic Integration with Development Workflow
+
+#### 1. Pre-Development Consultation (Major Features Only)
+Before starting complex new features or making architectural changes:
+```bash
+# Get architectural guidance
+echo "Planning to add [feature description]. What's the best approach considering our tech stack?" | gemini
+
+# Understand best practices
+echo "What are the latest React 18 + Next.js 14 best practices for [specific area]?" | gemini
+```
+
+#### 2. During Development (Complex Issues Only)
+When facing significant technical challenges or roadblocks:
+```bash
+# Get quick solutions
+echo "I'm stuck with [specific problem]. What are possible solutions?" | gemini
+
+# Validate approaches
+echo "Is this the right way to implement [feature] in our React/Next.js app?" | gemini
+```
+
+#### 3. Code Review Enhancement (Critical Components Only)
+Before committing major features or performance-critical code:
+```bash
+# Performance analysis
+echo "Review this component for performance issues: [paste code]" | gemini
+
+# Security review
+echo "Are there any security concerns with this API implementation?" | gemini
+```
+
+#### 4. Error Resolution
+When encountering issues:
+```bash
+# Build errors
+echo "Getting build error: [error message]. How to resolve?" | gemini
+
+# Runtime issues
+echo "Application behaving unexpectedly: [describe issue]. Debugging approach?" | gemini
+```
+
+### Best Practices for Gemini Collaboration
+
+#### 1. Provide Context
+Always include relevant context in your queries:
+```bash
+# Good: Specific to our stack
+echo "In Next.js 14 with App Router and TypeScript, how should I handle form validation?" | gemini
+
+# Better: Include our specific constraints
+echo "For our React tournament app using Supabase, what's the best way to implement real-time updates?" | gemini
+```
+
+#### 2. Iterative Problem Solving
+Use Gemini for step-by-step analysis:
+```bash
+# Step 1: Understand the problem
+echo "Explain the performance implications of [specific code pattern]" | gemini
+
+# Step 2: Get solutions
+echo "Based on the performance issues, what are the recommended solutions?" | gemini
+
+# Step 3: Implementation guidance
+echo "How to implement [chosen solution] in our Next.js app?" | gemini
+```
+
+#### 3. Code Quality Focus
+Regular quality checks:
+```bash
+# Type safety
+echo "How to improve TypeScript type safety for this API response?" | gemini
+
+# Performance
+echo "Are there performance bottlenecks in this component pattern?" | gemini
+
+# Best practices
+echo "Does this code follow React 18 + Next.js 14 best practices?" | gemini
+```
+
+### Common Use Cases
+
+#### React/Next.js Development
+- Component optimization strategies
+- Hook usage patterns and best practices
+- State management decisions
+- Performance debugging
+- Server vs Client component decisions
+
+#### Supabase Integration
+- Database schema optimization
+- Row Level Security implementation
+- Real-time subscription patterns
+- Authentication flow improvements
+
+#### TypeScript Enhancement
+- Type definition improvements
+- Generic type usage
+- API response typing
+- Error handling patterns
+
+#### Performance Optimization
+- Bundle size analysis
+- Rendering optimization
+- Database query optimization
+- Caching strategies
+
+### Gemini CLI Commands Reference
+
+#### Basic Usage
+```bash
+# Simple question
+echo "question" | gemini
+
+# Multi-line input
+gemini << EOF
+Complex question or
+code snippet for analysis
+EOF
+
+# File analysis
+cat src/components/SomeComponent.tsx | gemini
+```
+
+#### Advanced Usage
+```bash
+# Combine with other tools
+npm run build 2>&1 | gemini  # Analyze build output
+npm run test 2>&1 | gemini   # Analyze test results
+```
+
+### Integration Examples
+
+#### Example 1: Performance Analysis
+```bash
+# Before optimization
+echo "This component re-renders frequently. Analyze for optimization opportunities:" | gemini
+
+# After receiving suggestions, implement and verify
+echo "Implemented useMemo and useCallback. Are there other optimizations?" | gemini
+```
+
+#### Example 2: Architecture Decisions
+```bash
+# Planning new feature
+echo "Need to add match bracket visualization. React library recommendations?" | gemini
+
+# Implementation approach
+echo "Chosen library X for brackets. Best integration pattern with Next.js?" | gemini
+```
+
+#### Example 3: Error Resolution
+```bash
+# When stuck
+echo "Getting hydration mismatch in Next.js. Common causes and solutions?" | gemini
+
+# Follow-up
+echo "Applied server-side rendering fix. How to prevent future hydration issues?" | gemini
+```
+
+### Performance Evaluation Results
+
+**Technical Quality**: ⭐⭐⭐⭐⭐ (5/5) - Excellent technical insights and practical solutions
+**Stability**: ⭐⭐⭐ (3/5) - Occasional connection timeouts and MCP errors
+**Practical Value**: ⭐⭐⭐⭐ (4/5) - High value for complex decisions, less suited for routine tasks
+
+### Strategic Usage Guidelines
+
+**Best Practice**: Use Gemini CLI as a **strategic consulting tool** for:
+- Making informed architectural decisions
+- Solving complex technical challenges
+- Reviewing critical code before major releases
+- Optimizing performance bottlenecks
+
+**Efficiency Tip**: Focus on quality over quantity - one well-targeted consultation is more valuable than multiple routine queries.
+
+This strategic AI consultation approach ensures optimal use of development time while leveraging AI expertise for maximum impact on code quality and architecture decisions.

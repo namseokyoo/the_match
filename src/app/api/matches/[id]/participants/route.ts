@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { MatchParticipant, ParticipantStatus, ApplyToMatchForm } from '@/types';
+import { ParticipantStatus, ApplyToMatchForm } from '@/types';
 
 // Supabase 클라이언트 생성 (서버용)
 const supabaseAdmin = createClient(

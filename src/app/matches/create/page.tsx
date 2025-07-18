@@ -5,16 +5,18 @@ import { useRouter } from 'next/navigation';
 import { MatchForm } from '@/components/match';
 import { CreateMatchForm } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotification } from '@/contexts/NotificationContext';
 
 export default function CreateMatchPage() {
     const [isLoading, setIsLoading] = useState(false);
     const { user, getAccessToken, loading: authLoading } = useAuth();
+    const { showNotification } = useNotification();
     const router = useRouter();
 
     // 경기 생성 핸들러
     const handleSubmit = async (formData: CreateMatchForm) => {
         if (!user) {
-            alert('로그인이 필요합니다.');
+            showNotification('로그인이 필요합니다.', 'error');
             router.push('/login');
             return;
         }
@@ -24,7 +26,7 @@ export default function CreateMatchPage() {
 
             const token = await getAccessToken();
             if (!token) {
-                alert('인증 토큰을 가져올 수 없습니다.');
+                showNotification('인증 토큰을 가져올 수 없습니다.', 'error');
                 return;
             }
 
@@ -43,11 +45,11 @@ export default function CreateMatchPage() {
                 throw new Error(data.error || '경기 생성에 실패했습니다.');
             }
 
-            alert('경기가 성공적으로 생성되었습니다!');
+            showNotification('경기가 성공적으로 생성되었습니다!', 'success');
             router.push(`/matches/${data.data.id}`);
         } catch (error) {
             console.error('경기 생성 오류:', error);
-            alert(error instanceof Error ? error.message : '경기 생성 중 오류가 발생했습니다.');
+            showNotification(error instanceof Error ? error.message : '경기 생성 중 오류가 발생했습니다.', 'error');
         } finally {
             setIsLoading(false);
         }

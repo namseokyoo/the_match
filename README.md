@@ -40,6 +40,24 @@
 - pnpm (권장) 또는 npm
 - Supabase 계정
 
+### pnpm 설치 (권장)
+```bash
+# npm을 통한 전역 설치
+npm install -g pnpm
+
+# 또는 Homebrew (macOS)
+brew install pnpm
+
+# 또는 curl을 통한 설치
+curl -fsSL https://get.pnpm.io/install.sh | sh
+```
+
+**pnpm 사용 이유:**
+- 더 빠른 설치 속도
+- 디스크 공간 절약
+- 엄격한 의존성 관리
+- package.json에 명시된 권장 패키지 매니저
+
 ### 설치 및 실행
 
 1. **프로젝트 클론**
@@ -103,6 +121,7 @@ src/
 
 ## 🔧 개발 스크립트
 
+**pnpm 사용 (권장):**
 - `pnpm dev` - 개발 서버 실행
 - `pnpm build` - 프로덕션 빌드
 - `pnpm start` - 프로덕션 서버 실행
@@ -113,6 +132,18 @@ src/
 - `pnpm supabase:stop` - Supabase 로컬 환경 중지
 - `pnpm supabase:reset` - 데이터베이스 리셋
 - `pnpm supabase:gen-types` - Supabase 타입 생성
+
+**npm 사용:**
+- `npm run dev` - 개발 서버 실행
+- `npm run build` - 프로덕션 빌드
+- `npm run start` - 프로덕션 서버 실행
+- `npm run lint` - ESLint 검사
+- `npm run type-check` - TypeScript 타입 검사
+- `npm run format` - Prettier 포맷팅
+- `npm run supabase:start` - Supabase 로컬 환경 시작
+- `npm run supabase:stop` - Supabase 로컬 환경 중지
+- `npm run supabase:reset` - 데이터베이스 리셋
+- `npm run supabase:gen-types` - Supabase 타입 생성
 
 ## 📊 비용 최적화
 

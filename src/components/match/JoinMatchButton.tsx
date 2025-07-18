@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Match, MatchParticipant, ParticipantStatus } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui';
@@ -22,7 +22,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
     const [checkingParticipation, setCheckingParticipation] = useState(true);
 
     // 현재 사용자의 참가 상태 확인
-    const checkMyParticipation = async () => {
+    const checkMyParticipation = useCallback(async () => {
         if (!user) {
             setCheckingParticipation(false);
             return;
@@ -44,7 +44,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
         } finally {
             setCheckingParticipation(false);
         }
-    };
+    }, [user, match.id]);
 
     // 참가 신청
     const handleJoin = async () => {
@@ -164,7 +164,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
     // 컴포넌트 마운트 시 참가 상태 확인
     useEffect(() => {
         checkMyParticipation();
-    }, [user, match.id]);
+    }, [checkMyParticipation]);
 
     if (checkingParticipation) {
         return (

@@ -21,13 +21,21 @@ pids
 *.seed
 *.pid.lock
 
-# Environment variables
+# Environment variables - NEVER COMMIT THESE!
 .env
 .env.local
 .env.production
 .env.development.local
 .env.test.local
 .env.production.local
+.env.*.local
+
+# Security keys and secrets
+**/service-role-key*
+**/jwt-secret*
+**/*secret*
+**/*key*.json
+**/*credentials*
 
 # IDE
 .vscode/

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Team, Player, PaginatedResponse } from '@/types';
 import { TeamList } from '@/components/team';
@@ -19,7 +19,7 @@ export default function TeamsPage() {
     const router = useRouter();
 
     // 팀 목록 조회
-    const fetchTeams = async (page = 1, search = '', reset = false) => {
+    const fetchTeams = useCallback(async (page = 1, search = '', reset = false) => {
         try {
             setLoading(true);
 
@@ -60,7 +60,7 @@ export default function TeamsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     // 팀별 선수 정보 조회
     const fetchPlayersForTeams = async (teamIds: string[], reset = false) => {
@@ -96,7 +96,7 @@ export default function TeamsPage() {
     // 컴포넌트 마운트 시 데이터 로드
     useEffect(() => {
         fetchTeams(1, '', true);
-    }, []);
+    }, [fetchTeams]);
 
     // 검색 핸들러
     const handleSearch = async (query: string) => {

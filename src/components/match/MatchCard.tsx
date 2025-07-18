@@ -5,9 +5,9 @@ import { formatDate } from '@/lib/utils';
 
 interface MatchCardProps {
     match: Match;
-    onView?: (id: string) => void;
-    onEdit?: (id: string) => void;
-    onDelete?: (id: string) => void;
+    onView?: (matchId: string) => void;
+    onEdit?: (matchId: string) => void;
+    onDelete?: (matchId: string) => void;
     showActions?: boolean;
     isOwner?: boolean;
 }
