@@ -51,7 +51,7 @@ export default function TeamDetailPage() {
                 captain_id: data.captain_id || undefined,
                 match_id: data.tournament_id || undefined, // tournament_id를 match_id로 매핑
             });
-            setPlayers((data.players || []).map(player => ({
+            setPlayers((data.players || []).map((player: any) => ({
                 ...player,
                 email: player.email || undefined,
                 avatar_url: player.avatar_url || undefined,
