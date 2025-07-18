@@ -1,11 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@/types/supabase';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 // 안전한 기본값을 사용하여 클라이언트 생성
-export const supabase = createClient<Database>(
+export const supabase = createClient(
     supabaseUrl || 'https://placeholder.supabase.co',
     supabaseAnonKey || 'placeholder-key',
     {
