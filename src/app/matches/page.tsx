@@ -99,13 +99,18 @@ export default function MatchesPage() {
         router.push('/matches/create');
     };
 
-    // 로딩 중일 때
-    if (authLoading) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-match-blue"></div>
-            </div>
-        );
+    // 초기 인증 로딩 중일 때만 스피너 표시
+    // 이미 초기화된 경우에는 스피너를 표시하지 않음
+    if (authLoading && typeof window !== 'undefined') {
+        // 클라이언트 사이드에서만 초기 로딩 체크
+        const isInitialLoad = !sessionStorage.getItem('auth_initialized');
+        if (isInitialLoad) {
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-match-blue"></div>
+                </div>
+            );
+        }
     }
 
     return (

@@ -167,8 +167,8 @@ export default function TeamDetailPage() {
     // 권한 확인
     const isOwner = user && team && team.captain_id === user.id;
 
-    // 로딩 상태 (인증 확인 중)
-    if (authLoading || loading) {
+    // 로딩 상태 (인증 확인 중 또는 데이터 로딩 중)
+    if (loading || (authLoading && typeof window !== 'undefined' && !sessionStorage.getItem('auth_initialized'))) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-match-blue"></div>
