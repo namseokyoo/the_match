@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import dynamic from 'next/dynamic';
 import Navbar from '@/components/ui/Navbar';
 import { ErrorBoundary } from '@/components/ui';
+import { ToastContainer } from '@/components/ui/Toast';
 import ClientProviders from '@/components/providers/ClientProviders';
 import './globals.css';
 
@@ -97,6 +98,9 @@ export default function RootLayout({
                                 </main>
                             </div>
                         </div>
+
+                        {/* Toast 컨테이너 */}
+                        <ToastContainer />
 
                         {/* 개발 환경에서 설정 상태 표시 */}
                         {process.env.NODE_ENV === 'development' && (

@@ -96,12 +96,20 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                     </div>
 
                     {/* 참가 신청 버튼 */}
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 space-y-2">
                         <JoinMatchButton
                             match={match}
                             onJoined={onJoined}
                             className="w-full md:w-auto"
                         />
+                        {match.type === 'single_elimination' && (
+                            <a
+                                href={`/matches/${match.id}/bracket`}
+                                className="block w-full md:w-auto px-4 py-2 bg-purple-600 text-white text-center rounded-md hover:bg-purple-700 transition-colors"
+                            >
+                                🏆 토너먼트 브라켓 보기
+                            </a>
+                        )}
                     </div>
                 </div>
             </Card>

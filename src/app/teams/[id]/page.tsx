@@ -7,7 +7,10 @@ import { TeamDetail } from '@/components/team';
 import { Button } from '@/components/ui';
 import { AddPlayerModal, EditPlayerModal } from '@/components/player';
 import { useAuth } from '@/hooks/useAuth';
+import { useTeamRealtime, usePlayersRealtime } from '@/hooks/useRealtimeSubscription';
+import { showToast } from '@/components/ui/Toast';
 import { supabase } from '@/lib/supabase';
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 export default function TeamDetailPage() {
     const [team, setTeam] = useState<Team | null>(null);
@@ -78,6 +81,56 @@ export default function TeamDetailPage() {
             fetchTeam();
         }
     }, [teamId, fetchTeam]);
+
+    // 팀 실시간 업데이트 구독
+    useTeamRealtime(teamId, {
+        onUpdate: useCallback((payload: RealtimePostgresChangesPayload<any>) => {
+            console.log('Team updated:', payload);
+            const updatedTeam = payload.new as Team;
+            setTeam(updatedTeam);
+            
+            if (user && payload.new && (payload.new as any).updated_by !== user.id) {
+                showToast('팀 정보가 업데이트되었습니다', 'info');
+            }
+        }, [user]),
+        onDelete: useCallback(() => {
+            showToast('팀이 삭제되었습니다', 'warning');
+            router.push('/teams');
+        }, [router]),
+    });
+
+    // 선수 실시간 업데이트 구독
+    usePlayersRealtime(teamId, {
+        onInsert: useCallback((payload: RealtimePostgresChangesPayload<any>) => {
+            console.log('Player added:', payload);
+            const newPlayer = payload.new as Player;
+            setPlayers(prev => [...prev, newPlayer]);
+            
+            if (user && (payload.new as any).created_by !== user.id) {
+                showToast(`새로운 선수 ${newPlayer.name}이(가) 추가되었습니다`, 'info');
+            }
+        }, [user]),
+        onUpdate: useCallback((payload: RealtimePostgresChangesPayload<any>) => {
+            console.log('Player updated:', payload);
+            const updatedPlayer = payload.new as Player;
+            setPlayers(prev => prev.map(p => 
+                p.id === updatedPlayer.id ? updatedPlayer : p
+            ));
+            
+            if (user && (payload.new as any).updated_by !== user.id) {
+                showToast('선수 정보가 업데이트되었습니다', 'info');
+            }
+        }, [user]),
+        onDelete: useCallback((payload: RealtimePostgresChangesPayload<any>) => {
+            console.log('Player deleted:', payload);
+            const deletedPlayer = payload.old as Player;
+            setPlayers(prev => prev.filter(p => p.id !== deletedPlayer.id));
+            
+            if (user && (payload.old as any).deleted_by !== user.id) {
+                showToast(`선수 ${deletedPlayer.name}이(가) 제거되었습니다`, 'warning');
+            }
+        }, [user]),
+    });
 
     // 팀 수정 페이지로 이동
     const handleEdit = () => {

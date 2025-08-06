@@ -1,13 +1,16 @@
 /* eslint-disable no-unused-vars */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Match } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
+import { useMatchRealtime } from '@/hooks/useRealtimeSubscription';
 import { MatchDetail } from '@/components/match';
 import ParticipantManagement from '@/components/match/ParticipantManagement';
 import MatchStatusManager from '@/components/match/MatchStatusManager';
+import { showToast } from '@/components/ui/Toast';
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 interface MatchDetailClientProps {
     match: Match;
@@ -19,15 +22,31 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
     const [refreshKey, setRefreshKey] = useState(0);
     const [match, setMatch] = useState(initialMatch);
 
+    // 실시간 업데이트 구독
+    useMatchRealtime(match.id, {
+        onUpdate: useCallback((payload: RealtimePostgresChangesPayload<any>) => {
+            console.log('Match updated:', payload);
+            const updatedMatch = payload.new as Match;
+            setMatch(updatedMatch);
+            
+            // 다른 사용자가 업데이트한 경우 알림 표시
+            if (payload.new && user && (payload.new as any).updated_by !== user.id) {
+                showToast('경기 정보가 업데이트되었습니다', 'info');
+            }
+        }, [user]),
+    });
+
     const handleJoined = () => {
         // 참가 신청 후 페이지 새로고침
         setRefreshKey(prev => prev + 1);
+        showToast('참가 신청이 완료되었습니다', 'success');
     };
 
     const handleStatusChange = (newStatus: any) => {
         // 상태 변경 후 match 업데이트
         setMatch(prev => ({ ...prev, status: newStatus }));
         setRefreshKey(prev => prev + 1);
+        showToast('경기 상태가 변경되었습니다', 'info');
     };
 
     const handleEdit = (id: string) => {
