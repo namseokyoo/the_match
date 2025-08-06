@@ -3,8 +3,7 @@ import { Inter } from 'next/font/google';
 import dynamic from 'next/dynamic';
 import Navbar from '@/components/ui/Navbar';
 import { ErrorBoundary } from '@/components/ui';
-import { NotificationProvider } from '@/contexts/NotificationContext';
-import { AuthProvider } from '@/contexts/AuthContext';
+import ClientProviders from '@/components/providers/ClientProviders';
 import './globals.css';
 
 // ConfigStatus는 클라이언트 사이드에서만 렌더링
@@ -84,28 +83,26 @@ export default function RootLayout({
         <html lang="ko" suppressHydrationWarning>
             <body className={inter.className}>
                 <ErrorBoundary>
-                    <AuthProvider>
-                        <NotificationProvider>
-                            <div className="min-h-screen bg-background font-sans antialiased">
-                                <div className="relative flex min-h-screen flex-col">
-                                    {/* 네비게이션 바 */}
-                                    <Navbar />
+                    <ClientProviders>
+                        <div className="min-h-screen bg-background font-sans antialiased">
+                            <div className="relative flex min-h-screen flex-col">
+                                {/* 네비게이션 바 */}
+                                <Navbar />
 
-                                    {/* 메인 콘텐츠 */}
-                                    <main className="flex-1">
-                                        <ErrorBoundary>
-                                            {children}
-                                        </ErrorBoundary>
-                                    </main>
-                                </div>
+                                {/* 메인 콘텐츠 */}
+                                <main className="flex-1">
+                                    <ErrorBoundary>
+                                        {children}
+                                    </ErrorBoundary>
+                                </main>
                             </div>
+                        </div>
 
-                            {/* 개발 환경에서 설정 상태 표시 */}
-                            {process.env.NODE_ENV === 'development' && (
-                                <ConfigStatus />
-                            )}
-                        </NotificationProvider>
-                    </AuthProvider>
+                        {/* 개발 환경에서 설정 상태 표시 */}
+                        {process.env.NODE_ENV === 'development' && (
+                            <ConfigStatus />
+                        )}
+                    </ClientProviders>
                 </ErrorBoundary>
             </body>
         </html>

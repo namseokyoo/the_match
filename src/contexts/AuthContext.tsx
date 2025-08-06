@@ -217,7 +217,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const value = {
         user,
         session,
-        loading: !initialized || loading,
+        loading: loading && !initialized,  // 초기화되지 않았을 때만 loading true
         initialized,
         signIn,
         signUp,
