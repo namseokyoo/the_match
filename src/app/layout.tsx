@@ -1,9 +1,16 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import dynamic from 'next/dynamic';
 import Navbar from '@/components/ui/Navbar';
 import { ErrorBoundary } from '@/components/ui';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import './globals.css';
+
+// ConfigStatus는 클라이언트 사이드에서만 렌더링
+const ConfigStatus = dynamic(
+    () => import('@/components/ui/ConfigStatus'),
+    { ssr: false }
+);
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -90,6 +97,11 @@ export default function RootLayout({
                                 </main>
                             </div>
                         </div>
+
+                        {/* 개발 환경에서 설정 상태 표시 */}
+                        {process.env.NODE_ENV === 'development' && (
+                            <ConfigStatus />
+                        )}
                     </NotificationProvider>
                 </ErrorBoundary>
             </body>
