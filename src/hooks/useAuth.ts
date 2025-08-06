@@ -23,57 +23,69 @@ export const useAuth = (): UseAuthReturn => {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
-    const [isInitialized, setIsInitialized] = useState(false);
 
     useEffect(() => {
-        // 이미 초기화되었으면 중복 실행 방지
-        if (isInitialized) return;
-        
         // Supabase 설정이 유효하지 않으면 로딩만 false로 설정
         if (!hasValidSupabaseConfig()) {
             setLoading(false);
-            setIsInitialized(true);
             return;
         }
 
+        let isMounted = true;
+
         // 현재 세션 확인
-        const getCurrentSession = async () => {
+        const initializeAuth = async () => {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
-                setSession(session);
-                setUser(session?.user ?? null);
+                if (isMounted) {
+                    setSession(session);
+                    setUser(session?.user ?? null);
+                    setLoading(false);
+                }
             } catch (error) {
                 console.error('Error getting session:', error);
-                setUser(null);
-                setSession(null);
-            } finally {
-                setLoading(false);
-                setIsInitialized(true);
+                if (isMounted) {
+                    setUser(null);
+                    setSession(null);
+                    setLoading(false);
+                }
             }
         };
 
-        getCurrentSession();
+        // 초기 세션 로드
+        initializeAuth();
 
         // 인증 상태 변화 감지
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
             console.log('Auth state changed:', event, session?.user?.id);
-            setSession(session);
-            setUser(session?.user ?? null);
-            // 이미 초기화가 완료된 후에만 loading 상태 변경
-            if (isInitialized) {
+            if (isMounted) {
+                setSession(session);
+                setUser(session?.user ?? null);
                 setLoading(false);
-            }
 
-            // Handle profile creation on sign up
-            if (event === 'SIGNED_IN' && session?.user && !user) {
-                await createUserProfile(session.user);
+                // Handle profile creation on sign up
+                if (event === 'SIGNED_IN' && session?.user) {
+                    // 새로운 사용자인지 확인 (프로필이 없는 경우)
+                    const { data: existingProfile } = await supabase
+                        .from('profiles')
+                        .select('user_id')
+                        .eq('user_id', session.user.id)
+                        .single();
+                    
+                    if (!existingProfile) {
+                        await createUserProfile(session.user);
+                    }
+                }
             }
         });
 
-        return () => subscription.unsubscribe();
-    }, [isInitialized]);
+        return () => {
+            isMounted = false;
+            subscription.unsubscribe();
+        };
+    }, []); // 빈 dependency 배열 - 컴포넌트 마운트 시 한 번만 실행
 
     const createUserProfile = async (user: User) => {
         try {

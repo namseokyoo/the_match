@@ -1,11 +1,24 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 
 const SimpleNavbar = () => {
     const { user, signOut, loading, isAuthenticated } = useAuth();
+    const [loadingTimeout, setLoadingTimeout] = useState(false);
+
+    // 로딩이 3초 이상 지속되면 타임아웃 처리
+    useEffect(() => {
+        if (loading) {
+            const timer = setTimeout(() => {
+                setLoadingTimeout(true);
+            }, 3000);
+            return () => clearTimeout(timer);
+        } else {
+            setLoadingTimeout(false);
+        }
+    }, [loading]);
 
     const handleSignOut = async () => {
         await signOut();
@@ -38,7 +51,7 @@ const SimpleNavbar = () => {
                             팀
                         </Link>
 
-                        {loading ? (
+                        {loading && !loadingTimeout ? (
                             <span className="text-gray-500 text-sm">로딩 중...</span>
                         ) : isAuthenticated ? (
                             // 로그인된 상태
