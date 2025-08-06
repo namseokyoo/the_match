@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { MatchType, MatchStatus, CreateMatchForm } from '@/types';
+import { verifyAuth, requireEmailVerified } from '@/lib/auth-middleware';
 
 // 서버 전용 Supabase 클라이언트 (Service Role Key 사용)
 const supabaseAdmin = createClient(
@@ -105,8 +106,33 @@ export async function GET(request: NextRequest) {
 // POST /api/matches - 경기 생성
 export async function POST(request: NextRequest) {
     try {
-        // Service Role 클라이언트는 서버 사이드에서 실행되므로 인증 확인 불필요
-        // 클라이언트에서 인증된 사용자만 이 API를 호출할 수 있도록 별도 처리 필요
+        // 인증 헤더에서 사용자 정보 추출
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return NextResponse.json(
+                { error: '인증이 필요합니다.' },
+                { status: 401 }
+            );
+        }
+
+        const token = authHeader.substring(7);
+        
+        // 보안 강화된 인증 검증 미들웨어 사용
+        const authResult = await verifyAuth(request);
+        
+        if ('error' in authResult) {
+            return authResult.error;
+        }
+        
+        const { user } = authResult;
+        
+        // 이메일 인증 여부 확인
+        const emailError = requireEmailVerified(user);
+        if (emailError) {
+            return emailError;
+        }
+        
+        const userId = user.id;
 
         const body: CreateMatchForm = await request.json();
 
@@ -125,7 +151,7 @@ export async function POST(request: NextRequest) {
             description: body.description?.trim() || null,
             type: body.type,
             status: MatchStatus.DRAFT,
-            creator_id: null, // Service Role에서는 creator_id를 별도로 처리
+            creator_id: userId, // 인증된 사용자 ID 사용
             max_participants: body.max_participants || null,
             registration_deadline: body.registration_deadline || null,
             start_date: body.start_date || null,
