@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase, hasValidSupabaseConfig } from '@/lib/supabase';
+import { getAuthState, setAuthInitialized, setAuthLoading, isInitialLoad } from '@/lib/auth-state';
 
 interface AuthContextType {
     user: User | null;
@@ -36,17 +37,24 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [initialized, setInitialized] = useState(false);
+    const authState = getAuthState();
+    const [loading, setLoading] = useState(authState.loading);
+    const [initialized, setInitialized] = useState(authState.initialized);
+    const hasInitialized = useRef(authState.initialized);
 
     useEffect(() => {
+        // 이미 초기화되었으면 스킵
+        if (hasInitialized.current) {
+            return;
+        }
+
         // Supabase 설정이 유효하지 않으면 즉시 초기화 완료
         if (!hasValidSupabaseConfig()) {
             setLoading(false);
             setInitialized(true);
-            if (typeof window !== 'undefined') {
-                sessionStorage.setItem('auth_initialized', 'true');
-            }
+            setAuthInitialized(true);
+            setAuthLoading(false);
+            hasInitialized.current = true;
             return;
         }
 
@@ -61,9 +69,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     setUser(session?.user ?? null);
                     setLoading(false);
                     setInitialized(true);
-                    if (typeof window !== 'undefined') {
-                        sessionStorage.setItem('auth_initialized', 'true');
-                    }
+                    setAuthInitialized(true);
+                    setAuthLoading(false);
+                    hasInitialized.current = true;
                 }
             } catch (error) {
                 console.error('Error getting session:', error);
@@ -72,9 +80,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     setSession(null);
                     setLoading(false);
                     setInitialized(true);
-                    if (typeof window !== 'undefined') {
-                        sessionStorage.setItem('auth_initialized', 'true');
-                    }
+                    setAuthInitialized(true);
+                    setAuthLoading(false);
+                    hasInitialized.current = true;
                 }
             }
         };
@@ -217,7 +225,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const value = {
         user,
         session,
-        loading: loading && !initialized,  // 초기화되지 않았을 때만 loading true
+        loading,
         initialized,
         signIn,
         signUp,
