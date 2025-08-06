@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 'use client';
 
 import React, { useState } from 'react';
@@ -11,8 +12,8 @@ interface MatchDetailClientProps {
 }
 
 export default function MatchDetailClient({ match }: MatchDetailClientProps) {
-    const router = useRouter();
-    const { user, getAccessToken } = useAuth();
+    const router = useRouter(); // TODO: 경기 수정/삭제 기능에서 사용 예정
+    const { user, getAccessToken } = useAuth(); // TODO: 경기 삭제 기능에서 사용 예정
     const [refreshKey, setRefreshKey] = useState(0);
 
     const handleJoined = () => {
@@ -20,48 +21,47 @@ export default function MatchDetailClient({ match }: MatchDetailClientProps) {
         setRefreshKey(prev => prev + 1);
     };
 
-    // 경기 수정
-    const handleEdit = (id: string) => {
-        router.push(`/matches/${id}/edit`);
-    };
+    // TODO: 경기 수정/삭제 기능은 향후 구현 예정
+    // const handleEdit = (id: string) => {
+    //     router.push(`/matches/${id}/edit`);
+    // };
 
-    // 경기 삭제
-    const handleDelete = async (id: string) => {
-        if (!user) {
-            alert('로그인이 필요합니다.');
-            return;
-        }
-
-        const confirmDelete = window.confirm('정말로 이 경기를 삭제하시겠습니까?\\n이 작업은 되돌릴 수 없습니다.');
-        if (!confirmDelete) return;
-
-        try {
-            const token = await getAccessToken();
-            if (!token) {
-                alert('인증 토큰을 가져올 수 없습니다.');
-                return;
-            }
-
-            const response = await fetch(`/api/matches/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || '경기 삭제에 실패했습니다.');
-            }
-
-            alert('경기가 성공적으로 삭제되었습니다.');
-            router.push('/matches');
-        } catch (err) {
-            console.error('경기 삭제 오류:', err);
-            alert(err instanceof Error ? err.message : '경기 삭제 중 오류가 발생했습니다.');
-        }
-    };
+    // const handleDelete = async (id: string) => {
+    //     if (!user) {
+    //         alert('로그인이 필요합니다.');
+    //         return;
+    //     }
+    // 
+    //     const confirmDelete = window.confirm('정말로 이 경기를 삭제하시겠습니까?\\n이 작업은 되돌릴 수 없습니다.');
+    //     if (!confirmDelete) return;
+    // 
+    //     try {
+    //         const token = await getAccessToken();
+    //         if (!token) {
+    //             alert('인증 토큰을 가져올 수 없습니다.');
+    //             return;
+    //         }
+    // 
+    //         const response = await fetch(`/api/matches/${id}`, {
+    //             method: 'DELETE',
+    //             headers: {
+    //                 'Authorization': `Bearer ${token}`,
+    //             },
+    //         });
+    // 
+    //         const data = await response.json();
+    // 
+    //         if (!response.ok) {
+    //             throw new Error(data.error || '경기 삭제에 실패했습니다.');
+    //         }
+    // 
+    //         alert('경기가 성공적으로 삭제되었습니다.');
+    //         router.push('/matches');
+    //     } catch (err) {
+    //         console.error('경기 삭제 오류:', err);
+    //         alert(err instanceof Error ? err.message : '경기 삭제 중 오류가 발생했습니다.');
+    //     }
+    // };
 
     const isOwner = user?.id === match.creator_id;
 

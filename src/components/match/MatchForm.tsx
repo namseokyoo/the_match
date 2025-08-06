@@ -1,10 +1,11 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Button, Input } from '@/components/ui';
 import { Match, MatchType, CreateMatchForm } from '@/types';
 
 interface MatchFormProps {
     match?: Match;
-    onSubmit: (formData: CreateMatchForm) => Promise<void>;
+    onSubmit: (data: CreateMatchForm) => Promise<void>;
     onCancel?: () => void;
     isLoading?: boolean;
     mode?: 'create' | 'edit';

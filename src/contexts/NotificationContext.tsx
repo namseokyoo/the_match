@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
@@ -11,8 +12,8 @@ interface NotificationData {
 }
 
 interface NotificationContextType {
-    showNotification: (message: string, type: NotificationData['type'], duration?: number) => void;
-    hideNotification: (id: string) => void;
+    showNotification: (text: string, level: NotificationData['type'], timeout?: number) => void;
+    hideNotification: (notificationId: string) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);

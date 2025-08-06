@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Match, MatchType, MatchStatus } from '@/types';
 import { MatchCard } from './MatchCard';
@@ -9,9 +10,9 @@ interface MatchListProps {
     loading?: boolean;
     error?: string | null;
     currentUserId?: string;
-    onView?: (id: string) => void;
-    onEdit?: (id: string) => void;
-    onDelete?: (id: string) => void;
+    onView?: (matchId: string) => void;
+    onEdit?: (matchId: string) => void;
+    onDelete?: (matchId: string) => void;
     onRefresh?: () => void;
 }
 
@@ -58,8 +59,8 @@ export const MatchList: React.FC<MatchListProps> = ({
     });
 
     const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
-    const [sortBy, setSortBy] = useState<'created_at' | 'start_date' | 'title'>('created_at');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+    const [sortBy] = useState<'created_at' | 'start_date' | 'title'>('created_at');
+    const [sortOrder] = useState<'asc' | 'desc'>('desc');
 
     // 경기 필터링 및 정렬
     useEffect(() => {

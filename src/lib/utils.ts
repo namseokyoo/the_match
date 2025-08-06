@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -66,22 +67,22 @@ export function generateId(): string {
 export function debounce<T extends (...args: any[]) => void>(
     func: T,
     delay: number
-): (...args: Parameters<T>) => void {
+): (...params: Parameters<T>) => void {
     let timeoutId: NodeJS.Timeout;
-    return (...args: Parameters<T>) => {
+    return (...params: Parameters<T>) => {
         clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func(...args), delay);
+        timeoutId = setTimeout(() => func(...params), delay);
     };
 }
 
 export function throttle<T extends (...args: any[]) => void>(
     func: T,
     limit: number
-): (...args: Parameters<T>) => void {
+): (...params: Parameters<T>) => void {
     let inThrottle: boolean;
-    return (...args: Parameters<T>) => {
+    return (...params: Parameters<T>) => {
         if (!inThrottle) {
-            func(...args);
+            func(...params);
             inThrottle = true;
             setTimeout(() => (inThrottle = false), limit);
         }

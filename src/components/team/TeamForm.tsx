@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Team, CreateTeamForm, Match } from '@/types';
 import { Button, Input, Card } from '@/components/ui';
 
@@ -8,7 +10,7 @@ interface TeamFormProps {
     team?: Team;
     matches?: Match[];
     loading?: boolean;
-    onSubmit: (data: CreateTeamForm & { match_id?: string }) => Promise<void>;
+    onSubmit: (formData: CreateTeamForm & { match_id?: string }) => Promise<void>;
     onCancel?: () => void;
 }
 
@@ -222,9 +224,11 @@ export const TeamForm: React.FC<TeamFormProps> = ({
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 로고 미리보기
                             </label>
-                            <img
+                            <Image
                                 src={formData.logo_url}
                                 alt="팀 로고 미리보기"
+                                width={64}
+                                height={64}
                                 className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
                                 onError={(e) => {
                                     e.currentTarget.style.display = 'none';

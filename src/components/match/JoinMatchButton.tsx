@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Match, MatchParticipant, ParticipantStatus } from '@/types';
+import { Match, MatchParticipant } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui';
 

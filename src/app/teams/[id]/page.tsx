@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Team, Player } from '@/types';
 import { TeamDetail } from '@/components/team';
@@ -20,7 +20,7 @@ export default function TeamDetailPage() {
     const teamId = params.id as string;
 
     // 팀 상세 정보 조회
-    const fetchTeam = async () => {
+    const fetchTeam = useCallback(async () => {
         try {
             setLoading(true);
 
@@ -66,7 +66,7 @@ export default function TeamDetailPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [teamId]);
 
     // 컴포넌트 마운트 시 데이터 로드
     useEffect(() => {

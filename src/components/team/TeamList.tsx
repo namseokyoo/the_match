@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 'use client';
 
 import React, { useState } from 'react';
@@ -11,11 +12,11 @@ interface TeamListProps {
     pagination?: PaginatedResponse['pagination'];
     loading?: boolean;
     searchable?: boolean;
-    onSearch?: (query: string) => void;
+    onSearch?: (searchText: string) => void;
     onLoadMore?: () => void;
-    onTeamClick?: (team: Team) => void;
-    onEdit?: (team: Team) => void;
-    onDelete?: (team: Team) => void;
+    onTeamClick?: (selectedTeam: Team) => void;
+    onEdit?: (selectedTeam: Team) => void;
+    onDelete?: (selectedTeam: Team) => void;
     currentUserId?: string;
     emptyMessage?: string;
     className?: string;

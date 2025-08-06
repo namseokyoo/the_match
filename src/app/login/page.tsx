@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { Trophy, Eye, EyeOff } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { signIn, signInWithGoogle, user, loading } = useAuth();
@@ -21,7 +21,7 @@ export default function LoginPage() {
     // Redirect if already logged in
     useEffect(() => {
         if (user && !loading) {
-            router.push('/tournaments');
+            router.push('/matches');
         }
     }, [user, loading, router]);
 
@@ -49,7 +49,7 @@ export default function LoginPage() {
         if (error) {
             setError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
         } else {
-            router.push('/tournaments');
+            router.push('/matches');
         }
 
         setIsLoading(false);
@@ -227,5 +227,20 @@ export default function LoginPage() {
                 </Card>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex min-h-screen items-center justify-center bg-gray-50">
+                <div className="text-center">
+                    <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-match-blue border-t-transparent"></div>
+                    <p className="text-sm text-gray-600">로딩 중...</p>
+                </div>
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     );
 } 

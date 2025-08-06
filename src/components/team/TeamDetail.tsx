@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Team, Player, Match } from '@/types';
 import { Button, Card } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
@@ -11,10 +13,10 @@ interface TeamDetailProps {
     match?: Match;
     currentUserId?: string;
     loading?: boolean;
-    onEdit?: (id: string) => void;
-    onDelete?: (id: string) => void;
-    onAddPlayer?: (teamId: string) => void;
-    onEditPlayer?: (playerId: string) => void;
+    onEdit?: () => void;
+    onDelete?: () => void;
+    onAddPlayer?: () => void;
+    onEditPlayer?: (player: Player) => void;
     onRemovePlayer?: (playerId: string) => void;
     isOwner?: boolean;
 }
@@ -23,7 +25,7 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
     team,
     players = [],
     match,
-    currentUserId,
+    // currentUserId is used for future permission checks
     loading = false,
     onEdit,
     onDelete,
@@ -60,9 +62,11 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                     <div className="flex items-start space-x-4">
                         {/* 팀 로고 */}
                         {team.logo_url ? (
-                            <img
+                            <Image
                                 src={team.logo_url}
                                 alt={`${team.name} 로고`}
+                                width={80}
+                                height={80}
                                 className="w-20 h-20 rounded-full object-cover border-4 border-gray-200"
                             />
                         ) : (
@@ -93,7 +97,7 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => onEdit?.(team.id)}
+                                onClick={() => onEdit?.()}
                                 disabled={loading}
                             >
                                 팀 수정
@@ -101,7 +105,7 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                             <Button
                                 variant="destructive"
                                 size="sm"
-                                onClick={() => onDelete?.(team.id)}
+                                onClick={() => onDelete?.()}
                                 disabled={loading}
                             >
                                 팀 삭제
@@ -188,7 +192,7 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                             <Button
                                 variant="primary"
                                 size="sm"
-                                onClick={() => onAddPlayer(team.id)}
+                                onClick={() => onAddPlayer()}
                                 disabled={loading}
                             >
                                 선수 추가
@@ -222,9 +226,11 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center space-x-3">
                                                         {player.avatar_url ? (
-                                                            <img
+                                                            <Image
                                                                 src={player.avatar_url}
                                                                 alt={player.name}
+                                                                width={32}
+                                                                height={32}
                                                                 className="w-8 h-8 rounded-full object-cover"
                                                             />
                                                         ) : (
@@ -261,7 +267,7 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                                                                 </svg>
                                                             </button>
                                                             <button
-                                                                onClick={() => onEditPlayer?.(player.id)}
+                                                                onClick={() => onEditPlayer?.(player)}
                                                                 className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
                                                                 title="수정"
                                                             >

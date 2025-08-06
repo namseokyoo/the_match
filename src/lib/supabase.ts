@@ -62,11 +62,11 @@ export const getCurrentUser = async () => {
 
 // Helper functions for common database operations
 export const db = {
-    // Tournament operations
-    tournaments: {
+    // Match operations (formerly Tournament operations)
+    matches: {
         async getAll() {
             const { data, error } = await supabase
-                .from('tournaments')
+                .from('matches')
                 .select('*')
                 .order('created_at', { ascending: false });
 
@@ -76,7 +76,7 @@ export const db = {
 
         async getById(id: string) {
             const { data, error } = await supabase
-                .from('tournaments')
+                .from('matches')
                 .select('*')
                 .eq('id', id)
                 .single();
@@ -85,10 +85,10 @@ export const db = {
             return data;
         },
 
-        async create(tournament: any) {
+        async create(match: any) {
             const { data, error } = await supabase
-                .from('tournaments')
-                .insert([tournament])
+                .from('matches')
+                .insert([match])
                 .select()
                 .single();
 
@@ -98,7 +98,7 @@ export const db = {
 
         async update(id: string, updates: any) {
             const { data, error } = await supabase
-                .from('tournaments')
+                .from('matches')
                 .update(updates)
                 .eq('id', id)
                 .select()
@@ -110,7 +110,7 @@ export const db = {
 
         async delete(id: string) {
             const { error } = await supabase
-                .from('tournaments')
+                .from('matches')
                 .delete()
                 .eq('id', id);
 
@@ -120,11 +120,11 @@ export const db = {
 
     // Team operations
     teams: {
-        async getByTournament(tournamentId: string) {
+        async getByMatch(matchId: string) {
             const { data, error } = await supabase
                 .from('teams')
                 .select('*')
-                .eq('tournament_id', tournamentId)
+                .eq('match_id', matchId)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -210,28 +210,28 @@ export const db = {
         },
     },
 
-    // Match operations
-    matches: {
-        async getByTournament(tournamentId: string) {
+    // Game operations (for individual games within matches)
+    games: {
+        async getByMatch(matchId: string) {
             const { data, error } = await supabase
-                .from('matches')
+                .from('game_results')
                 .select(`
           *,
-          team1:teams!matches_team1_id_fkey(*),
-          team2:teams!matches_team2_id_fkey(*),
-          result:match_results(*)
+          team1:teams!game_results_team1_id_fkey(*),
+          team2:teams!game_results_team2_id_fkey(*),
+          details:game_details(*)
         `)
-                .eq('tournament_id', tournamentId)
+                .eq('match_id', matchId)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
             return data;
         },
 
-        async create(match: any) {
+        async create(game: any) {
             const { data, error } = await supabase
-                .from('matches')
-                .insert([match])
+                .from('game_results')
+                .insert([game])
                 .select()
                 .single();
 
@@ -241,7 +241,7 @@ export const db = {
 
         async update(id: string, updates: any) {
             const { data, error } = await supabase
-                .from('matches')
+                .from('game_results')
                 .update(updates)
                 .eq('id', id)
                 .select()

@@ -1,5 +1,6 @@
 'use client';
 
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase, hasValidSupabaseConfig } from '@/lib/supabase';
@@ -8,11 +9,11 @@ interface UseAuthReturn {
     user: User | null;
     session: Session | null;
     loading: boolean;
-    signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-    signUp: (email: string, password: string, metadata?: Record<string, any>) => Promise<{ error: AuthError | null }>;
+    signIn: (userEmail: string, userPassword: string) => Promise<{ error: AuthError | null }>;
+    signUp: (userEmail: string, userPassword: string, userMetadata?: Record<string, any>) => Promise<{ error: AuthError | null }>;
     signOut: () => Promise<{ error: AuthError | null }>;
     signInWithGoogle: () => Promise<{ error: AuthError | null }>;
-    resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+    resetPassword: (userEmail: string) => Promise<{ error: AuthError | null }>;
     getAccessToken: () => Promise<string | null>;
     isAuthenticated: boolean;
     hasValidConfig: boolean;
@@ -62,7 +63,7 @@ export const useAuth = (): UseAuthReturn => {
         });
 
         return () => subscription.unsubscribe();
-    }, []);
+    }, [user]);
 
     const createUserProfile = async (user: User) => {
         try {
@@ -87,7 +88,7 @@ export const useAuth = (): UseAuthReturn => {
 
     const signIn = async (email: string, password: string) => {
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
@@ -103,7 +104,7 @@ export const useAuth = (): UseAuthReturn => {
 
     const signUp = async (email: string, password: string, metadata?: Record<string, any>) => {
         try {
-            const { data, error } = await supabase.auth.signUp({
+            const { error } = await supabase.auth.signUp({
                 email,
                 password,
                 options: {

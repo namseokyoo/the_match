@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Base types
 export type Json =
     | string
@@ -27,6 +28,7 @@ export interface Profile {
 }
 
 // Match types (기존 Tournament에서 변경)
+// eslint-disable-next-line no-unused-vars
 export enum MatchType {
     SINGLE_ELIMINATION = 'single_elimination',
     DOUBLE_ELIMINATION = 'double_elimination',
@@ -35,6 +37,7 @@ export enum MatchType {
     LEAGUE = 'league',
 }
 
+// eslint-disable-next-line no-unused-vars
 export enum MatchStatus {
     DRAFT = 'draft',
     REGISTRATION = 'registration',
@@ -91,7 +94,8 @@ export interface Player {
     updated_at: string;
 }
 
-// Game types (기존 Match에서 변경)
+// Game types (기존 Match에서 변경) - TODO: 추후 게임 기능 구현 시 사용
+// eslint-disable-next-line no-unused-vars
 export enum GameStatus {
     SCHEDULED = 'scheduled',
     IN_PROGRESS = 'in_progress',
@@ -129,7 +133,8 @@ export interface GameDetail {
     updated_at: string;
 }
 
-// Media types
+// Media types - TODO: 추후 미디어 업로드 기능 구현 시 사용
+// eslint-disable-next-line no-unused-vars
 export enum MediaType {
     IMAGE = 'image',
     VIDEO = 'video',
@@ -167,7 +172,8 @@ export interface BracketNode {
     updated_at: string;
 }
 
-// User roles
+// User roles - TODO: 추후 권한 관리 시스템 구현 시 사용
+// eslint-disable-next-line no-unused-vars
 export enum UserRole {
     ADMIN = 'admin',
     ORGANIZER = 'organizer',
@@ -247,6 +253,7 @@ export interface InputProps extends BaseComponentProps {
     id?: string;
     type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
     placeholder?: string;
+    // eslint-disable-next-line no-unused-vars
     value?: string;
     defaultValue?: string;
     disabled?: boolean;
@@ -262,6 +269,7 @@ export type DeepPartial<T> = {
 };
 
 // Participant types (경기 참가 관련)
+// eslint-disable-next-line no-unused-vars
 export enum ParticipantStatus {
     PENDING = 'pending',
     APPROVED = 'approved',

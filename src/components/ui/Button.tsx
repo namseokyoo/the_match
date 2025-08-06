@@ -22,7 +22,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             lg: 'text-lg px-6 py-3',
         };
 
-        const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        const handleClick = () => {
             if (disabled || loading) return;
             onClick?.();
         };

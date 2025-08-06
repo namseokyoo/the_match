@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 'use client';
 
 import React from 'react';
@@ -9,9 +10,9 @@ import { formatDate } from '@/lib/utils';
 interface ParticipantCardProps {
     participant: MatchParticipant;
     isOwner?: boolean;
-    onApprove?: (teamId: string) => void;
-    onReject?: (teamId: string) => void;
-    onCancel?: (teamId: string) => void;
+    onApprove?: (id: string) => void;
+    onReject?: (id: string) => void;
+    onCancel?: (id: string) => void;
 }
 
 const ParticipantCard: React.FC<ParticipantCardProps> = ({

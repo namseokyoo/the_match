@@ -342,15 +342,19 @@ export interface Database {
             }
         }
         Views: {
+            // eslint-disable-next-line no-unused-vars
             [_ in never]: never
         }
         Functions: {
+            // eslint-disable-next-line no-unused-vars
             [_ in never]: never
         }
         Enums: {
+            // eslint-disable-next-line no-unused-vars
             [_ in never]: never
         }
         CompositeTypes: {
+            // eslint-disable-next-line no-unused-vars
             [_ in never]: never
         }
     }
