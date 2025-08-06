@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { Team, Player } from '@/types';
 import { TeamDetail } from '@/components/team';
 import { Button } from '@/components/ui';
+import { AddPlayerModal, EditPlayerModal } from '@/components/player';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 
@@ -13,6 +14,9 @@ export default function TeamDetailPage() {
     const [players, setPlayers] = useState<Player[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isAddPlayerModalOpen, setIsAddPlayerModalOpen] = useState(false);
+    const [isEditPlayerModalOpen, setIsEditPlayerModalOpen] = useState(false);
+    const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
@@ -115,16 +119,38 @@ export default function TeamDetailPage() {
         }
     };
 
-    // 선수 추가 (임시 - 추후 구현)
+    // 선수 추가
     const handleAddPlayer = () => {
-        // TODO: 선수 추가 모달 또는 페이지로 이동
-        alert('선수 추가 기능은 곧 구현됩니다.');
+        if (!isOwner) {
+            alert('팀 캡틴만 선수를 추가할 수 있습니다.');
+            return;
+        }
+        setIsAddPlayerModalOpen(true);
     };
 
-    // 선수 수정 (임시 - 추후 구현)
-    const handleEditPlayer = () => {
-        // TODO: 선수 수정 모달 또는 페이지로 이동
-        alert('선수 수정 기능은 곧 구현됩니다.');
+    // 선수 수정
+    const handleEditPlayer = (player: Player) => {
+        if (!isOwner) {
+            alert('팀 캡틴만 선수 정보를 수정할 수 있습니다.');
+            return;
+        }
+        setSelectedPlayer(player);
+        setIsEditPlayerModalOpen(true);
+    };
+
+    // 선수 추가 완료 처리
+    const handlePlayerAdded = (newPlayer: Player) => {
+        setPlayers(prev => [...prev, newPlayer]);
+        setIsAddPlayerModalOpen(false);
+    };
+
+    // 선수 수정 완료 처리
+    const handlePlayerUpdated = (updatedPlayer: Player) => {
+        setPlayers(prev => prev.map(p => 
+            p.id === updatedPlayer.id ? updatedPlayer : p
+        ));
+        setIsEditPlayerModalOpen(false);
+        setSelectedPlayer(null);
     };
 
     // 선수 제거
@@ -272,6 +298,25 @@ export default function TeamDetailPage() {
                     isOwner={isOwner || false}
                 />
             </div>
+
+            {/* 선수 추가 모달 */}
+            <AddPlayerModal
+                teamId={teamId}
+                isOpen={isAddPlayerModalOpen}
+                onClose={() => setIsAddPlayerModalOpen(false)}
+                onPlayerAdded={handlePlayerAdded}
+            />
+
+            {/* 선수 수정 모달 */}
+            <EditPlayerModal
+                player={selectedPlayer}
+                isOpen={isEditPlayerModalOpen}
+                onClose={() => {
+                    setIsEditPlayerModalOpen(false);
+                    setSelectedPlayer(null);
+                }}
+                onPlayerUpdated={handlePlayerUpdated}
+            />
         </div>
     );
 }

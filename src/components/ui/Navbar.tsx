@@ -50,15 +50,24 @@ const SimpleNavbar = () => {
                         >
                             팀
                         </Link>
+                        <Link
+                            href="/players"
+                            className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                        >
+                            선수
+                        </Link>
 
                         {loading && !loadingTimeout ? (
                             <span className="text-gray-500 text-sm">로딩 중...</span>
                         ) : isAuthenticated ? (
                             // 로그인된 상태
                             <div className="flex items-center space-x-4">
-                                <span className="text-sm text-gray-700">
+                                <Link
+                                    href="/profile"
+                                    className="text-sm text-gray-700 hover:text-gray-900"
+                                >
                                     {user?.email?.split('@')[0] || '사용자'}님
-                                </span>
+                                </Link>
                                 <Link
                                     href="/teams/create"
                                     className="bg-match-blue hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
