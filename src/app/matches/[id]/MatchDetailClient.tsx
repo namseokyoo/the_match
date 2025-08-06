@@ -5,7 +5,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Match } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
-import { MatchDetail, ParticipantList } from '@/components/match';
+import { MatchDetail } from '@/components/match';
+import ParticipantManagement from '@/components/match/ParticipantManagement';
 
 interface MatchDetailClientProps {
     match: Match;
@@ -87,9 +88,10 @@ export default function MatchDetailClient({ match }: MatchDetailClientProps) {
                     </p>
                 </div>
                 <div className="p-6">
-                    <ParticipantList
+                    <ParticipantManagement
                         matchId={match.id}
-                        isOwner={isOwner}
+                        isCreator={isOwner}
+                        onUpdate={() => setRefreshKey(prev => prev + 1)}
                         key={refreshKey}
                     />
                 </div>
