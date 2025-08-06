@@ -2,6 +2,7 @@ export { default as MatchCard } from './MatchCard';
 export { default as MatchDetail } from './MatchDetail';
 export { default as MatchForm } from './MatchForm';
 export { default as MatchList } from './MatchList';
+export { default as MatchStatusManager } from './MatchStatusManager';
 
 // 참가자 관련 컴포넌트들
 export { default as ParticipantCard } from './ParticipantCard';

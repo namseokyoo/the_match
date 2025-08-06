@@ -7,18 +7,26 @@ import { Match } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { MatchDetail } from '@/components/match';
 import ParticipantManagement from '@/components/match/ParticipantManagement';
+import MatchStatusManager from '@/components/match/MatchStatusManager';
 
 interface MatchDetailClientProps {
     match: Match;
 }
 
-export default function MatchDetailClient({ match }: MatchDetailClientProps) {
+export default function MatchDetailClient({ match: initialMatch }: MatchDetailClientProps) {
     const router = useRouter(); // TODO: 경기 수정/삭제 기능에서 사용 예정
     const { user, getAccessToken } = useAuth(); // TODO: 경기 삭제 기능에서 사용 예정
     const [refreshKey, setRefreshKey] = useState(0);
+    const [match, setMatch] = useState(initialMatch);
 
     const handleJoined = () => {
         // 참가 신청 후 페이지 새로고침
+        setRefreshKey(prev => prev + 1);
+    };
+
+    const handleStatusChange = (newStatus: any) => {
+        // 상태 변경 후 match 업데이트
+        setMatch(prev => ({ ...prev, status: newStatus }));
         setRefreshKey(prev => prev + 1);
     };
 
@@ -73,6 +81,15 @@ export default function MatchDetailClient({ match }: MatchDetailClientProps) {
                 match={match}
                 onJoined={handleJoined}
             />
+
+            {/* 경기 상태 관리 (생성자만 표시) */}
+            {isOwner && (
+                <MatchStatusManager
+                    match={match}
+                    isCreator={isOwner}
+                    onStatusChange={handleStatusChange}
+                />
+            )}
 
             {/* 참가자 목록 */}
             <div className="bg-white rounded-lg shadow-sm border">
