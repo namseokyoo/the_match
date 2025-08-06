@@ -259,6 +259,15 @@ export interface InputProps extends BaseComponentProps {
     disabled?: boolean;
     required?: boolean;
     onChange?: (value: string) => void;
+    min?: string | number;
+    max?: string | number;
+    step?: string | number;
+    pattern?: string;
+    maxLength?: number;
+    minLength?: number;
+    autoComplete?: string;
+    autoFocus?: boolean;
+    readOnly?: boolean;
 }
 
 // Utility types
