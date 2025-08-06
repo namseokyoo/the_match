@@ -9,4 +9,10 @@ export {
     CardContent,
     CardFooter
 } from './Card';
-export { default as Notification } from './Notification'; 
+export { default as Notification } from './Notification';
+export { 
+    default as ErrorBoundary, 
+    useAsyncError, 
+    useErrorBoundary, 
+    ErrorBoundaryProvider 
+} from './ErrorBoundary'; 

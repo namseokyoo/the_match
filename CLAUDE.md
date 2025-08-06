@@ -171,15 +171,20 @@ src/
 ## Git Workflow and Branch Management
 
 ### Branch Strategy
-Follow the **Git Flow** pattern with simplified approach:
+Follow the **Git Flow** pattern with Vercel auto-deployment integration:
 
 ```
-main (production)
-├── develop (integration)
+main (production) → Vercel Production Deployment
+├── develop (integration) → Vercel Preview Deployment  
 ├── feature/feature-name (feature development)
 ├── hotfix/issue-description (emergency fixes)
 └── release/version-number (release preparation)
 ```
+
+### Vercel Auto-Deployment Setup
+- **Production**: `main` branch automatically deploys to production URL
+- **Preview**: `develop` branch creates preview deployments for testing
+- **Feature Branches**: Create individual preview URLs for code review
 
 ### Branch Naming Convention
 - `feature/descriptive-name` - New features
@@ -218,18 +223,22 @@ chore(deps): update dependencies to latest versions
 
 ### Development Workflow
 
-#### 1. Starting New Work
+#### 1. Starting New Work (Feature Development)
 ```bash
-# Update develop branch
+# Switch to develop branch and get latest changes
 git checkout develop
 git pull origin develop
 
-# Create new feature branch
+# Create new feature branch from develop
 git checkout -b feature/descriptive-name
 
 # Work on feature...
+# Make commits as you develop
 git add .
 git commit -m "feat(scope): description"
+
+# Push feature branch for backup/collaboration
+git push origin feature/descriptive-name
 ```
 
 #### 2. Before Committing
@@ -240,33 +249,89 @@ npm run type-check    # Verify TypeScript types
 npm run build         # Ensure build works
 ```
 
-#### 3. Merging Work
+#### 3. Feature Completion and Merge to Develop
 ```bash
-# Push feature branch
+# Ensure feature is complete and tested
 git push origin feature/descriptive-name
 
-# Create Pull Request to develop
+# Create Pull Request to develop branch
 # After review and approval, merge using squash and merge
 # Delete feature branch after merge
+
+# Alternative: Direct merge to develop (for small changes)
+git checkout develop
+git pull origin develop
+git merge feature/descriptive-name --no-ff
+git push origin develop
+git branch -d feature/descriptive-name
 ```
 
-#### 4. Release Process
+#### 4. Automatic Deployment to Production
 ```bash
-# Create release branch from develop
-git checkout -b release/v1.0.0 develop
+# When develop branch is stable and ready for production
+git checkout main
+git pull origin main
+git merge develop --no-ff
+git push origin main
 
-# Final testing and bug fixes
-# Update version numbers
-# Merge to main and develop
-# Tag the release
+# This automatically triggers Vercel production deployment
+# Tag the release for version tracking
 git tag v1.0.0
+git push origin --tags
+```
+
+#### 5. Development Environment Setup
+```bash
+# Clone repository and switch to develop
+git clone <repository-url>
+cd the_match
+git checkout develop
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your Supabase credentials
+
+# Start development
+npm run dev
 ```
 
 ### Branch Protection Rules
-- **main**: Protected, requires PR, requires status checks
-- **develop**: Protected, requires PR, allows admin push
-- **feature/***: No protection, delete after merge
-- **hotfix/***: Allowed to merge directly to main after review
+- **main**: Protected, requires PR, requires status checks, triggers production deployment
+- **develop**: Protected, requires PR, allows admin push, creates preview deployments
+- **feature/***: No protection, creates individual preview deployments, delete after merge
+- **hotfix/***: Emergency fixes, merge to main after review, immediate deployment
+
+### Deployment Guidelines
+
+#### Vercel Deployment Environments
+1. **Production** (main branch)
+   - Automatic deployment on push to main
+   - Production database (Supabase production)
+   - Custom domain (if configured)
+   - Requires thorough testing before deployment
+
+2. **Preview** (develop branch)
+   - Automatic preview deployment on push to develop
+   - Preview database or staging environment
+   - Used for integration testing and stakeholder review
+
+3. **Feature Previews** (feature branches)
+   - Individual preview URLs for each feature branch
+   - Useful for code review and feature demonstration
+   - Automatically deleted when branch is deleted
+
+#### Deployment Checklist
+**Before merging to main:**
+- [ ] All tests pass (`npm run test:e2e`)
+- [ ] Build succeeds (`npm run build`)
+- [ ] Code quality checks pass (`npm run lint`, `npm run type-check`)
+- [ ] Feature tested on develop branch preview
+- [ ] Database migrations applied (if any)
+- [ ] Environment variables updated (if needed)
+- [ ] Documentation updated
 
 ### Pull Request Guidelines
 1. **Title**: Clear, descriptive title following commit convention
