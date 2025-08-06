@@ -1,5 +1,6 @@
 import React from 'react';
 import { redirect } from 'next/navigation';
+import { createClient } from '@supabase/supabase-js';
 import { Match } from '@/types';
 import MatchDetailClient from './MatchDetailClient';
 
@@ -7,18 +8,27 @@ interface MatchDetailPageProps {
     params: { id: string };
 }
 
+// 서버 컴포넌트에서 직접 Supabase 사용
+const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 async function getMatch(id: string): Promise<Match | null> {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/matches/${id}`, {
-            next: { revalidate: 60 }, // 캐시 1분
-        });
+        // 직접 Supabase에서 데이터 조회
+        const { data: match, error } = await supabaseAdmin
+            .from('tournaments')
+            .select('*')
+            .eq('id', id)
+            .single();
 
-        if (!response.ok) {
+        if (error) {
+            console.error('경기 조회 오류:', error);
             return null;
         }
 
-        const result = await response.json();
-        return result.data;
+        return match as Match;
     } catch (error) {
         console.error('서버에서 경기 조회 오류:', error);
         return null;
