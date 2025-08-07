@@ -1,7 +1,19 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle, Button, Input } from '@/components/ui';
 import { Match, MatchType, CreateMatchForm } from '@/types';
+import { MapPin } from 'lucide-react';
+
+// 네이버 지도는 클라이언트 사이드에서만 로드
+const NaverMap = dynamic(() => import('@/components/map/NaverMap'), {
+    ssr: false,
+    loading: () => (
+        <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+            <p className="text-sm text-gray-600">지도를 불러오는 중...</p>
+        </div>
+    )
+});
 
 interface MatchFormProps {
     match?: Match;

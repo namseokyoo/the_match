@@ -1,10 +1,25 @@
 'use client';
 
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { Match } from '@/types';
 import { Card } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
 import JoinMatchButton from './JoinMatchButton';
+import { MapPin } from 'lucide-react';
+
+// 네이버 지도는 클라이언트 사이드에서만 로드
+const NaverMap = dynamic(() => import('@/components/map/NaverMap'), {
+    ssr: false,
+    loading: () => (
+        <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className="text-sm text-gray-600">지도를 불러오는 중...</p>
+            </div>
+        </div>
+    )
+});
 
 interface MatchDetailProps {
     match: Match;
@@ -127,6 +142,28 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                     <div className="text-gray-600 whitespace-pre-line">
                         {typeof match.rules === 'string' ? match.rules : JSON.stringify(match.rules, null, 2)}
                     </div>
+                </Card>
+            )}
+
+            {/* 경기장 위치 */}
+            {(match.venue || (match as any).venue_address) && (
+                <Card className="p-6">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <MapPin className="w-5 h-5" />
+                        경기장 위치
+                    </h2>
+                    <NaverMap
+                        address={(match as any).venue_address || match.venue || ''}
+                        title={match.title}
+                        lat={(match as any).venue_lat}
+                        lng={(match as any).venue_lng}
+                        phoneNumber={(match as any).venue_phone}
+                        openingHours={(match as any).venue_hours}
+                        additionalInfo={(match as any).venue_info}
+                        editable={false}
+                        showInfo={true}
+                        height="400px"
+                    />
                 </Card>
             )}
 
