@@ -31,41 +31,48 @@ export default function Home() {
         try {
             setLoading(true);
 
-            // 현재 진행 중인 경기들
-            const { data: activeMatchData } = await supabase
-                .from('tournaments')
-                .select('*')
-                .in('status', [MatchStatus.IN_PROGRESS, MatchStatus.REGISTRATION])
-                .order('created_at', { ascending: false })
-                .limit(6);
+            // API를 통해 경기 데이터 가져오기
+            const matchResponse = await fetch('/api/matches');
+            const matchData = await matchResponse.json();
 
-            if (activeMatchData) {
-                setActiveMatches(activeMatchData);
+            if (matchData.success && matchData.data) {
+                // 현재 진행 중인 경기들 필터링
+                const activeMatches = matchData.data
+                    .filter((match: Match) => 
+                        match.status === MatchStatus.IN_PROGRESS || 
+                        match.status === MatchStatus.REGISTRATION
+                    )
+                    .slice(0, 6);
+                
+                setActiveMatches(activeMatches);
+
+                // 곧 시작될 경기들 필터링
+                const upcoming = matchData.data
+                    .filter((match: Match) => 
+                        match.status === MatchStatus.REGISTRATION &&
+                        match.start_date && new Date(match.start_date) >= new Date()
+                    )
+                    .sort((a: Match, b: Match) => {
+                        const dateA = new Date(a.start_date || 0).getTime();
+                        const dateB = new Date(b.start_date || 0).getTime();
+                        return dateA - dateB;
+                    })
+                    .slice(0, 4);
+                
+                setUpcomingMatches(upcoming);
             }
 
-            // 곧 시작될 경기들
-            const { data: upcomingMatchData } = await supabase
-                .from('tournaments')
-                .select('*')
-                .eq('status', MatchStatus.REGISTRATION)
-                .gte('start_date', new Date().toISOString())
-                .order('start_date', { ascending: true })
-                .limit(4);
+            // API를 통해 팀 데이터 가져오기
+            const teamResponse = await fetch('/api/teams');
+            const teamData = await teamResponse.json();
 
-            if (upcomingMatchData) {
-                setUpcomingMatches(upcomingMatchData);
-            }
-
-            // 팀원을 모집 중인 팀들 (캡틴이 있는 팀들)
-            const { data: teamsData } = await supabase
-                .from('teams')
-                .select('*')
-                .not('captain_id', 'is', null)
-                .order('created_at', { ascending: false })
-                .limit(4);
-
-            if (teamsData) {
-                setRecruitingTeams(teamsData);
+            if (teamData.success && teamData.data) {
+                // 캡틴이 있는 팀들 필터링 (팀원 모집 중)
+                const recruiting = teamData.data
+                    .filter((team: Team) => team.captain_id !== null)
+                    .slice(0, 4);
+                
+                setRecruitingTeams(recruiting);
             }
 
             // 전체 통계
