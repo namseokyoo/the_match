@@ -28,9 +28,6 @@ export function getSupabaseAdmin() {
                 autoRefreshToken: false,
                 persistSession: false,
             },
-            db: {
-                schema: 'public',
-            },
             global: {
                 // 헤더 설정
                 headers: {

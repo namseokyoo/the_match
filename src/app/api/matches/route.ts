@@ -158,6 +158,7 @@ export async function POST(request: NextRequest) {
             settings: {},
         };
 
+        const supabaseAdmin = getSupabaseAdmin();
         const { data: match, error } = await supabaseAdmin
             .from('matches')
             .insert(matchData)

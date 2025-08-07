@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-server';
 
 // GET /api/teams - 팀 목록 조회
@@ -71,6 +71,9 @@ export async function POST(request: NextRequest) {
         // Service Role 클라이언트는 서버 사이드에서 실행되므로 인증 확인 불필요
         // 클라이언트에서 인증된 사용자만 이 API를 호출할 수 있도록 별도 처리 필요
 
+        // Supabase 클라이언트 가져오기
+        const supabaseAdmin = getSupabaseAdmin();
+        
         // 동일한 매치 내에서 팀 이름 중복 체크
         if (match_id) {
             const { data: existingTeams } = await supabaseAdmin
