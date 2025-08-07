@@ -3,6 +3,7 @@
 import { Trophy, Users, Calendar, BarChart3 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { OnboardingTour } from '@/components/onboarding';
 
 export default function Home() {
     const router = useRouter();
@@ -33,6 +34,9 @@ export default function Home() {
 
     return (
         <div className="flex min-h-screen flex-col">
+            {/* Onboarding Tour for new users */}
+            <OnboardingTour autoStart={!!user} />
+            
             {/* Hero Section */}
             <section className="flex-1 flex items-center justify-center bg-gradient-to-br from-match-blue to-match-purple px-4 py-12">
                 <div className="text-center text-white">

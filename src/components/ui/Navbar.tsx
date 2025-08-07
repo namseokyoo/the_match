@@ -47,6 +47,7 @@ const SimpleNavbar = () => {
                         <Link
                             href="/teams"
                             className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                            data-tour="teams"
                         >
                             팀
                         </Link>
@@ -65,6 +66,7 @@ const SimpleNavbar = () => {
                                 <Link
                                     href="/dashboard"
                                     className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                                    data-tour="dashboard"
                                 >
                                     대시보드
                                 </Link>
@@ -83,6 +85,7 @@ const SimpleNavbar = () => {
                                 <Link
                                     href="/matches/create"
                                     className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                                    data-tour="create-match"
                                 >
                                     경기 생성
                                 </Link>
