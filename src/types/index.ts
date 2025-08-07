@@ -59,6 +59,13 @@ export interface Match {
     end_date?: string;
     rules?: Record<string, any>;
     settings?: Record<string, any>;
+    venue?: string;
+    venue_address?: string;
+    venue_lat?: number;
+    venue_lng?: number;
+    venue_phone?: string;
+    venue_hours?: string;
+    venue_info?: string;
     created_at: string;
     updated_at: string;
 }

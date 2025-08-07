@@ -105,6 +105,15 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                                 팀 채팅
                             </Button>
                         </Link>
+                        <Link href={`/stats?teamId=${team.id}`}>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={loading}
+                            >
+                                📊 팀 통계
+                            </Button>
+                        </Link>
                         {isOwner && (
                             <>
                                 <Button

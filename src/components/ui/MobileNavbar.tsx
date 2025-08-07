@@ -18,7 +18,8 @@ import {
     LogIn,
     UserPlus,
     LayoutDashboard,
-    User
+    User,
+    BarChart3
 } from 'lucide-react';
 
 const MobileNavbar = () => {
@@ -161,6 +162,13 @@ const MobileNavbar = () => {
                             >
                                 <LayoutTemplate className="w-5 h-5" />
                                 <span>템플릿</span>
+                            </Link>
+                            <Link 
+                                href="/stats"
+                                className={isActive('/stats') ? activeMenuItemClass : menuItemClass}
+                            >
+                                <BarChart3 className="w-5 h-5" />
+                                <span>통계</span>
                             </Link>
                         </div>
 
@@ -305,6 +313,12 @@ const MobileNavbar = () => {
                                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                             >
                                 선수
+                            </Link>
+                            <Link
+                                href="/stats"
+                                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                            >
+                                통계
                             </Link>
 
                             {showSkeleton ? (

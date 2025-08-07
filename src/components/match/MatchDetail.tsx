@@ -131,6 +131,12 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                         >
                             📊 경기 결과 및 통계
                         </a>
+                        <a
+                            href={`/stats?matchId=${match.id}`}
+                            className="block w-full md:w-auto px-4 py-2 bg-purple-600 text-white text-center rounded-md hover:bg-purple-700 transition-colors"
+                        >
+                            📈 선수 통계 보기
+                        </a>
                     </div>
                 </div>
             </Card>
@@ -146,20 +152,20 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
             )}
 
             {/* 경기장 위치 */}
-            {(match.venue || (match as any).venue_address) && (
+            {(match.venue || match.venue_address) && (
                 <Card className="p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                         <MapPin className="w-5 h-5" />
                         경기장 위치
                     </h2>
                     <NaverMap
-                        address={(match as any).venue_address || match.venue || ''}
+                        address={match.venue_address || match.venue || ''}
                         title={match.title}
-                        lat={(match as any).venue_lat}
-                        lng={(match as any).venue_lng}
-                        phoneNumber={(match as any).venue_phone}
-                        openingHours={(match as any).venue_hours}
-                        additionalInfo={(match as any).venue_info}
+                        lat={match.venue_lat}
+                        lng={match.venue_lng}
+                        phoneNumber={match.venue_phone}
+                        openingHours={match.venue_hours}
+                        additionalInfo={match.venue_info}
                         editable={false}
                         showInfo={true}
                         height="400px"
