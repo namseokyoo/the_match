@@ -1,124 +1,356 @@
 'use client';
 
-import { Trophy, Users, Calendar, BarChart3 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Trophy, Users, Calendar, Clock, ArrowRight, UserPlus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { OnboardingTour } from '@/components/onboarding';
+import { supabase } from '@/lib/supabase';
+import { Match, Team, MatchStatus, MatchType } from '@/types';
+import { formatDate } from '@/lib/utils';
 
 export default function Home() {
     const router = useRouter();
     const { user } = useAuth();
+    const [activeMatches, setActiveMatches] = useState<Match[]>([]);
+    const [recruitingTeams, setRecruitingTeams] = useState<Team[]>([]);
+    const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({
+        totalMatches: 0,
+        totalTeams: 0,
+        totalPlayers: 0,
+    });
 
-    // 경기 생성 페이지로 이동
-    const handleCreateMatch = () => {
-        if (!user) {
-            router.push('/login');
-        } else {
-            router.push('/matches/create');
+    useEffect(() => {
+        fetchDynamicContent();
+    }, []);
+
+    const fetchDynamicContent = async () => {
+        try {
+            setLoading(true);
+
+            // 현재 진행 중인 경기들
+            const { data: activeMatchData } = await supabase
+                .from('tournaments')
+                .select('*')
+                .in('status', [MatchStatus.IN_PROGRESS, MatchStatus.REGISTRATION])
+                .order('created_at', { ascending: false })
+                .limit(6);
+
+            if (activeMatchData) {
+                setActiveMatches(activeMatchData);
+            }
+
+            // 곧 시작될 경기들
+            const { data: upcomingMatchData } = await supabase
+                .from('tournaments')
+                .select('*')
+                .eq('status', MatchStatus.REGISTRATION)
+                .gte('start_date', new Date().toISOString())
+                .order('start_date', { ascending: true })
+                .limit(4);
+
+            if (upcomingMatchData) {
+                setUpcomingMatches(upcomingMatchData);
+            }
+
+            // 팀원을 모집 중인 팀들 (캡틴이 있는 팀들)
+            const { data: teamsData } = await supabase
+                .from('teams')
+                .select('*')
+                .not('captain_id', 'is', null)
+                .order('created_at', { ascending: false })
+                .limit(4);
+
+            if (teamsData) {
+                setRecruitingTeams(teamsData);
+            }
+
+            // 전체 통계
+            const { count: matchCount } = await supabase
+                .from('tournaments')
+                .select('*', { count: 'exact', head: true });
+
+            const { count: teamCount } = await supabase
+                .from('teams')
+                .select('*', { count: 'exact', head: true });
+
+            const { count: playerCount } = await supabase
+                .from('players')
+                .select('*', { count: 'exact', head: true });
+
+            setStats({
+                totalMatches: matchCount || 0,
+                totalTeams: teamCount || 0,
+                totalPlayers: playerCount || 0,
+            });
+
+        } catch (error) {
+            console.error('Error fetching dynamic content:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    // 경기 목록 페이지로 이동
-    const handleViewMatches = () => {
-        router.push('/matches');
-    };
-
-    // 시작하기 버튼 (회원가입 또는 경기 페이지로)
-    const handleGetStarted = () => {
-        if (!user) {
-            router.push('/signup');
-        } else {
-            router.push('/matches');
+    const getTypeLabel = (type: MatchType) => {
+        switch (type) {
+            case MatchType.SINGLE_ELIMINATION:
+                return '토너먼트';
+            case MatchType.DOUBLE_ELIMINATION:
+                return '더블 엘리미네이션';
+            case MatchType.ROUND_ROBIN:
+                return '리그전';
+            case MatchType.SWISS:
+                return '스위스';
+            case MatchType.LEAGUE:
+                return '리그';
+            default:
+                return type;
         }
     };
+
+    const getStatusColor = (status: MatchStatus) => {
+        switch (status) {
+            case MatchStatus.REGISTRATION:
+                return 'bg-blue-100 text-blue-800';
+            case MatchStatus.IN_PROGRESS:
+                return 'bg-green-100 text-green-800';
+            case MatchStatus.COMPLETED:
+                return 'bg-purple-100 text-purple-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const getStatusLabel = (status: MatchStatus) => {
+        switch (status) {
+            case MatchStatus.REGISTRATION:
+                return '모집중';
+            case MatchStatus.IN_PROGRESS:
+                return '진행중';
+            case MatchStatus.COMPLETED:
+                return '완료';
+            case MatchStatus.CANCELLED:
+                return '취소됨';
+            default:
+                return status;
+        }
+    };
+
 
     return (
-        <div className="flex min-h-screen flex-col">
+        <div className="flex min-h-screen flex-col bg-gray-50">
             {/* Onboarding Tour for new users */}
             <OnboardingTour autoStart={!!user} />
             
-            {/* Hero Section */}
-            <section className="flex-1 flex items-center justify-center bg-gradient-to-br from-match-blue to-match-purple px-4 py-12">
-                <div className="text-center text-white">
-                    <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
-                        <Trophy className="h-12 w-12" />
+            {/* Hero Section - 간소화 */}
+            <section className="bg-gradient-to-br from-match-blue to-match-purple px-4 py-12">
+                <div className="mx-auto max-w-7xl">
+                    <div className="text-center text-white mb-8">
+                        <h1 className="mb-2 text-3xl font-bold tracking-tight md:text-4xl">
+                            The Match
+                        </h1>
+                        <p className="text-lg text-white/90">
+                            경기와 팀을 만나는 곳
+                        </p>
                     </div>
-                    <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-6xl">
-                        The Match
-                    </h1>
-                    <p className="mb-8 text-xl text-white/90 md:text-2xl">
-                        경기 관리의 새로운 기준
-                    </p>
-                    <p className="mb-8 max-w-2xl text-lg text-white/80 md:text-xl">
-                        다양한 스포츠 경기의 대진표를 쉽게 생성하고, 팀을 관리하며,
-                        경기 결과를 추적하는 모바일 최적화 플랫폼
-                    </p>
-                    <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-                        <button
-                            onClick={handleCreateMatch}
-                            className="touch-target rounded-lg bg-white px-8 py-3 font-semibold text-match-blue transition-all hover:bg-white/90 hover:shadow-lg"
-                        >
-                            경기 생성하기
-                        </button>
-                        <button
-                            onClick={handleViewMatches}
-                            className="touch-target rounded-lg border-2 border-white px-8 py-3 font-semibold text-white transition-all hover:bg-white hover:text-match-blue"
-                        >
-                            경기 보기
-                        </button>
+
+                    {/* 통계 카드 */}
+                    <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+                            <div className="text-2xl md:text-3xl font-bold text-white">{stats.totalMatches}</div>
+                            <div className="text-sm text-white/80">경기</div>
+                        </div>
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+                            <div className="text-2xl md:text-3xl font-bold text-white">{stats.totalTeams}</div>
+                            <div className="text-sm text-white/80">팀</div>
+                        </div>
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+                            <div className="text-2xl md:text-3xl font-bold text-white">{stats.totalPlayers}</div>
+                            <div className="text-sm text-white/80">선수</div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Features Section */}
-            <section className="bg-white py-16 px-4">
-                <div className="mx-auto max-w-6xl">
-                    <h2 className="mb-12 text-center text-3xl font-bold text-gray-900">
-                        주요 기능
-                    </h2>
-                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-                        <div className="text-center">
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-match-blue/10">
-                                <Trophy className="h-8 w-8 text-match-blue" />
-                            </div>
-                            <h3 className="mb-2 text-xl font-semibold">경기 생성</h3>
-                            <p className="text-gray-600">
-                                다양한 형식의 경기를 쉽게 생성하고 관리하세요
-                            </p>
-                        </div>
-                        <div className="text-center">
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-match-green/10">
-                                <Users className="h-8 w-8 text-match-green" />
-                            </div>
-                            <h3 className="mb-2 text-xl font-semibold">팀 관리</h3>
-                            <p className="text-gray-600">
-                                팀과 선수 정보를 체계적으로 관리하고 추적하세요
-                            </p>
-                        </div>
-                        <div className="text-center">
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-match-orange/10">
-                                <Calendar className="h-8 w-8 text-match-orange" />
-                            </div>
-                            <h3 className="mb-2 text-xl font-semibold">경기 일정</h3>
-                            <p className="text-gray-600">
-                                경기 일정을 관리하고 실시간으로 업데이트하세요
-                            </p>
-                        </div>
-                        <div className="text-center">
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-match-purple/10">
-                                <BarChart3 className="h-8 w-8 text-match-purple" />
-                            </div>
-                            <h3 className="mb-2 text-xl font-semibold">통계 분석</h3>
-                            <p className="text-gray-600">
-                                상세한 통계와 분석으로 성과를 추적하세요
-                            </p>
-                        </div>
+            {/* 현재 진행 중인 경기 */}
+            <section className="py-8 px-4">
+                <div className="mx-auto max-w-7xl">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900">
+                            🔥 지금 진행 중인 경기
+                        </h2>
+                        <Link href="/matches" className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                            모두 보기 <ArrowRight className="w-4 h-4" />
+                        </Link>
                     </div>
+
+                    {loading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="bg-white rounded-lg p-6 animate-pulse">
+                                    <div className="h-6 bg-gray-200 rounded mb-4"></div>
+                                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : activeMatches.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {activeMatches.map(match => (
+                                <Link key={match.id} href={`/matches/${match.id}`}>
+                                    <div className="bg-white rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <h3 className="font-semibold text-lg text-gray-900 flex-1">
+                                                {match.title}
+                                            </h3>
+                                            <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(match.status)}`}>
+                                                {getStatusLabel(match.status)}
+                                            </span>
+                                        </div>
+                                        <div className="space-y-2 text-sm text-gray-600">
+                                            <div className="flex items-center gap-2">
+                                                <Trophy className="w-4 h-4" />
+                                                <span>{getTypeLabel(match.type)}</span>
+                                            </div>
+                                            {match.start_date && (
+                                                <div className="flex items-center gap-2">
+                                                    <Calendar className="w-4 h-4" />
+                                                    <span>{formatDate(match.start_date)}</span>
+                                                </div>
+                                            )}
+                                            {match.max_participants && (
+                                                <div className="flex items-center gap-2">
+                                                    <Users className="w-4 h-4" />
+                                                    <span>최대 {match.max_participants}팀</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 bg-white rounded-lg">
+                            <Trophy className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-600 mb-4">아직 진행 중인 경기가 없습니다</p>
+                            {user ? (
+                                <Link href="/matches/create" className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                    경기 만들기
+                                </Link>
+                            ) : (
+                                <Link href="/signup" className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                    회원가입하고 시작하기
+                                </Link>
+                            )}
+                        </div>
+                    )}
                 </div>
             </section>
+
+            {/* 팀원 모집 중 */}
+            <section className="py-8 px-4 bg-white">
+                <div className="mx-auto max-w-7xl">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900">
+                            👥 팀원 모집 중
+                        </h2>
+                        <Link href="/teams" className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                            모든 팀 보기 <ArrowRight className="w-4 h-4" />
+                        </Link>
+                    </div>
+
+                    {loading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {[1, 2, 3, 4].map(i => (
+                                <div key={i} className="bg-gray-50 rounded-lg p-4 animate-pulse">
+                                    <div className="h-6 bg-gray-200 rounded mb-3"></div>
+                                    <div className="h-4 bg-gray-200 rounded"></div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : recruitingTeams.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {recruitingTeams.map(team => (
+                                <Link key={team.id} href={`/teams/${team.id}`}>
+                                    <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors cursor-pointer">
+                                        <h3 className="font-semibold text-gray-900 mb-2">
+                                            {team.name}
+                                        </h3>
+                                        <p className="text-sm text-gray-600 line-clamp-2">
+                                            {team.description || '팀원을 모집하고 있습니다'}
+                                        </p>
+                                        <div className="mt-3 flex items-center text-blue-600 text-sm">
+                                            <UserPlus className="w-4 h-4 mr-1" />
+                                            <span>참가 신청</span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 bg-gray-50 rounded-lg">
+                            <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-600 mb-4">팀원을 모집 중인 팀이 없습니다</p>
+                            {user && (
+                                <Link href="/teams/create" className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                    팀 만들기
+                                </Link>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* 곧 시작될 경기 */}
+            {upcomingMatches.length > 0 && (
+                <section className="py-8 px-4">
+                    <div className="mx-auto max-w-7xl">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-gray-900">
+                                📅 곧 시작될 경기
+                            </h2>
+                            <Link href="/matches?status=registration" className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                                참가 가능한 경기 <ArrowRight className="w-4 h-4" />
+                            </Link>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {upcomingMatches.map(match => (
+                                <Link key={match.id} href={`/matches/${match.id}`}>
+                                    <div className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer border border-gray-200">
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold text-gray-900">
+                                                    {match.title}
+                                                </h3>
+                                                <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                                                    <div className="flex items-center gap-1">
+                                                        <Clock className="w-4 h-4" />
+                                                        <span>{formatDate(match.start_date || '')}</span>
+                                                    </div>
+                                                    {match.registration_deadline && (
+                                                        <div className="flex items-center gap-1 text-orange-600">
+                                                            <Calendar className="w-4 h-4" />
+                                                            <span>마감 {formatDate(match.registration_deadline)}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <ArrowRight className="w-5 h-5 text-gray-400" />
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* CTA Section */}
-            <section className="bg-gray-50 py-16 px-4">
+            <section className="py-12 px-4">
                 <div className="mx-auto max-w-4xl text-center">
                     <h2 className="mb-4 text-3xl font-bold text-gray-900">
                         지금 시작하세요
@@ -126,12 +358,27 @@ export default function Home() {
                     <p className="mb-8 text-xl text-gray-600">
                         무료로 The Match를 체험해보고 경기 관리의 새로운 경험을 만나보세요
                     </p>
-                    <button
-                        onClick={handleGetStarted}
-                        className="touch-target rounded-lg bg-match-blue px-8 py-3 font-semibold text-white transition-all hover:bg-match-blue/90 hover:shadow-lg"
-                    >
-                        {user ? '경기 보기' : '무료로 시작하기'}
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        {user ? (
+                            <>
+                                <Link href="/matches/create" className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                                    경기 만들기
+                                </Link>
+                                <Link href="/teams/create" className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold">
+                                    팀 만들기
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <Link href="/signup" className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                                    무료 회원가입
+                                </Link>
+                                <Link href="/login" className="px-8 py-3 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 font-semibold">
+                                    로그인
+                                </Link>
+                            </>
+                        )}
+                    </div>
                 </div>
             </section>
 
@@ -151,4 +398,4 @@ export default function Home() {
             </footer>
         </div>
     );
-} 
+}
