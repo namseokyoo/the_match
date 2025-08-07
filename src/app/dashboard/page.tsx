@@ -193,21 +193,24 @@ export default function DashboardPage() {
                         </div>
                     </Card>
 
-                    <Card className="p-6">
-                        <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                                <div className="p-3 bg-orange-100 rounded-lg">
-                                    <svg className="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
+                    <Link href="/matches/calendar">
+                        <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer">
+                            <div className="flex items-center">
+                                <div className="flex-shrink-0">
+                                    <div className="p-3 bg-orange-100 rounded-lg">
+                                        <svg className="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div className="ml-5">
+                                    <p className="text-sm font-medium text-gray-500">캘린더 보기</p>
+                                    <p className="text-2xl font-bold text-gray-900">{stats.upcomingGames}</p>
+                                    <p className="text-xs text-gray-500 mt-1">예정 경기</p>
                                 </div>
                             </div>
-                            <div className="ml-5">
-                                <p className="text-sm font-medium text-gray-500">예정 경기</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.upcomingGames}</p>
-                            </div>
-                        </div>
-                    </Card>
+                        </Card>
+                    </Link>
                 </div>
 
                 {/* 내 경기 목록 */}
