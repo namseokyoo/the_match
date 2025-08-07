@@ -353,4 +353,36 @@ export interface ApplyToMatchForm {
 export interface ParticipantResponse {
     status: ParticipantStatus.APPROVED | ParticipantStatus.REJECTED;
     notes?: string;
+}
+
+// Match Template types
+export interface MatchTemplate {
+    id: string;
+    name: string;
+    description?: string;
+    creator_id: string;
+    type: MatchType;
+    sport_type?: string;
+    max_teams?: number;
+    min_teams?: number;
+    rules?: Record<string, any>;
+    settings?: Record<string, any>;
+    usage_count: number;
+    is_public: boolean;
+    tags?: string[];
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CreateTemplateForm {
+    name: string;
+    description?: string;
+    type: MatchType;
+    sport_type?: string;
+    max_teams?: number;
+    min_teams?: number;
+    rules?: Record<string, any>;
+    settings?: Record<string, any>;
+    is_public?: boolean;
+    tags?: string[];
 } 

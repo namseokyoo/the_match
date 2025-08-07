@@ -75,6 +75,12 @@ const SimpleNavbar = () => {
                             경기
                         </Link>
                         <Link
+                            href="/matches/templates"
+                            className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                        >
+                            템플릿
+                        </Link>
+                        <Link
                             href="/teams"
                             className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                             data-tour="teams"

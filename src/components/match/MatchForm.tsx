@@ -5,6 +5,7 @@ import { Match, MatchType, CreateMatchForm } from '@/types';
 
 interface MatchFormProps {
     match?: Match;
+    initialData?: Partial<CreateMatchForm>;
     onSubmit: (data: CreateMatchForm) => Promise<void>;
     onCancel?: () => void;
     isLoading?: boolean;
@@ -22,19 +23,21 @@ const matchTypeOptions = [
 
 export const MatchForm: React.FC<MatchFormProps> = ({
     match,
+    initialData,
     onSubmit,
     onCancel,
     isLoading = false,
     mode = 'create',
 }) => {
     const [formData, setFormData] = useState<CreateMatchForm>({
-        title: match?.title || '',
-        description: match?.description || '',
-        type: match?.type || MatchType.SINGLE_ELIMINATION,
-        max_participants: match?.max_participants || undefined,
-        registration_deadline: match?.registration_deadline || '',
-        start_date: match?.start_date || '',
-        end_date: match?.end_date || '',
+        title: initialData?.title || match?.title || '',
+        description: initialData?.description || match?.description || '',
+        type: initialData?.type || match?.type || MatchType.SINGLE_ELIMINATION,
+        max_participants: initialData?.max_participants || match?.max_participants || undefined,
+        registration_deadline: initialData?.registration_deadline || match?.registration_deadline || '',
+        start_date: initialData?.start_date || match?.start_date || '',
+        end_date: initialData?.end_date || match?.end_date || '',
+        rules: initialData?.rules || match?.rules || {},
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
