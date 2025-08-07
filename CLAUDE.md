@@ -31,6 +31,11 @@ pnpm supabase:gen-types     # Generate TypeScript types
 
 # Package management
 pnpm install                # Install dependencies (uses pnpm)
+
+# Deployment (Quick)
+git add .                   # Stage all changes
+git commit -m "fix: message" # Commit with conventional message
+git push origin main        # Deploy to production via Vercel
 ```
 
 ### Environment Requirements
@@ -266,7 +271,17 @@ git push origin develop
 git branch -d feature/descriptive-name
 ```
 
-#### 4. Automatic Deployment to Production
+#### 4. Quick Deploy to Production (Most Common)
+```bash
+# For quick deployment directly to production
+git add .
+git commit -m "perf: optimize API performance and database queries"
+git push origin main
+
+# This automatically triggers Vercel production deployment
+```
+
+#### 5. Feature Branch Workflow
 ```bash
 # When develop branch is stable and ready for production
 git checkout main
@@ -280,7 +295,7 @@ git tag v1.0.0
 git push origin --tags
 ```
 
-#### 5. Development Environment Setup
+#### 6. Development Environment Setup
 ```bash
 # Clone repository and switch to develop
 git clone <repository-url>

@@ -5,10 +5,9 @@ import { Trophy, Users, Calendar, Clock, ArrowRight, UserPlus } from 'lucide-rea
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { OnboardingTour } from '@/components/onboarding';
-import { supabase } from '@/lib/supabase';
 import { Match, Team, MatchStatus, MatchType } from '@/types';
 import { formatDate } from '@/lib/utils';
-import { matchAPI, teamAPI } from '@/lib/api-client';
+import { dashboardAPI, performanceUtils } from '@/lib/api-client';
 
 export default function Home() {
     const { user } = useAuth();
@@ -30,81 +29,48 @@ export default function Home() {
         try {
             setLoading(true);
 
-            // 병렬로 데이터 가져오기
-            console.log('Fetching data...');
-            const [matchData, teamData] = await Promise.all([
-                matchAPI.getAll().catch(err => {
-                    console.error('Match API error:', err);
-                    return { success: false, data: [] };
-                }),
-                teamAPI.getAll().catch(err => {
-                    console.error('Team API error:', err);
-                    return { success: false, data: [] };
-                })
-            ]);
-
-            console.log('API responses:', { matchData, teamData });
-
-            // 경기 데이터 처리
-            if (matchData.success && matchData.data) {
-                // 현재 진행 중인 경기들 필터링
-                const activeMatches = matchData.data
-                    .filter((match: Match) => 
-                        match.status === 'in_progress' ||
-                        match.status === 'registration'
-                    )
-                    .slice(0, 6);
-                
-                console.log('Active matches:', activeMatches);
-                setActiveMatches(activeMatches);
-
-                // 곧 시작될 경기들 필터링
-                const upcoming = matchData.data
-                    .filter((match: Match) => 
-                        (match.status === 'registration' || 
-                         match.status === 'draft') &&
-                        match.start_date && new Date(match.start_date) >= new Date()
-                    )
-                    .sort((a: Match, b: Match) => {
-                        const dateA = new Date(a.start_date || 0).getTime();
-                        const dateB = new Date(b.start_date || 0).getTime();
-                        return dateA - dateB;
-                    })
-                    .slice(0, 4);
-                
-                console.log('Upcoming matches:', upcoming);
-                setUpcomingMatches(upcoming);
-            }
-
-            // 팀 데이터 처리
-            if (teamData.success && teamData.data) {
-                // 캡틴이 있는 팀들 필터링 (팀원 모집 중)
-                const recruiting = teamData.data
-                    .filter((team: Team) => team.captain_id !== null)
-                    .slice(0, 4);
-                
-                console.log('Recruiting teams:', recruiting);
-                setRecruitingTeams(recruiting);
-            }
-
-            // 전체 통계
-            const { count: matchCount } = await supabase
-                .from('matches')
-                .select('*', { count: 'exact', head: true });
-
-            const { count: teamCount } = await supabase
-                .from('teams')
-                .select('*', { count: 'exact', head: true });
-
-            const { count: playerCount } = await supabase
-                .from('players')
-                .select('*', { count: 'exact', head: true });
-
-            setStats({
-                totalMatches: matchCount || 0,
-                totalTeams: teamCount || 0,
-                totalPlayers: playerCount || 0,
+            console.log('Fetching dashboard data...');
+            console.time('Dashboard API Call');
+            
+            // 단일 API 호출로 모든 데이터 가져오기 - N+1 쿼리 방지
+            const dashboardData = await dashboardAPI.getHomeData().catch(err => {
+                console.error('Dashboard API error:', err);
+                return { 
+                    success: false, 
+                    data: {
+                        activeMatches: [],
+                        upcomingMatches: [],
+                        recruitingTeams: [],
+                        stats: { totalMatches: 0, totalTeams: 0, totalPlayers: 0 }
+                    }
+                };
             });
+
+            console.timeEnd('Dashboard API Call');
+            console.log('Dashboard API response:', dashboardData);
+
+            // 데이터 설정
+            if (dashboardData.success && dashboardData.data) {
+                const { activeMatches, upcomingMatches, recruitingTeams, stats } = dashboardData.data;
+                
+                setActiveMatches(activeMatches || []);
+                setUpcomingMatches(upcomingMatches || []);
+                setRecruitingTeams(recruitingTeams || []);
+                setStats(stats || { totalMatches: 0, totalTeams: 0, totalPlayers: 0 });
+
+                console.log('Data loaded:', {
+                    activeMatches: activeMatches?.length || 0,
+                    upcomingMatches: upcomingMatches?.length || 0,
+                    recruitingTeams: recruitingTeams?.length || 0,
+                    stats
+                });
+            } else {
+                // 폴백 데이터
+                setActiveMatches([]);
+                setRecruitingTeams([]);
+                setUpcomingMatches([]);
+                setStats({ totalMatches: 0, totalTeams: 0, totalPlayers: 0 });
+            }
 
         } catch (error) {
             console.error('Error fetching dynamic content:', error);
@@ -112,13 +78,16 @@ export default function Home() {
             setActiveMatches([]);
             setRecruitingTeams([]);
             setUpcomingMatches([]);
-            setStats({
-                totalMatches: 0,
-                totalTeams: 0,
-                totalPlayers: 0,
-            });
+            setStats({ totalMatches: 0, totalTeams: 0, totalPlayers: 0 });
         } finally {
             setLoading(false);
+            
+            // 성능 메트릭 로그 (개발 환경에서만)
+            if (process.env.NODE_ENV === 'development') {
+                setTimeout(() => {
+                    performanceUtils.logPerformance();
+                }, 1000);
+            }
         }
     };
 
