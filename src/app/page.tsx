@@ -47,8 +47,6 @@ export default function Home() {
                     // 현재 진행 중인 경기들 필터링
                     const activeMatches = matchData.data
                         .filter((match: Match) => 
-                            match.status === 'active' || 
-                            match.status === 'recruiting' ||
                             match.status === 'in_progress' ||
                             match.status === 'registration'
                         )
@@ -61,9 +59,7 @@ export default function Home() {
                     const upcoming = matchData.data
                         .filter((match: Match) => 
                             (match.status === 'registration' || 
-                             match.status === 'recruiting' ||
-                             match.status === 'draft' ||
-                             match.status === 'upcoming') &&
+                             match.status === 'draft') &&
                             match.start_date && new Date(match.start_date) >= new Date()
                         )
                         .sort((a: Match, b: Match) => {
@@ -147,17 +143,15 @@ export default function Home() {
     const getStatusColor = (status: MatchStatus | string) => {
         switch (status) {
             case 'registration':
-            case 'recruiting':
                 return 'bg-blue-100 text-blue-800';
             case 'in_progress':
-            case 'active':
                 return 'bg-green-100 text-green-800';
             case 'completed':
                 return 'bg-purple-100 text-purple-800';
-            case 'upcoming':
-                return 'bg-yellow-100 text-yellow-800';
             case 'draft':
                 return 'bg-gray-100 text-gray-800';
+            case 'cancelled':
+                return 'bg-red-100 text-red-800';
             default:
                 return 'bg-gray-100 text-gray-800';
         }
@@ -166,17 +160,13 @@ export default function Home() {
     const getStatusLabel = (status: MatchStatus | string) => {
         switch (status) {
             case 'registration':
-            case 'recruiting':
                 return '모집중';
             case 'in_progress':
-            case 'active':
                 return '진행중';
             case 'completed':
                 return '완료';
             case 'cancelled':
                 return '취소됨';
-            case 'upcoming':
-                return '예정';
             case 'draft':
                 return '준비중';
             default:
