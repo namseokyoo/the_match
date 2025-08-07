@@ -32,47 +32,68 @@ export default function Home() {
             setLoading(true);
 
             // API를 통해 경기 데이터 가져오기
+            console.log('Fetching matches...');
             const matchResponse = await fetch('/api/matches');
-            const matchData = await matchResponse.json();
+            
+            if (!matchResponse.ok) {
+                console.error('Match API error:', matchResponse.status, matchResponse.statusText);
+                const errorData = await matchResponse.json();
+                console.error('Match API error details:', errorData);
+            } else {
+                const matchData = await matchResponse.json();
+                console.log('Match API response:', matchData);
 
-            if (matchData.success && matchData.data) {
-                // 현재 진행 중인 경기들 필터링
-                const activeMatches = matchData.data
-                    .filter((match: Match) => 
-                        match.status === MatchStatus.IN_PROGRESS || 
-                        match.status === MatchStatus.REGISTRATION
-                    )
-                    .slice(0, 6);
-                
-                setActiveMatches(activeMatches);
+                if (matchData.success && matchData.data) {
+                    // 현재 진행 중인 경기들 필터링
+                    const activeMatches = matchData.data
+                        .filter((match: Match) => 
+                            match.status === MatchStatus.IN_PROGRESS || 
+                            match.status === MatchStatus.REGISTRATION
+                        )
+                        .slice(0, 6);
+                    
+                    console.log('Active matches:', activeMatches);
+                    setActiveMatches(activeMatches);
 
-                // 곧 시작될 경기들 필터링
-                const upcoming = matchData.data
-                    .filter((match: Match) => 
-                        match.status === MatchStatus.REGISTRATION &&
-                        match.start_date && new Date(match.start_date) >= new Date()
-                    )
-                    .sort((a: Match, b: Match) => {
-                        const dateA = new Date(a.start_date || 0).getTime();
-                        const dateB = new Date(b.start_date || 0).getTime();
-                        return dateA - dateB;
-                    })
-                    .slice(0, 4);
-                
-                setUpcomingMatches(upcoming);
+                    // 곧 시작될 경기들 필터링
+                    const upcoming = matchData.data
+                        .filter((match: Match) => 
+                            match.status === MatchStatus.REGISTRATION &&
+                            match.start_date && new Date(match.start_date) >= new Date()
+                        )
+                        .sort((a: Match, b: Match) => {
+                            const dateA = new Date(a.start_date || 0).getTime();
+                            const dateB = new Date(b.start_date || 0).getTime();
+                            return dateA - dateB;
+                        })
+                        .slice(0, 4);
+                    
+                    console.log('Upcoming matches:', upcoming);
+                    setUpcomingMatches(upcoming);
+                }
             }
 
             // API를 통해 팀 데이터 가져오기
+            console.log('Fetching teams...');
             const teamResponse = await fetch('/api/teams');
-            const teamData = await teamResponse.json();
+            
+            if (!teamResponse.ok) {
+                console.error('Team API error:', teamResponse.status, teamResponse.statusText);
+                const errorData = await teamResponse.json();
+                console.error('Team API error details:', errorData);
+            } else {
+                const teamData = await teamResponse.json();
+                console.log('Team API response:', teamData);
 
-            if (teamData.success && teamData.data) {
-                // 캡틴이 있는 팀들 필터링 (팀원 모집 중)
-                const recruiting = teamData.data
-                    .filter((team: Team) => team.captain_id !== null)
-                    .slice(0, 4);
-                
-                setRecruitingTeams(recruiting);
+                if (teamData.success && teamData.data) {
+                    // 캡틴이 있는 팀들 필터링 (팀원 모집 중)
+                    const recruiting = teamData.data
+                        .filter((team: Team) => team.captain_id !== null)
+                        .slice(0, 4);
+                    
+                    console.log('Recruiting teams:', recruiting);
+                    setRecruitingTeams(recruiting);
+                }
             }
 
             // 전체 통계
