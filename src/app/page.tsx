@@ -33,12 +33,15 @@ export default function Home() {
 
             // API를 통해 경기 데이터 가져오기
             console.log('Fetching matches...');
-            const matchResponse = await fetch('/api/matches');
+            // Vercel 배포 환경과 로컬 환경 모두 지원
+            const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+            const matchResponse = await fetch(`${baseUrl}/api/matches`);
             
             if (!matchResponse.ok) {
                 console.error('Match API error:', matchResponse.status, matchResponse.statusText);
                 const errorData = await matchResponse.json();
                 console.error('Match API error details:', errorData);
+                throw new Error(`Match API failed: ${matchResponse.status}`);
             } else {
                 const matchData = await matchResponse.json();
                 console.log('Match API response:', matchData);
@@ -76,12 +79,13 @@ export default function Home() {
 
             // API를 통해 팀 데이터 가져오기
             console.log('Fetching teams...');
-            const teamResponse = await fetch('/api/teams');
+            const teamResponse = await fetch(`${baseUrl}/api/teams`);
             
             if (!teamResponse.ok) {
                 console.error('Team API error:', teamResponse.status, teamResponse.statusText);
                 const errorData = await teamResponse.json();
                 console.error('Team API error details:', errorData);
+                throw new Error(`Team API failed: ${teamResponse.status}`);
             } else {
                 const teamData = await teamResponse.json();
                 console.log('Team API response:', teamData);
@@ -118,6 +122,15 @@ export default function Home() {
 
         } catch (error) {
             console.error('Error fetching dynamic content:', error);
+            // 에러가 발생해도 로딩을 해제하고 빈 데이터로 표시
+            setActiveMatches([]);
+            setRecruitingTeams([]);
+            setUpcomingMatches([]);
+            setStats({
+                totalMatches: 0,
+                totalTeams: 0,
+                totalPlayers: 0,
+            });
         } finally {
             setLoading(false);
         }
