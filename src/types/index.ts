@@ -172,6 +172,49 @@ export interface BracketNode {
     updated_at: string;
 }
 
+// Statistics types
+export interface MatchStats {
+    id: string;
+    match_id: string;
+    total_games: number;
+    completed_games: number;
+    total_teams: number;
+    active_teams: number;
+    total_players: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface TeamStats {
+    id: string;
+    team_id: string;
+    match_id?: string;
+    games_played: number;
+    wins: number;
+    losses: number;
+    draws: number;
+    points_for: number;
+    points_against: number;
+    win_rate: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface PlayerStats {
+    id: string;
+    player_id: string;
+    match_id?: string;
+    games_played: number;
+    points: number;
+    assists: number;
+    rebounds?: number;
+    steals?: number;
+    blocks?: number;
+    fouls?: number;
+    created_at: string;
+    updated_at: string;
+}
+
 // User roles - TODO: 추후 권한 관리 시스템 구현 시 사용
 // eslint-disable-next-line no-unused-vars
 export enum UserRole {

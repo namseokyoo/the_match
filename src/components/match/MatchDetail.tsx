@@ -110,6 +110,12 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                                 🏆 토너먼트 브라켓 보기
                             </a>
                         )}
+                        <a
+                            href={`/matches/${match.id}/results`}
+                            className="block w-full md:w-auto px-4 py-2 bg-indigo-600 text-white text-center rounded-md hover:bg-indigo-700 transition-colors"
+                        >
+                            📊 경기 결과 및 통계
+                        </a>
                     </div>
                 </div>
             </Card>
