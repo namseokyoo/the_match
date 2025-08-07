@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { headers } from 'next/headers';
 
 // 서버 사이드용 Supabase 클라이언트
 // Connection pooling과 더 나은 에러 처리를 포함

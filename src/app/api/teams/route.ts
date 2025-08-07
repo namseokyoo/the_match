@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseAdmin, executeQuery } from '@/lib/supabase-server';
+import { NextResponse } from 'next/server';
+import { getSupabaseAdmin } from '@/lib/supabase-server';
 
 // GET /api/teams - 팀 목록 조회
 export async function GET() {
@@ -18,12 +18,10 @@ export async function GET() {
         console.log('Executing basic teams query...');
         const supabaseAdmin = getSupabaseAdmin();
         
-        const { data: teams, error } = await executeQuery(() => 
-            supabaseAdmin
-                .from('teams')
-                .select('*')
-                .limit(10)
-        );
+        const { data: teams, error } = await supabaseAdmin
+            .from('teams')
+            .select('*')
+            .limit(10);
 
         if (error) {
             console.error('Teams fetch error:', error);

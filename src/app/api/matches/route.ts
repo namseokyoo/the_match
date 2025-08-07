@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MatchType, MatchStatus, CreateMatchForm } from '@/types';
 import { verifyAuth, requireEmailVerified } from '@/lib/auth-middleware';
-import { getSupabaseAdmin, executeQuery } from '@/lib/supabase-server';
+import { getSupabaseAdmin } from '@/lib/supabase-server';
 
 // GET /api/matches - 경기 목록 조회
 export async function GET(request: NextRequest) {
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
             .order('created_at', { ascending: false })
             .range(from, to);
 
-        const { data: matches, error } = await executeQuery(() => query);
+        const { data: matches, error } = await query;
 
         if (error) {
             console.error('경기 목록 조회 오류:', error);
@@ -114,8 +114,6 @@ export async function POST(request: NextRequest) {
                 { status: 401 }
             );
         }
-
-        const token = authHeader.substring(7);
         
         // 보안 강화된 인증 검증 미들웨어 사용
         const authResult = await verifyAuth(request);

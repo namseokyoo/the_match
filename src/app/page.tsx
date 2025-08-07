@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Trophy, Users, Calendar, Clock, ArrowRight, UserPlus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { OnboardingTour } from '@/components/onboarding';
@@ -12,7 +11,6 @@ import { formatDate } from '@/lib/utils';
 import { matchAPI, teamAPI } from '@/lib/api-client';
 
 export default function Home() {
-    const router = useRouter();
     const { user } = useAuth();
     const [activeMatches, setActiveMatches] = useState<Match[]>([]);
     const [recruitingTeams, setRecruitingTeams] = useState<Team[]>([]);
