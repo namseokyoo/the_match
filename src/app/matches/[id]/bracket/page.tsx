@@ -32,7 +32,7 @@ export default function MatchBracketPage() {
 
             // 경기 정보 조회
             const { data: matchData, error: matchError } = await supabase
-                .from('tournaments')
+                .from('matches')
                 .select('*, teams(*)')
                 .eq('id', matchId)
                 .single();

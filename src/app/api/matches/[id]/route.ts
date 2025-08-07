@@ -24,7 +24,7 @@ export async function GET(
         }
 
         const { data: match, error } = await supabaseAdmin
-            .from('tournaments') // DB 테이블명은 일단 유지 (추후 마이그레이션)
+            .from('matches') // DB 테이블명은 일단 유지 (추후 마이그레이션)
             .select('*')
             .eq('id', id)
             .single();
@@ -106,7 +106,7 @@ export async function PUT(
 
         // 기존 경기 조회 (권한 확인)
         const { data: existingMatch, error: fetchError } = await supabaseAdmin
-            .from('tournaments') // DB 테이블명은 일단 유지
+            .from('matches') // DB 테이블명은 일단 유지
             .select('*')
             .eq('id', id)
             .single();
@@ -157,7 +157,7 @@ export async function PUT(
         };
 
         const { data: match, error } = await supabaseAdmin
-            .from('tournaments') // DB 테이블명은 일단 유지
+            .from('matches') // DB 테이블명은 일단 유지
             .update(updateData)
             .eq('id', id)
             .select()
@@ -221,7 +221,7 @@ export async function DELETE(
 
         // 기존 경기 조회 (권한 확인)
         const { data: existingMatch, error: fetchError } = await supabaseAdmin
-            .from('tournaments') // DB 테이블명은 일단 유지
+            .from('matches') // DB 테이블명은 일단 유지
             .select('*')
             .eq('id', id)
             .single();
@@ -279,7 +279,7 @@ export async function DELETE(
 
         // 경기 삭제
         const { error: deleteError } = await supabaseAdmin
-            .from('tournaments') // DB 테이블명은 일단 유지
+            .from('matches') // DB 테이블명은 일단 유지
             .delete()
             .eq('id', id);
 

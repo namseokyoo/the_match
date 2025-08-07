@@ -39,7 +39,7 @@ export default function EditMatchPage() {
             try {
                 setLoading(true);
                 const { data, error } = await supabase
-                    .from('tournaments')
+                    .from('matches')
                     .select('*')
                     .eq('id', matchId)
                     .single();
@@ -134,7 +134,7 @@ export default function EditMatchPage() {
             };
 
             const { error: updateError } = await supabase
-                .from('tournaments')
+                .from('matches')
                 .update(updateData)
                 .eq('id', matchId)
                 .eq('creator_id', user.id); // 추가 보안

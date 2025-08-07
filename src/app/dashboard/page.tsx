@@ -53,7 +53,7 @@ export default function DashboardPage() {
 
             // 내가 생성한 경기들
             const { data: createdMatches, error: matchError } = await supabase
-                .from('tournaments')
+                .from('matches')
                 .select('*')
                 .eq('creator_id', user.id)
                 .order('created_at', { ascending: false });
@@ -79,7 +79,7 @@ export default function DashboardPage() {
 
             // 최근 경기들
             const { data: recent, error: recentError } = await supabase
-                .from('tournaments')
+                .from('matches')
                 .select('*')
                 .order('created_at', { ascending: false })
                 .limit(5);

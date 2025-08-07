@@ -37,7 +37,7 @@ export default function MatchResultsPage() {
 
             // 경기 정보 조회
             const { data: matchData, error: matchError } = await supabase
-                .from('tournaments')
+                .from('matches')
                 .select(`
                     *,
                     tournament_participants (

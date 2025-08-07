@@ -80,7 +80,7 @@ export const MatchCalendar: React.FC = () => {
             }
 
             const { data, error } = await supabase
-                .from('tournaments')
+                .from('matches')
                 .select('*')
                 .or(`start_date.gte.${startDate.toISOString()},end_date.lte.${endDate.toISOString()}`)
                 .order('start_date', { ascending: true });

@@ -25,7 +25,7 @@ export async function GET(
 
         // 먼저 경기 존재 확인
         const { data: match, error: matchError } = await supabaseAdmin
-            .from('tournaments') // DB 테이블명은 일단 유지
+            .from('matches') // DB 테이블명은 일단 유지
             .select('id, title')
             .eq('id', matchId)
             .single();
@@ -125,7 +125,7 @@ export async function POST(
 
         // 경기 존재 및 상태 확인
         const { data: match, error: matchError } = await supabaseAdmin
-            .from('tournaments') // DB 테이블명은 일단 유지
+            .from('matches') // DB 테이블명은 일단 유지
             .select('id, title, status, creator_id')
             .eq('id', matchId)
             .single();

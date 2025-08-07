@@ -96,7 +96,7 @@ export default function ProfilePage() {
 
             // 내가 만든 경기 조회
             const { data: matchesData, error: matchesError } = await supabase
-                .from('tournaments') // DB 테이블명은 일단 유지
+                .from('matches') // DB 테이블명은 일단 유지
                 .select('*')
                 .eq('creator_id', user.id)
                 .order('created_at', { ascending: false });

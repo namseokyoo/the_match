@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         const creatorId = searchParams.get('creator_id');
 
         let query = supabaseAdmin
-            .from('tournaments')
+            .from('matches')
             .select('*');
 
         // 필터 적용
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 
         // 전체 개수 조회 (페이지네이션용)
         let countQuery = supabaseAdmin
-            .from('tournaments')
+            .from('matches')
             .select('id', { count: 'exact', head: true });
 
         if (status && status !== 'all') {
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
         };
 
         const { data: match, error } = await supabaseAdmin
-            .from('tournaments')
+            .from('matches')
             .insert(matchData)
             .select()
             .single();

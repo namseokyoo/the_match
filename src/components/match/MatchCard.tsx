@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@/components/ui';
-import { Match, MatchType, MatchStatus } from '@/types';
+import { Match } from '@/types';
 import { formatDate } from '@/lib/utils';
 
 interface MatchCardProps {
@@ -14,25 +14,28 @@ interface MatchCardProps {
 }
 
 // 경기 타입 표시 텍스트
-const getMatchTypeText = (type: MatchType): string => {
-    const typeMap = {
-        [MatchType.SINGLE_ELIMINATION]: '단일 토너먼트',
-        [MatchType.DOUBLE_ELIMINATION]: '더블 토너먼트',
-        [MatchType.ROUND_ROBIN]: '리그전',
-        [MatchType.SWISS]: '스위스',
-        [MatchType.LEAGUE]: '리그',
+const getMatchTypeText = (type: string): string => {
+    const typeMap: Record<string, string> = {
+        'single_elimination': '단일 토너먼트',
+        'double_elimination': '더블 토너먼트',
+        'round_robin': '리그전',
+        'swiss': '스위스',
+        'league': '리그',
     };
     return typeMap[type] || type;
 };
 
 // 경기 상태 표시 텍스트와 색상
-const getMatchStatusInfo = (status: MatchStatus) => {
-    const statusMap = {
-        [MatchStatus.DRAFT]: { text: '준비중', color: 'bg-gray-100 text-gray-800' },
-        [MatchStatus.REGISTRATION]: { text: '등록중', color: 'bg-blue-100 text-blue-800' },
-        [MatchStatus.IN_PROGRESS]: { text: '진행중', color: 'bg-green-100 text-green-800' },
-        [MatchStatus.COMPLETED]: { text: '완료', color: 'bg-purple-100 text-purple-800' },
-        [MatchStatus.CANCELLED]: { text: '취소', color: 'bg-red-100 text-red-800' },
+const getMatchStatusInfo = (status: string) => {
+    const statusMap: Record<string, { text: string; color: string }> = {
+        'draft': { text: '준비중', color: 'bg-gray-100 text-gray-800' },
+        'registration': { text: '등록중', color: 'bg-blue-100 text-blue-800' },
+        'recruiting': { text: '모집중', color: 'bg-blue-100 text-blue-800' },
+        'in_progress': { text: '진행중', color: 'bg-green-100 text-green-800' },
+        'active': { text: '진행중', color: 'bg-green-100 text-green-800' },
+        'completed': { text: '완료', color: 'bg-purple-100 text-purple-800' },
+        'cancelled': { text: '취소', color: 'bg-red-100 text-red-800' },
+        'upcoming': { text: '예정', color: 'bg-yellow-100 text-yellow-800' },
     };
     return statusMap[status] || { text: status, color: 'bg-gray-100 text-gray-800' };
 };

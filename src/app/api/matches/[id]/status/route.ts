@@ -47,7 +47,7 @@ export async function PATCH(
 
         // 경기 정보 조회
         const { data: match, error: matchError } = await supabaseAdmin
-            .from('tournaments')
+            .from('matches')
             .select(`
                 *,
                 participants:match_participants(
@@ -155,7 +155,7 @@ export async function PATCH(
 
         // 상태 업데이트
         const { data: updatedMatch, error: updateError } = await supabaseAdmin
-            .from('tournaments')
+            .from('matches')
             .update(updateData)
             .eq('id', matchId)
             .select()
@@ -208,7 +208,7 @@ export async function GET(
 
         // 경기 정보 조회
         const { data: match, error } = await supabaseAdmin
-            .from('tournaments')
+            .from('matches')
             .select(`
                 id,
                 title,

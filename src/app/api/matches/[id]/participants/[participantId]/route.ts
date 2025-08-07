@@ -36,7 +36,7 @@ export async function PATCH(
 
         // 경기 정보 조회 (생성자 확인)
         const { data: match, error: matchError } = await supabaseAdmin
-            .from('tournaments')
+            .from('matches')
             .select('id, title, creator_id, status')
             .eq('id', matchId)
             .single();

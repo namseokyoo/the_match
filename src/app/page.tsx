@@ -47,8 +47,10 @@ export default function Home() {
                     // 현재 진행 중인 경기들 필터링
                     const activeMatches = matchData.data
                         .filter((match: Match) => 
-                            match.status === MatchStatus.IN_PROGRESS || 
-                            match.status === MatchStatus.REGISTRATION
+                            match.status === 'active' || 
+                            match.status === 'recruiting' ||
+                            match.status === 'in_progress' ||
+                            match.status === 'registration'
                         )
                         .slice(0, 6);
                     
@@ -58,7 +60,10 @@ export default function Home() {
                     // 곧 시작될 경기들 필터링
                     const upcoming = matchData.data
                         .filter((match: Match) => 
-                            match.status === MatchStatus.REGISTRATION &&
+                            (match.status === 'registration' || 
+                             match.status === 'recruiting' ||
+                             match.status === 'draft' ||
+                             match.status === 'upcoming') &&
                             match.start_date && new Date(match.start_date) >= new Date()
                         )
                         .sort((a: Match, b: Match) => {
@@ -98,7 +103,7 @@ export default function Home() {
 
             // 전체 통계
             const { count: matchCount } = await supabase
-                .from('tournaments')
+                .from('matches')
                 .select('*', { count: 'exact', head: true });
 
             const { count: teamCount } = await supabase
@@ -122,46 +127,58 @@ export default function Home() {
         }
     };
 
-    const getTypeLabel = (type: MatchType) => {
+    const getTypeLabel = (type: MatchType | string) => {
         switch (type) {
-            case MatchType.SINGLE_ELIMINATION:
+            case 'single_elimination':
                 return '토너먼트';
-            case MatchType.DOUBLE_ELIMINATION:
+            case 'double_elimination':
                 return '더블 엘리미네이션';
-            case MatchType.ROUND_ROBIN:
+            case 'round_robin':
                 return '리그전';
-            case MatchType.SWISS:
+            case 'swiss':
                 return '스위스';
-            case MatchType.LEAGUE:
+            case 'league':
                 return '리그';
             default:
                 return type;
         }
     };
 
-    const getStatusColor = (status: MatchStatus) => {
+    const getStatusColor = (status: MatchStatus | string) => {
         switch (status) {
-            case MatchStatus.REGISTRATION:
+            case 'registration':
+            case 'recruiting':
                 return 'bg-blue-100 text-blue-800';
-            case MatchStatus.IN_PROGRESS:
+            case 'in_progress':
+            case 'active':
                 return 'bg-green-100 text-green-800';
-            case MatchStatus.COMPLETED:
+            case 'completed':
                 return 'bg-purple-100 text-purple-800';
+            case 'upcoming':
+                return 'bg-yellow-100 text-yellow-800';
+            case 'draft':
+                return 'bg-gray-100 text-gray-800';
             default:
                 return 'bg-gray-100 text-gray-800';
         }
     };
 
-    const getStatusLabel = (status: MatchStatus) => {
+    const getStatusLabel = (status: MatchStatus | string) => {
         switch (status) {
-            case MatchStatus.REGISTRATION:
+            case 'registration':
+            case 'recruiting':
                 return '모집중';
-            case MatchStatus.IN_PROGRESS:
+            case 'in_progress':
+            case 'active':
                 return '진행중';
-            case MatchStatus.COMPLETED:
+            case 'completed':
                 return '완료';
-            case MatchStatus.CANCELLED:
+            case 'cancelled':
                 return '취소됨';
+            case 'upcoming':
+                return '예정';
+            case 'draft':
+                return '준비중';
             default:
                 return status;
         }

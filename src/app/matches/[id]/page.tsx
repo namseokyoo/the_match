@@ -18,7 +18,7 @@ async function getMatch(id: string): Promise<Match | null> {
     try {
         // 직접 Supabase에서 데이터 조회
         const { data: match, error } = await supabaseAdmin
-            .from('tournaments')
+            .from('matches')
             .select('*')
             .eq('id', id)
             .single();

@@ -50,8 +50,8 @@ export interface Match {
     id: string;
     title: string;
     description?: string;
-    type: MatchType;
-    status: MatchStatus;
+    type: MatchType | string;
+    status: MatchStatus | string;
     creator_id: string;
     max_participants?: number;
     registration_deadline?: string;
