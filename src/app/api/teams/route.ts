@@ -1,11 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-// Supabase 클라이언트 (Service Role Key 또는 Anon Key 사용)
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { getSupabaseAdmin, executeQuery } from '@/lib/supabase-server';
 
 // GET /api/teams - 팀 목록 조회
 export async function GET() {
@@ -22,10 +16,14 @@ export async function GET() {
 
         // 가장 간단한 쿼리부터 시작
         console.log('Executing basic teams query...');
-        const { data: teams, error } = await supabaseAdmin
-            .from('teams')
-            .select('*')
-            .limit(10);
+        const supabaseAdmin = getSupabaseAdmin();
+        
+        const { data: teams, error } = await executeQuery(() => 
+            supabaseAdmin
+                .from('teams')
+                .select('*')
+                .limit(10)
+        );
 
         if (error) {
             console.error('Teams fetch error:', error);

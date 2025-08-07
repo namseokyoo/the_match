@@ -9,6 +9,7 @@ import { OnboardingTour } from '@/components/onboarding';
 import { supabase } from '@/lib/supabase';
 import { Match, Team, MatchStatus, MatchType } from '@/types';
 import { formatDate } from '@/lib/utils';
+import { matchAPI, teamAPI } from '@/lib/api-client';
 
 export default function Home() {
     const router = useRouter();
@@ -31,74 +32,61 @@ export default function Home() {
         try {
             setLoading(true);
 
-            // API를 통해 경기 데이터 가져오기
-            console.log('Fetching matches...');
-            // Vercel 배포 환경과 로컬 환경 모두 지원
-            const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-            const matchResponse = await fetch(`${baseUrl}/api/matches`);
-            
-            if (!matchResponse.ok) {
-                console.error('Match API error:', matchResponse.status, matchResponse.statusText);
-                const errorData = await matchResponse.json();
-                console.error('Match API error details:', errorData);
-                throw new Error(`Match API failed: ${matchResponse.status}`);
-            } else {
-                const matchData = await matchResponse.json();
-                console.log('Match API response:', matchData);
+            // 병렬로 데이터 가져오기
+            console.log('Fetching data...');
+            const [matchData, teamData] = await Promise.all([
+                matchAPI.getAll().catch(err => {
+                    console.error('Match API error:', err);
+                    return { success: false, data: [] };
+                }),
+                teamAPI.getAll().catch(err => {
+                    console.error('Team API error:', err);
+                    return { success: false, data: [] };
+                })
+            ]);
 
-                if (matchData.success && matchData.data) {
-                    // 현재 진행 중인 경기들 필터링
-                    const activeMatches = matchData.data
-                        .filter((match: Match) => 
-                            match.status === 'in_progress' ||
-                            match.status === 'registration'
-                        )
-                        .slice(0, 6);
-                    
-                    console.log('Active matches:', activeMatches);
-                    setActiveMatches(activeMatches);
+            console.log('API responses:', { matchData, teamData });
 
-                    // 곧 시작될 경기들 필터링
-                    const upcoming = matchData.data
-                        .filter((match: Match) => 
-                            (match.status === 'registration' || 
-                             match.status === 'draft') &&
-                            match.start_date && new Date(match.start_date) >= new Date()
-                        )
-                        .sort((a: Match, b: Match) => {
-                            const dateA = new Date(a.start_date || 0).getTime();
-                            const dateB = new Date(b.start_date || 0).getTime();
-                            return dateA - dateB;
-                        })
-                        .slice(0, 4);
-                    
-                    console.log('Upcoming matches:', upcoming);
-                    setUpcomingMatches(upcoming);
-                }
+            // 경기 데이터 처리
+            if (matchData.success && matchData.data) {
+                // 현재 진행 중인 경기들 필터링
+                const activeMatches = matchData.data
+                    .filter((match: Match) => 
+                        match.status === 'in_progress' ||
+                        match.status === 'registration'
+                    )
+                    .slice(0, 6);
+                
+                console.log('Active matches:', activeMatches);
+                setActiveMatches(activeMatches);
+
+                // 곧 시작될 경기들 필터링
+                const upcoming = matchData.data
+                    .filter((match: Match) => 
+                        (match.status === 'registration' || 
+                         match.status === 'draft') &&
+                        match.start_date && new Date(match.start_date) >= new Date()
+                    )
+                    .sort((a: Match, b: Match) => {
+                        const dateA = new Date(a.start_date || 0).getTime();
+                        const dateB = new Date(b.start_date || 0).getTime();
+                        return dateA - dateB;
+                    })
+                    .slice(0, 4);
+                
+                console.log('Upcoming matches:', upcoming);
+                setUpcomingMatches(upcoming);
             }
 
-            // API를 통해 팀 데이터 가져오기
-            console.log('Fetching teams...');
-            const teamResponse = await fetch(`${baseUrl}/api/teams`);
-            
-            if (!teamResponse.ok) {
-                console.error('Team API error:', teamResponse.status, teamResponse.statusText);
-                const errorData = await teamResponse.json();
-                console.error('Team API error details:', errorData);
-                throw new Error(`Team API failed: ${teamResponse.status}`);
-            } else {
-                const teamData = await teamResponse.json();
-                console.log('Team API response:', teamData);
-
-                if (teamData.success && teamData.data) {
-                    // 캡틴이 있는 팀들 필터링 (팀원 모집 중)
-                    const recruiting = teamData.data
-                        .filter((team: Team) => team.captain_id !== null)
-                        .slice(0, 4);
-                    
-                    console.log('Recruiting teams:', recruiting);
-                    setRecruitingTeams(recruiting);
-                }
+            // 팀 데이터 처리
+            if (teamData.success && teamData.data) {
+                // 캡틴이 있는 팀들 필터링 (팀원 모집 중)
+                const recruiting = teamData.data
+                    .filter((team: Team) => team.captain_id !== null)
+                    .slice(0, 4);
+                
+                console.log('Recruiting teams:', recruiting);
+                setRecruitingTeams(recruiting);
             }
 
             // 전체 통계

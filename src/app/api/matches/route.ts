@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { MatchType, MatchStatus, CreateMatchForm } from '@/types';
 import { verifyAuth, requireEmailVerified } from '@/lib/auth-middleware';
-
-// Supabase 클라이언트 (Service Role Key 또는 Anon Key 사용)
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { getSupabaseAdmin, executeQuery } from '@/lib/supabase-server';
 
 // GET /api/matches - 경기 목록 조회
 export async function GET(request: NextRequest) {
@@ -20,6 +14,8 @@ export async function GET(request: NextRequest) {
         const search = searchParams.get('search');
         const creatorId = searchParams.get('creator_id');
 
+        const supabaseAdmin = getSupabaseAdmin();
+        
         let query = supabaseAdmin
             .from('matches')
             .select('*');
@@ -49,12 +45,16 @@ export async function GET(request: NextRequest) {
             .order('created_at', { ascending: false })
             .range(from, to);
 
-        const { data: matches, error } = await query;
+        const { data: matches, error } = await executeQuery(() => query);
 
         if (error) {
             console.error('경기 목록 조회 오류:', error);
             return NextResponse.json(
-                { error: '경기 목록을 불러오는 중 오류가 발생했습니다.' },
+                { 
+                    error: '경기 목록을 불러오는 중 오류가 발생했습니다.',
+                    success: false,
+                    data: []
+                },
                 { status: 500 }
             );
         }
