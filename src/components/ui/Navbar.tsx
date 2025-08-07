@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import InstallPWAButton from '@/components/pwa/InstallPWAButton';
 
 const SimpleNavbar = () => {
     const { user, signOut, loading, initialized, isAuthenticated, isSigningOut } = useAuth();
@@ -84,6 +85,7 @@ const SimpleNavbar = () => {
                         ) : isAuthenticated ? (
                             // 로그인된 상태
                             <div className="flex items-center space-x-4">
+                                <InstallPWAButton />
                                 <Link
                                     href="/dashboard"
                                     className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"

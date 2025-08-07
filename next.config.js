@@ -28,6 +28,20 @@ const nextConfig = {
     compiler: {
         removeConsole: process.env.NODE_ENV === 'production',
     },
+    // PWA 헤더 설정
+    async headers() {
+        return [
+            {
+                source: '/sw.js',
+                headers: [
+                    {
+                        key: 'Service-Worker-Allowed',
+                        value: '/',
+                    },
+                ],
+            },
+        ];
+    },
 }
 
 module.exports = nextConfig 

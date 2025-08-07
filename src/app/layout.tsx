@@ -5,6 +5,7 @@ import Navbar from '@/components/ui/Navbar';
 import { ErrorBoundary } from '@/components/ui';
 import { ToastContainer } from '@/components/ui/Toast';
 import ClientProviders from '@/components/providers/ClientProviders';
+import PWAProvider from '@/components/pwa/PWAProvider';
 import './globals.css';
 
 // ConfigStatus는 클라이언트 사이드에서만 렌더링
@@ -85,27 +86,29 @@ export default function RootLayout({
             <body className={inter.className}>
                 <ErrorBoundary>
                     <ClientProviders>
-                        <div className="min-h-screen bg-background font-sans antialiased">
-                            <div className="relative flex min-h-screen flex-col">
-                                {/* 네비게이션 바 */}
-                                <Navbar />
+                        <PWAProvider>
+                            <div className="min-h-screen bg-background font-sans antialiased">
+                                <div className="relative flex min-h-screen flex-col">
+                                    {/* 네비게이션 바 */}
+                                    <Navbar />
 
-                                {/* 메인 콘텐츠 */}
-                                <main className="flex-1">
-                                    <ErrorBoundary>
-                                        {children}
-                                    </ErrorBoundary>
-                                </main>
+                                    {/* 메인 콘텐츠 */}
+                                    <main className="flex-1">
+                                        <ErrorBoundary>
+                                            {children}
+                                        </ErrorBoundary>
+                                    </main>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Toast 컨테이너 */}
-                        <ToastContainer />
+                            {/* Toast 컨테이너 */}
+                            <ToastContainer />
 
-                        {/* 개발 환경에서 설정 상태 표시 */}
-                        {process.env.NODE_ENV === 'development' && (
-                            <ConfigStatus />
-                        )}
+                            {/* 개발 환경에서 설정 상태 표시 */}
+                            {process.env.NODE_ENV === 'development' && (
+                                <ConfigStatus />
+                            )}
+                        </PWAProvider>
                     </ClientProviders>
                 </ErrorBoundary>
             </body>
