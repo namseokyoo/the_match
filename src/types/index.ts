@@ -285,7 +285,7 @@ export interface BaseComponentProps {
 
 export interface ButtonProps extends BaseComponentProps {
     type?: 'button' | 'submit' | 'reset';
-    variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
+    variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'danger';
     size?: 'sm' | 'md' | 'lg';
     disabled?: boolean;
     loading?: boolean;

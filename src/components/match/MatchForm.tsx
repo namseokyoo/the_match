@@ -32,7 +32,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({
     const [formData, setFormData] = useState<CreateMatchForm>({
         title: initialData?.title || match?.title || '',
         description: initialData?.description || match?.description || '',
-        type: initialData?.type || match?.type || MatchType.SINGLE_ELIMINATION,
+        type: initialData?.type || (match?.type as MatchType) || MatchType.SINGLE_ELIMINATION,
         max_participants: initialData?.max_participants || match?.max_participants || undefined,
         registration_deadline: initialData?.registration_deadline || match?.registration_deadline || '',
         start_date: initialData?.start_date || match?.start_date || '',

@@ -179,8 +179,8 @@ export default function MatchStatusManager({
                     {/* 현재 상태 */}
                     <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-gray-700">현재 상태</span>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[match.status]}`}>
-                            {STATUS_LABELS[match.status]}
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[match.status as MatchStatus]}`}>
+                            {STATUS_LABELS[match.status as MatchStatus]}
                         </span>
                     </div>
 

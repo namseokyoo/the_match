@@ -62,12 +62,12 @@ export default function MatchesClient() {
 
         // 타입 필터링
         if (filters.type.length > 0) {
-            result = result.filter(match => filters.type.includes(match.type));
+            result = result.filter(match => filters.type.includes(match.type as MatchType));
         }
 
         // 상태 필터링
         if (filters.status.length > 0) {
-            result = result.filter(match => filters.status.includes(match.status));
+            result = result.filter(match => filters.status.includes(match.status as MatchStatus));
         }
 
         // 날짜 범위 필터링
