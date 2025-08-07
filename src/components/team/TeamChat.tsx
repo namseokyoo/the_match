@@ -6,7 +6,6 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Send, Bell, BellOff, MoreVertical, Trash2, Pin, Users } from 'lucide-react';
 import { showToast } from '@/components/ui/Toast';
-import type { Database } from '@/types/supabase';
 
 interface TeamMessage {
   id: string;
@@ -42,7 +41,7 @@ export default function TeamChat({ teamId, isTeamCaptain = false, currentUserId 
   const [showOptions, setShowOptions] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createClientComponentClient();
 
   // 메시지 목록 불러오기
   const fetchMessages = useCallback(async () => {

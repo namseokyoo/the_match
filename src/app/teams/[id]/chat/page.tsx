@@ -5,7 +5,6 @@ import { cookies } from 'next/headers';
 import TeamChat from '@/components/team/TeamChat';
 import Link from 'next/link';
 import { ArrowLeft, Users } from 'lucide-react';
-import type { Database } from '@/types/supabase';
 
 export const metadata: Metadata = {
   title: '팀 채팅 - The Match',
@@ -19,7 +18,7 @@ interface PageProps {
 }
 
 export default async function TeamChatPage({ params }: PageProps) {
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const supabase = createServerComponentClient({ cookies });
 
   // 현재 사용자 정보 가져오기
   const { data: { user } } = await supabase.auth.getUser();
