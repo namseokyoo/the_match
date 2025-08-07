@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import dynamic from 'next/dynamic';
-import Navbar from '@/components/ui/Navbar';
+import MobileNavbar from '@/components/ui/MobileNavbar';
 import { ErrorBoundary } from '@/components/ui';
 import { ToastContainer } from '@/components/ui/Toast';
 import ClientProviders from '@/components/providers/ClientProviders';
@@ -90,7 +90,7 @@ export default function RootLayout({
                             <div className="min-h-screen bg-background font-sans antialiased">
                                 <div className="relative flex min-h-screen flex-col">
                                     {/* 네비게이션 바 */}
-                                    <Navbar />
+                                    <MobileNavbar />
 
                                     {/* 메인 콘텐츠 */}
                                     <main className="flex-1">
