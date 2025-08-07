@@ -18,7 +18,7 @@ interface DashboardStats {
 
 export default function DashboardPage() {
     const router = useRouter();
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, initialized } = useAuth();
     const [stats, setStats] = useState<DashboardStats>({
         totalMatches: 0,
         activeMatches: 0,
@@ -29,20 +29,27 @@ export default function DashboardPage() {
     const [myTeams, setMyTeams] = useState<Team[]>([]);
     const [recentMatches, setRecentMatches] = useState<Match[]>([]);
     const [loading, setLoading] = useState(true);
+    const [dataFetched, setDataFetched] = useState(false);
 
     useEffect(() => {
-        if (!authLoading && user) {
-            fetchDashboardData();
-        } else if (!authLoading && !user) {
+        // 인증이 초기화되고 사용자가 없으면 로그인 페이지로
+        if (initialized && !user) {
             router.push('/login');
+            return;
         }
-    }, [user, authLoading, router]);
+        
+        // 인증이 초기화되고 사용자가 있으며 데이터를 아직 가져오지 않았으면 fetch
+        if (initialized && user && !dataFetched) {
+            fetchDashboardData();
+        }
+    }, [user, initialized, router, dataFetched]);
 
     const fetchDashboardData = async () => {
         if (!user) return;
 
         try {
             setLoading(true);
+            setDataFetched(true);
 
             // 내가 생성한 경기들
             const { data: createdMatches, error: matchError } = await supabase
@@ -102,7 +109,8 @@ export default function DashboardPage() {
         }
     };
 
-    if (authLoading || loading) {
+    // 초기 인증 로딩 중
+    if (!initialized) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-match-blue"></div>
@@ -110,8 +118,18 @@ export default function DashboardPage() {
         );
     }
 
-    if (!user) {
+    // 인증 완료 후 사용자 없음 (로그인 페이지로 리다이렉트 중)
+    if (initialized && !user) {
         return null;
+    }
+
+    // 데이터 로딩 중
+    if (loading && !dataFetched) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-match-blue"></div>
+            </div>
+        );
     }
 
     return (
@@ -121,7 +139,7 @@ export default function DashboardPage() {
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">대시보드</h1>
                     <p className="mt-2 text-gray-600">
-                        안녕하세요, {user.email}님! 여기서 모든 활동을 한눈에 확인하세요.
+                        안녕하세요, {user?.email || '사용자'}님! 여기서 모든 활동을 한눈에 확인하세요.
                     </p>
                 </div>
 
