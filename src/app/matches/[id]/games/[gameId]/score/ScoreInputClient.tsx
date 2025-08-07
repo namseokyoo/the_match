@@ -1,21 +1,34 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui';
 import { showToast } from '@/components/ui/Toast';
-import { Trophy, Clock, Play, Pause, StopCircle, RotateCcw, Plus, Minus } from 'lucide-react';
+import { Trophy, Play, Pause, StopCircle, RotateCcw, Plus, Minus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { updateGameResult } from '@/lib/tournament';
+
+// 모바일 UI를 동적으로 로드 (코드 스플리팅)
+const MobileScoreInput = dynamic(() => import('./MobileScoreInput'), {
+    ssr: false,
+    loading: () => (
+        <div className="flex items-center justify-center min-h-screen">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+    )
+});
 
 interface ScoreInputClientProps {
     game: any;
 }
 
 export default function ScoreInputClient({ game }: ScoreInputClientProps) {
+    // 모든 Hooks를 먼저 선언
     const router = useRouter();
     const { user } = useAuth();
+    const [isMobile, setIsMobile] = useState(false);
     const [team1Score, setTeam1Score] = useState(game.team1_score || 0);
     const [team2Score, setTeam2Score] = useState(game.team2_score || 0);
     const [gameStatus, setGameStatus] = useState<'scheduled' | 'in_progress' | 'completed'>(game.status);
@@ -24,6 +37,23 @@ export default function ScoreInputClient({ game }: ScoreInputClientProps) {
     const [period, setPeriod] = useState(1);
     const [saving, setSaving] = useState(false);
     const [isLiveMode, setIsLiveMode] = useState(false);
+
+    // 모바일 감지
+    useEffect(() => {
+        const checkMobile = () => {
+            const userAgent = navigator.userAgent || navigator.vendor;
+            const isMobileDevice = /android|iphone|ipad|ipod|windows phone/i.test(userAgent.toLowerCase());
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            const isSmallScreen = window.innerWidth <= 768;
+            
+            setIsMobile(isMobileDevice || (isTouchDevice && isSmallScreen));
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // 타이머 기능
     useEffect(() => {
@@ -197,6 +227,11 @@ export default function ScoreInputClient({ game }: ScoreInputClientProps) {
                 </div>
             </div>
         );
+    }
+
+    // 모바일 디바이스에서는 전용 UI 표시
+    if (isMobile) {
+        return <MobileScoreInput game={game} />;
     }
 
     return (
