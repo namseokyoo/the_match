@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -32,27 +32,8 @@ const SimpleNavbar = () => {
         }
     };
 
-    // 초기 로딩 상태 (첫 초기화 전)
-    if (!initialized && loading) {
-        return (
-            <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <Link href="/" className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                                <span className="text-white font-bold text-lg">T</span>
-                            </div>
-                            <span className="text-xl font-bold text-gray-900">The Match</span>
-                        </Link>
-                        <div className="flex items-center space-x-2">
-                            <div className="animate-pulse h-8 w-20 bg-gray-200 rounded"></div>
-                            <div className="animate-pulse h-8 w-20 bg-gray-200 rounded"></div>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-        );
-    }
+    // 초기 로딩 상태 (첫 초기화 전) - 스켈레톤 UI를 보여주되 전체 네비바 구조는 유지
+    const showSkeleton = !initialized;
 
     return (
         <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -94,7 +75,13 @@ const SimpleNavbar = () => {
                             선수
                         </Link>
 
-                        {isAuthenticated ? (
+                        {showSkeleton ? (
+                            // 초기 로딩 중
+                            <div className="flex items-center space-x-2">
+                                <div className="animate-pulse h-8 w-20 bg-gray-200 rounded"></div>
+                                <div className="animate-pulse h-8 w-20 bg-gray-200 rounded"></div>
+                            </div>
+                        ) : isAuthenticated ? (
                             // 로그인된 상태
                             <div className="flex items-center space-x-4">
                                 <Link

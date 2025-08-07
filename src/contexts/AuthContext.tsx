@@ -38,7 +38,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [initialized, setInitialized] = useState(false);
     const [isSigningOut, setIsSigningOut] = useState(false);
     const initializationRef = useRef(false);
@@ -87,7 +87,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
         
         initializationRef.current = true;
-        setLoading(true);
 
         try {
             // Supabase 설정 확인
@@ -95,15 +94,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 console.warn('Invalid Supabase configuration');
                 setUser(null);
                 setSession(null);
-                setLoading(false);
                 setInitialized(true);
                 return;
             }
 
-            // 세션 가져오기 (타임아웃 설정)
+            // 세션 가져오기 (타임아웃 설정 - 2초로 단축)
             const sessionPromise = supabase.auth.getSession();
             const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Session timeout')), 5000)
+                setTimeout(() => reject(new Error('Session timeout')), 2000)
             );
 
             const { data: { session } } = await Promise.race([
@@ -134,7 +132,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUser(null);
             setSession(null);
         } finally {
-            setLoading(false);
             setInitialized(true);
         }
     }, [createUserProfile]);
@@ -195,7 +192,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // 로그인 함수
     const signIn = async (email: string, password: string) => {
         try {
-            setLoading(true);
             const { error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
@@ -206,15 +202,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } catch (error) {
             console.error('Sign in error:', error);
             return { error: error as AuthError };
-        } finally {
-            setLoading(false);
         }
     };
 
     // 회원가입 함수
     const signUp = async (email: string, password: string, metadata?: Record<string, any>) => {
         try {
-            setLoading(true);
             const { error } = await supabase.auth.signUp({
                 email,
                 password,
@@ -228,8 +221,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } catch (error) {
             console.error('Sign up error:', error);
             return { error: error as AuthError };
-        } finally {
-            setLoading(false);
         }
     };
 
