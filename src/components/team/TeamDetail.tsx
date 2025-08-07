@@ -3,9 +3,11 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Team, Player, Match } from '@/types';
 import { Button, Card } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
+import { MessageCircle } from 'lucide-react';
 
 interface TeamDetailProps {
     team: Team;
@@ -92,26 +94,38 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                     </div>
 
                     {/* 액션 버튼 */}
-                    {isOwner && (
-                        <div className="flex gap-2 mt-4 md:mt-0">
+                    <div className="flex gap-2 mt-4 md:mt-0">
+                        <Link href={`/teams/${team.id}/chat`}>
                             <Button
-                                variant="outline"
+                                variant="primary"
                                 size="sm"
-                                onClick={() => onEdit?.()}
                                 disabled={loading}
                             >
-                                팀 수정
+                                <MessageCircle className="w-4 h-4 mr-2" />
+                                팀 채팅
                             </Button>
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => onDelete?.()}
-                                disabled={loading}
-                            >
-                                팀 삭제
-                            </Button>
-                        </div>
-                    )}
+                        </Link>
+                        {isOwner && (
+                            <>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => onEdit?.()}
+                                    disabled={loading}
+                                >
+                                    팀 수정
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => onDelete?.()}
+                                    disabled={loading}
+                                >
+                                    팀 삭제
+                                </Button>
+                            </>
+                        )}
+                    </div>
                 </div>
 
                 {/* 팀 설명 */}
