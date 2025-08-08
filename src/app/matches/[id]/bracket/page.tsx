@@ -41,6 +41,7 @@ export default function MatchBracketPage() {
             if (matchError) {
                 console.error('Match fetch error:', matchError);
                 showToast('경기 정보를 불러올 수 없습니다', 'error');
+                setLoading(false);
                 return;
             }
 
@@ -54,6 +55,7 @@ export default function MatchBracketPage() {
             if (participantsError) {
                 console.error('Participants fetch error:', participantsError);
                 showToast('참가 팀 정보를 불러올 수 없습니다', 'error');
+                setLoading(false);
                 return;
             }
 
@@ -108,14 +110,15 @@ export default function MatchBracketPage() {
                 }
                 
                 setBracket(generatedBracket);
+                setLoading(false);
             } else {
                 showToast('참가 팀이 2팀 이상이어야 브라켓을 생성할 수 있습니다', 'warning');
+                setLoading(false);
             }
 
         } catch (error) {
             console.error('Bracket fetch error:', error);
             showToast('브라켓 정보를 불러오는데 실패했습니다', 'error');
-        } finally {
             setLoading(false);
         }
     };
