@@ -148,44 +148,47 @@ export default function Home() {
             {/* Onboarding Tour for new users */}
             <OnboardingTour autoStart={!!user} />
             
-            {/* Hero Section - Clean and Professional */}
-            <section className="bg-gradient-to-br from-primary-500 to-primary-700 px-4 py-16">
+            {/* Hero Section - Compact Design */}
+            <section className="bg-gradient-to-br from-primary-500 to-primary-700 px-4 py-6 sm:py-8">
                 <div className="mx-auto max-w-7xl">
-                    <div className="text-center text-white mb-10">
-                        <h1 className="mb-3 text-4xl font-bold tracking-tight md:text-5xl">
-                            The Match
-                        </h1>
-                        <p className="text-lg text-primary-100 font-medium">
-                            스포츠 경기 관리 플랫폼
-                        </p>
-                    </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        {/* 제목 */}
+                        <div className="text-white">
+                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                                The Match
+                            </h1>
+                            <p className="text-sm sm:text-base text-primary-100 mt-1">
+                                스포츠 경기 관리 플랫폼
+                            </p>
+                        </div>
 
-                    {/* 통계 카드 - Cleaner design */}
-                    <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
-                        <div className="bg-white/95 backdrop-blur-sm rounded-xl p-5 text-center shadow-lg">
-                            <div className="text-3xl md:text-4xl font-bold text-primary-600">{stats.totalMatches}</div>
-                            <div className="text-sm text-gray-600 font-medium mt-1">경기</div>
-                        </div>
-                        <div className="bg-white/95 backdrop-blur-sm rounded-xl p-5 text-center shadow-lg">
-                            <div className="text-3xl md:text-4xl font-bold text-primary-600">{stats.totalTeams}</div>
-                            <div className="text-sm text-gray-600 font-medium mt-1">팀</div>
-                        </div>
-                        <div className="bg-white/95 backdrop-blur-sm rounded-xl p-5 text-center shadow-lg">
-                            <div className="text-3xl md:text-4xl font-bold text-primary-600">{stats.totalPlayers}</div>
-                            <div className="text-sm text-gray-600 font-medium mt-1">선수</div>
+                        {/* 통계 - 가로로 배치 */}
+                        <div className="flex gap-3 sm:gap-4">
+                            <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 sm:px-6 sm:py-3 text-center shadow">
+                                <div className="text-xl sm:text-2xl font-bold text-primary-600">{stats.totalMatches}</div>
+                                <div className="text-xs text-gray-600">경기</div>
+                            </div>
+                            <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 sm:px-6 sm:py-3 text-center shadow">
+                                <div className="text-xl sm:text-2xl font-bold text-primary-600">{stats.totalTeams}</div>
+                                <div className="text-xs text-gray-600">팀</div>
+                            </div>
+                            <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 sm:px-6 sm:py-3 text-center shadow">
+                                <div className="text-xl sm:text-2xl font-bold text-primary-600">{stats.totalPlayers}</div>
+                                <div className="text-xs text-gray-600">선수</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* 현재 진행 중인 경기 */}
-            <section className="py-8 px-4">
+            <section className="py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-7xl">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-semibold text-gray-900">
+                    <div className="flex justify-between items-center mb-4 sm:mb-6">
+                        <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
                             진행 중인 경기
                         </h2>
-                        <Link href="/matches" className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 text-sm">
+                        <Link href="/matches" className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 text-xs sm:text-sm">
                             모두 보기 <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
@@ -309,10 +312,10 @@ export default function Home() {
 
             {/* 곧 시작될 경기 */}
             {upcomingMatches.length > 0 && (
-                <section className="py-8 px-4">
+                <section className="py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
                     <div className="mx-auto max-w-7xl">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-gray-900">
+                        <div className="flex justify-between items-center mb-4 sm:mb-6">
+                            <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
                                 📅 곧 시작될 경기
                             </h2>
                             <Link href="/matches?status=registration" className="text-primary-600 hover:text-primary-700 flex items-center gap-1 text-sm font-medium transition-colors">

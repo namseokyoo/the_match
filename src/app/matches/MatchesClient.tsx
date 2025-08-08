@@ -182,43 +182,46 @@ export default function MatchesClient() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* 페이지 헤더 - 깔끔한 디자인 */}
-                <div className="mb-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+                {/* 페이지 헤더 - 반응형 디자인 */}
+                <div className="mb-4 sm:mb-6 lg:mb-8">
                     <div className="sm:flex sm:items-center sm:justify-between">
-                        <div>
-                            <h1 className="text-2xl font-semibold text-gray-900">경기 목록</h1>
-                            <p className="mt-1 text-sm text-gray-600">
+                        <div className="mb-4 sm:mb-0">
+                            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">경기 목록</h1>
+                            <p className="mt-1 text-xs sm:text-sm text-gray-600">
                                 참가하고 싶은 경기를 찾아보세요
                             </p>
                         </div>
-                        <div className="mt-4 sm:mt-0 flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                             <Button
                                 onClick={() => router.push('/matches/calendar')}
                                 variant="secondary"
-                                size="md"
+                                size="sm"
+                                className="text-xs sm:text-sm"
                             >
-                                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                캘린더 보기
+                                <span className="hidden xs:inline">캘린더</span>
                             </Button>
                             <Button
                                 onClick={() => router.push('/matches/create-recurring')}
                                 variant="outline"
-                                size="md"
+                                size="sm"
+                                className="text-xs sm:text-sm"
                             >
-                                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
-                                반복 경기
+                                <span className="hidden xs:inline">반복</span>
                             </Button>
                             <Button
                                 onClick={handleCreateMatch}
                                 variant="primary"
-                                size="md"
+                                size="sm"
+                                className="text-xs sm:text-sm"
                             >
-                                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                 </svg>
                                 경기 생성
@@ -236,8 +239,8 @@ export default function MatchesClient() {
                 </div>
 
                 {/* 필터 패널과 경기 목록 */}
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <div className="lg:col-span-1">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div className="lg:col-span-1 order-2 lg:order-1">
                         <FilterPanel
                             filters={filters}
                             onFilterChange={(newFilters) => setFilters({
