@@ -111,17 +111,17 @@ export default function Home() {
     const getStatusColor = (status: MatchStatus | string) => {
         switch (status) {
             case 'registration':
-                return 'bg-blue-100 text-blue-800';
+                return 'bg-primary-50 text-primary-700 border border-primary-200';
             case 'in_progress':
-                return 'bg-green-100 text-green-800';
+                return 'bg-success-50 text-success-700 border border-success-200';
             case 'completed':
-                return 'bg-purple-100 text-purple-800';
+                return 'bg-gray-50 text-gray-700 border border-gray-200';
             case 'draft':
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gray-50 text-gray-600 border border-gray-200';
             case 'cancelled':
-                return 'bg-red-100 text-red-800';
+                return 'bg-error-50 text-error-700 border border-error-200';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gray-50 text-gray-600 border border-gray-200';
         }
     };
 
@@ -148,31 +148,31 @@ export default function Home() {
             {/* Onboarding Tour for new users */}
             <OnboardingTour autoStart={!!user} />
             
-            {/* Hero Section - 간소화 */}
-            <section className="bg-gradient-to-br from-match-blue to-match-purple px-4 py-12">
+            {/* Hero Section - Clean and Professional */}
+            <section className="bg-gradient-to-br from-primary-500 to-primary-700 px-4 py-16">
                 <div className="mx-auto max-w-7xl">
-                    <div className="text-center text-white mb-8">
-                        <h1 className="mb-2 text-3xl font-bold tracking-tight md:text-4xl">
+                    <div className="text-center text-white mb-10">
+                        <h1 className="mb-3 text-4xl font-bold tracking-tight md:text-5xl">
                             The Match
                         </h1>
-                        <p className="text-lg text-white/90">
-                            경기와 팀을 만나는 곳
+                        <p className="text-lg text-primary-100 font-medium">
+                            스포츠 경기 관리 플랫폼
                         </p>
                     </div>
 
-                    {/* 통계 카드 */}
+                    {/* 통계 카드 - Cleaner design */}
                     <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
-                            <div className="text-2xl md:text-3xl font-bold text-white">{stats.totalMatches}</div>
-                            <div className="text-sm text-white/80">경기</div>
+                        <div className="bg-white/95 backdrop-blur-sm rounded-xl p-5 text-center shadow-lg">
+                            <div className="text-3xl md:text-4xl font-bold text-primary-600">{stats.totalMatches}</div>
+                            <div className="text-sm text-gray-600 font-medium mt-1">경기</div>
                         </div>
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
-                            <div className="text-2xl md:text-3xl font-bold text-white">{stats.totalTeams}</div>
-                            <div className="text-sm text-white/80">팀</div>
+                        <div className="bg-white/95 backdrop-blur-sm rounded-xl p-5 text-center shadow-lg">
+                            <div className="text-3xl md:text-4xl font-bold text-primary-600">{stats.totalTeams}</div>
+                            <div className="text-sm text-gray-600 font-medium mt-1">팀</div>
                         </div>
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
-                            <div className="text-2xl md:text-3xl font-bold text-white">{stats.totalPlayers}</div>
-                            <div className="text-sm text-white/80">선수</div>
+                        <div className="bg-white/95 backdrop-blur-sm rounded-xl p-5 text-center shadow-lg">
+                            <div className="text-3xl md:text-4xl font-bold text-primary-600">{stats.totalPlayers}</div>
+                            <div className="text-sm text-gray-600 font-medium mt-1">선수</div>
                         </div>
                     </div>
                 </div>
@@ -182,10 +182,10 @@ export default function Home() {
             <section className="py-8 px-4">
                 <div className="mx-auto max-w-7xl">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900">
-                            🔥 지금 진행 중인 경기
+                        <h2 className="text-xl font-semibold text-gray-900">
+                            진행 중인 경기
                         </h2>
-                        <Link href="/matches" className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                        <Link href="/matches" className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 text-sm">
                             모두 보기 <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
@@ -204,29 +204,29 @@ export default function Home() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {activeMatches.map(match => (
                                 <Link key={match.id} href={`/matches/${match.id}`}>
-                                    <div className="bg-white rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer">
+                                    <div className="bg-white rounded-lg p-5 border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer">
                                         <div className="flex justify-between items-start mb-3">
-                                            <h3 className="font-semibold text-lg text-gray-900 flex-1">
+                                            <h3 className="font-medium text-base text-gray-900 flex-1">
                                                 {match.title}
                                             </h3>
-                                            <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(match.status)}`}>
+                                            <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${getStatusColor(match.status)}`}>
                                                 {getStatusLabel(match.status)}
                                             </span>
                                         </div>
-                                        <div className="space-y-2 text-sm text-gray-600">
+                                        <div className="space-y-2 text-sm text-gray-500">
                                             <div className="flex items-center gap-2">
-                                                <Trophy className="w-4 h-4" />
+                                                <Trophy className="w-3.5 h-3.5 text-gray-400" />
                                                 <span>{getTypeLabel(match.type)}</span>
                                             </div>
                                             {match.start_date && (
                                                 <div className="flex items-center gap-2">
-                                                    <Calendar className="w-4 h-4" />
+                                                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
                                                     <span>{formatDate(match.start_date)}</span>
                                                 </div>
                                             )}
                                             {match.max_participants && (
                                                 <div className="flex items-center gap-2">
-                                                    <Users className="w-4 h-4" />
+                                                    <Users className="w-3.5 h-3.5 text-gray-400" />
                                                     <span>최대 {match.max_participants}팀</span>
                                                 </div>
                                             )}
@@ -240,11 +240,11 @@ export default function Home() {
                             <Trophy className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-600 mb-4">아직 진행 중인 경기가 없습니다</p>
                             {user ? (
-                                <Link href="/matches/create" className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                <Link href="/matches/create" className="inline-flex items-center px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors shadow-sm">
                                     경기 만들기
                                 </Link>
                             ) : (
-                                <Link href="/signup" className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                <Link href="/signup" className="inline-flex items-center px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors shadow-sm">
                                     회원가입하고 시작하기
                                 </Link>
                             )}

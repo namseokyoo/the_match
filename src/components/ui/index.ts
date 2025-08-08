@@ -10,6 +10,7 @@ export {
     CardContent,
     CardFooter
 } from './Card';
+export { default as Badge } from './Badge';
 export { default as Notification } from './Notification';
 export { 
     default as ErrorBoundary, 

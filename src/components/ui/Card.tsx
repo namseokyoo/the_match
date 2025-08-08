@@ -12,9 +12,11 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
     ({ className, children, hover = false, padding = 'md', ...props }, ref) => {
+        // Clean, subtle card design with minimal shadows
         const baseClasses = 'bg-white rounded-lg border border-gray-200 shadow-sm';
 
-        const hoverClasses = hover ? 'hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer' : '';
+        // More subtle hover effect without scale
+        const hoverClasses = hover ? 'hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer' : '';
 
         const paddingClasses = {
             none: '',

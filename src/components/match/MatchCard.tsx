@@ -25,19 +25,19 @@ const getMatchTypeText = (type: string): string => {
     return typeMap[type] || type;
 };
 
-// 경기 상태 표시 텍스트와 색상
+// 경기 상태 표시 텍스트와 색상 - 새로운 디자인 시스템
 const getMatchStatusInfo = (status: string) => {
     const statusMap: Record<string, { text: string; color: string }> = {
-        'draft': { text: '준비중', color: 'bg-gray-100 text-gray-800' },
-        'registration': { text: '등록중', color: 'bg-blue-100 text-blue-800' },
-        'recruiting': { text: '모집중', color: 'bg-blue-100 text-blue-800' },
-        'in_progress': { text: '진행중', color: 'bg-green-100 text-green-800' },
-        'active': { text: '진행중', color: 'bg-green-100 text-green-800' },
-        'completed': { text: '완료', color: 'bg-purple-100 text-purple-800' },
-        'cancelled': { text: '취소', color: 'bg-red-100 text-red-800' },
-        'upcoming': { text: '예정', color: 'bg-yellow-100 text-yellow-800' },
+        'draft': { text: '준비중', color: 'bg-gray-50 text-gray-600 border border-gray-200' },
+        'registration': { text: '등록중', color: 'bg-primary-50 text-primary-700 border border-primary-200' },
+        'recruiting': { text: '모집중', color: 'bg-primary-50 text-primary-700 border border-primary-200' },
+        'in_progress': { text: '진행중', color: 'bg-success-50 text-success-700 border border-success-200' },
+        'active': { text: '진행중', color: 'bg-success-50 text-success-700 border border-success-200' },
+        'completed': { text: '완료', color: 'bg-gray-50 text-gray-700 border border-gray-200' },
+        'cancelled': { text: '취소', color: 'bg-error-50 text-error-700 border border-error-200' },
+        'upcoming': { text: '예정', color: 'bg-warning-50 text-warning-700 border border-warning-200' },
     };
-    return statusMap[status] || { text: status, color: 'bg-gray-100 text-gray-800' };
+    return statusMap[status] || { text: status, color: 'bg-gray-50 text-gray-600 border border-gray-200' };
 };
 
 export const MatchCard: React.FC<MatchCardProps> = ({
@@ -52,15 +52,15 @@ export const MatchCard: React.FC<MatchCardProps> = ({
     const typeText = getMatchTypeText(match.type);
 
     return (
-        <Card className="w-full hover:shadow-lg transition-shadow duration-200 cursor-pointer">
+        <Card className="w-full hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer">
             <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg font-semibold truncate text-gray-900">
+                        <CardTitle className="text-base font-medium truncate text-gray-900">
                             {match.title}
                         </CardTitle>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusInfo.color}`}>
+                        <div className="flex items-center gap-2 mt-2">
+                            <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${statusInfo.color}`}>
                                 {statusInfo.text}
                             </span>
                             <span className="text-sm text-gray-500">{typeText}</span>

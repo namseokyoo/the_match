@@ -6,21 +6,24 @@ import { ButtonProps } from '@/types';
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className, variant = 'primary', size = 'md', disabled, loading, children, onClick, ...props }, ref) => {
-        const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+        // Clean, professional base styles with subtle shadows
+        const baseClasses = 'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
+        // Updated variants with new color system - more subtle and professional
         const variants = {
-            primary: 'bg-match-blue text-white hover:bg-blue-600 focus:ring-match-blue shadow-md hover:shadow-lg',
-            secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500 border border-gray-300',
-            outline: 'border-2 border-match-blue text-match-blue hover:bg-match-blue hover:text-white focus:ring-match-blue',
-            ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
-            destructive: 'bg-match-red text-white hover:bg-red-600 focus:ring-red-500 shadow-md hover:shadow-lg',
-            danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-md hover:shadow-lg',
+            primary: 'bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500 shadow-sm hover:shadow-md',
+            secondary: 'bg-gray-50 text-gray-700 hover:bg-gray-100 focus:ring-gray-400 border border-gray-200',
+            outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-primary-500 bg-white',
+            ghost: 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 focus:ring-gray-400',
+            destructive: 'bg-error-500 text-white hover:bg-error-600 focus:ring-error-500 shadow-sm hover:shadow-md',
+            danger: 'bg-error-500 text-white hover:bg-error-600 focus:ring-error-500 shadow-sm hover:shadow-md',
         };
 
+        // Updated sizes with better proportions
         const sizes = {
-            sm: 'text-sm px-3 py-2',
-            md: 'text-base px-4 py-2.5',
-            lg: 'text-lg px-6 py-3',
+            sm: 'text-sm px-3 py-1.5 rounded-md',
+            md: 'text-base px-4 py-2 rounded-lg',
+            lg: 'text-lg px-6 py-2.5 rounded-lg',
         };
 
         const handleClick = () => {
