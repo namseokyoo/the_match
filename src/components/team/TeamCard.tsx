@@ -37,7 +37,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
     };
 
     const cardContent = (
-        <Card className={`hover:shadow-lg transition-shadow duration-200 cursor-pointer ${className}`}>
+        <Card className={`hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer ${className}`}>
             <div className="p-6">
                 {/* 팀 헤더 */}
                 <div className="flex items-start justify-between mb-4">
@@ -52,7 +52,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                                 className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                             />
                         ) : (
-                            <div className="w-12 h-12 rounded-full bg-match-blue flex items-center justify-center text-white font-bold text-lg">
+                            <div className="w-12 h-12 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold text-lg">
                                 {team.name.charAt(0).toUpperCase()}
                             </div>
                         )}
@@ -72,7 +72,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                     {/* 선수 수 */}
                     <div className="text-right">
                         <div className="text-sm text-gray-500">선수</div>
-                        <div className="text-lg font-semibold text-match-blue">
+                        <div className="text-lg font-semibold text-primary-600">
                             {playerCount}명
                         </div>
                     </div>
@@ -93,7 +93,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                             {players.slice(0, 3).map((player) => (
                                 <span
                                     key={player.id}
-                                    className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full"
+                                    className="inline-block px-2.5 py-1 bg-gray-50 text-gray-700 text-xs font-medium rounded-lg border border-gray-200"
                                 >
                                     {player.name}
                                     {player.position && (
@@ -104,7 +104,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                                 </span>
                             ))}
                             {playerCount > 3 && (
-                                <span className="inline-block px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded-full">
+                                <span className="inline-block px-2.5 py-1 bg-primary-50 text-primary-700 text-xs font-medium rounded-lg border border-primary-200">
                                     +{playerCount - 3}명
                                 </span>
                             )}
@@ -122,13 +122,13 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                         {isOwner && (
                             <>
                                 <button
-                                    className="ml-2 px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200"
+                                    className="ml-2 px-3 py-1 text-xs font-medium bg-warning-50 text-warning-700 rounded-lg hover:bg-warning-100 transition-colors border border-warning-200"
                                     onClick={e => { e.stopPropagation(); if (onEdit) onEdit(); }}
                                 >
                                     수정
                                 </button>
                                 <button
-                                    className="ml-1 px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
+                                    className="ml-1 px-3 py-1 text-xs font-medium bg-error-50 text-error-700 rounded-lg hover:bg-error-100 transition-colors border border-error-200"
                                     onClick={e => { e.stopPropagation(); if (onDelete) onDelete(); }}
                                 >
                                     삭제

@@ -175,7 +175,7 @@ export default function MatchesClient() {
     if (authLoading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-match-blue"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
             </div>
         );
     }
@@ -183,13 +183,13 @@ export default function MatchesClient() {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* 페이지 헤더 */}
+                {/* 페이지 헤더 - 깔끔한 디자인 */}
                 <div className="mb-8">
                     <div className="sm:flex sm:items-center sm:justify-between">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900">경기</h1>
-                            <p className="mt-2 text-sm text-gray-700">
-                                다양한 경기를 찾아보고 참가해보세요.
+                            <h1 className="text-2xl font-semibold text-gray-900">경기 목록</h1>
+                            <p className="mt-1 text-sm text-gray-600">
+                                참가하고 싶은 경기를 찾아보세요
                             </p>
                         </div>
                         <div className="mt-4 sm:mt-0 flex gap-2">

@@ -69,10 +69,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         return (
             <Card className="p-4">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">필터</h3>
+                    <h3 className="text-base font-medium text-gray-900">필터</h3>
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="text-gray-600 hover:text-gray-900"
+                        className="text-gray-500 hover:text-gray-700 transition-colors"
                     >
                         <svg 
                             className={`w-5 h-5 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
@@ -95,10 +95,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                                     <button
                                         key={type}
                                         onClick={() => handleTypeToggle(type)}
-                                        className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                                             localFilters.type?.includes(type)
-                                                ? 'bg-blue-600 text-white'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                ? 'bg-primary-500 text-white shadow-sm'
+                                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                                         }`}
                                     >
                                         {type.replace('_', ' ')}
@@ -115,10 +115,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                                     <button
                                         key={status}
                                         onClick={() => handleStatusToggle(status)}
-                                        className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                                             localFilters.status?.includes(status)
-                                                ? 'bg-green-600 text-white'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                ? 'bg-primary-500 text-white shadow-sm'
+                                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                                         }`}
                                     >
                                         {status === MatchStatus.DRAFT && '초안'}
@@ -141,7 +141,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                                         type="date"
                                         value={localFilters.dateFrom || ''}
                                         onChange={(e) => setLocalFilters({ ...localFilters, dateFrom: e.target.value })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                                     />
                                 </div>
                                 <div>
@@ -150,7 +150,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                                         type="date"
                                         value={localFilters.dateTo || ''}
                                         onChange={(e) => setLocalFilters({ ...localFilters, dateTo: e.target.value })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                                     />
                                 </div>
                             </div>
@@ -163,7 +163,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                                 <select
                                     value={localFilters.sortBy || 'created_at'}
                                     onChange={(e) => setLocalFilters({ ...localFilters, sortBy: e.target.value as any })}
-                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                                 >
                                     <option value="created_at">생성일</option>
                                     <option value="start_date">시작일</option>
@@ -172,7 +172,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                                 <select
                                     value={localFilters.sortOrder || 'desc'}
                                     onChange={(e) => setLocalFilters({ ...localFilters, sortOrder: e.target.value as 'asc' | 'desc' })}
-                                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                                 >
                                     <option value="desc">내림차순</option>
                                     <option value="asc">오름차순</option>
