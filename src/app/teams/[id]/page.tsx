@@ -55,7 +55,7 @@ export default function TeamDetailPage() {
                 logo_url: data.logo_url || undefined,
                 description: data.description || undefined,
                 captain_id: data.captain_id || undefined,
-                match_id: data.tournament_id || undefined, // tournament_id를 match_id로 매핑
+                match_id: undefined, // teams 테이블에는 tournament_id가 없음
             });
             setPlayers((data.players || []).map((player: any) => ({
                 ...player,

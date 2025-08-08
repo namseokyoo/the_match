@@ -60,7 +60,7 @@ export default function PlayerProfilePage() {
                     logo_url: playerData.team.logo_url || undefined,
                     description: playerData.team.description || undefined,
                     captain_id: playerData.team.captain_id || undefined,
-                    match_id: playerData.team.tournament_id || undefined,
+                    match_id: undefined, // teams 테이블에는 tournament_id가 없음
                 });
             }
             

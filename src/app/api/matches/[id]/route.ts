@@ -43,22 +43,25 @@ export async function GET(
             );
         }
 
-        // 참가팀 목록도 함께 조회 (tournament_id는 일단 match_id로 취급)
-        const { data: teams, error: teamsError } = await supabaseAdmin
-            .from('teams')
-            .select('*')
-            .eq('tournament_id', id); // 필드명은 일단 유지
+        // 참가팀 목록 조회 (match_participants를 통해)
+        const { data: participants, error: participantsError } = await supabaseAdmin
+            .from('match_participants')
+            .select('*, team:teams(*)')
+            .eq('match_id', id)
+            .eq('status', 'approved');
 
-        if (teamsError) {
-            console.error('참가팀 목록 조회 오류:', teamsError);
+        if (participantsError) {
+            console.error('참가팀 목록 조회 오류:', participantsError);
             // 참가팀 조회 실패는 전체 요청 실패로 처리하지 않음
         }
+
+        const teams = participants?.map(p => p.team).filter(Boolean) || [];
 
         return NextResponse.json({
             success: true,
             data: {
                 match,
-                teams: teams || [],
+                teams,
             },
         });
 
@@ -257,20 +260,20 @@ export async function DELETE(
         }
 
         // 참가팀이 있는 경우 확인
-        const { data: teams, error: teamsError } = await supabaseAdmin
-            .from('teams')
+        const { data: participants, error: participantsError } = await supabaseAdmin
+            .from('match_participants')
             .select('id')
-            .eq('tournament_id', id); // 필드명은 일단 유지
+            .eq('match_id', id);
 
-        if (teamsError) {
-            console.error('참가팀 확인 오류:', teamsError);
+        if (participantsError) {
+            console.error('참가팀 확인 오류:', participantsError);
             return NextResponse.json(
                 { error: '참가팀 확인 중 오류가 발생했습니다.' },
                 { status: 500 }
             );
         }
 
-        if (teams && teams.length > 0) {
+        if (participants && participants.length > 0) {
             return NextResponse.json(
                 { error: '참가팀이 있는 경기는 삭제할 수 없습니다. 먼저 모든 참가팀을 제거해주세요.' },
                 { status: 400 }

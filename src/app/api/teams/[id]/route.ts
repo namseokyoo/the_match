@@ -21,7 +21,7 @@ export async function GET(
             .select(`
                 *,
                 players:players(*),
-                tournament:tournaments(id, title)
+                match_participants!inner(match_id, matches(id, title))
             `)
             .eq('id', id)
             .single();
@@ -81,7 +81,7 @@ export async function PUT(
         // 팀 존재 여부 및 권한 확인
         const { data: existingTeam, error: fetchError } = await supabaseAdmin
             .from('teams')
-            .select('captain_id, tournament_id, name')
+            .select('captain_id, name')
             .eq('id', id)
             .single();
 
@@ -107,19 +107,18 @@ export async function PUT(
         //     );
         // }
 
-        // 동일한 토너먼트 내에서 팀 이름 중복 체크 (자신 제외)
-        if (name !== existingTeam.name && existingTeam.tournament_id) {
+        // 전체 팀 중에서 이름 중복 체크 (자신 제외)
+        if (name !== existingTeam.name) {
             const { data: duplicateTeams } = await supabaseAdmin
                 .from('teams')
                 .select('id')
-                .eq('tournament_id', existingTeam.tournament_id)
                 .eq('name', name)
                 .neq('id', id)
                 .limit(1);
 
             if (duplicateTeams && duplicateTeams.length > 0) {
                 return NextResponse.json(
-                    { error: '이미 동일한 이름의 팀이 해당 토너먼트에 존재합니다.' },
+                    { error: '이미 동일한 이름의 팀이 존재합니다.' },
                     { status: 409 }
                 );
             }

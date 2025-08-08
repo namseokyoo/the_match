@@ -34,7 +34,7 @@ export default function MatchBracketPage() {
             // 경기 정보 조회
             const { data: matchData, error: matchError } = await supabase
                 .from('matches')
-                .select('*, teams(*)')
+                .select('*')
                 .eq('id', matchId)
                 .single();
 
@@ -44,13 +44,26 @@ export default function MatchBracketPage() {
                 return;
             }
 
+            // 참가 팀 목록 조회
+            const { data: participants, error: participantsError } = await supabase
+                .from('match_participants')
+                .select('*, team:teams(*)')
+                .eq('match_id', matchId)
+                .eq('status', 'approved');
+
+            if (participantsError) {
+                console.error('Participants fetch error:', participantsError);
+                showToast('참가 팀 정보를 불러올 수 없습니다', 'error');
+                return;
+            }
+
             // 소유자 확인
             if (user && matchData.creator_id === user.id) {
                 setIsOwner(true);
             }
 
             // 팀 목록을 시드로 변환
-            const teams = matchData.teams || [];
+            const teams = participants?.map(p => p.team).filter(Boolean) || [];
             const seeds: BracketSeed[] = teams.map((team: any, index: number) => ({
                 teamId: team.id,
                 teamName: team.name,
@@ -116,7 +129,7 @@ export default function MatchBracketPage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-match-blue"></div>
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-500"></div>
             </div>
         );
     }

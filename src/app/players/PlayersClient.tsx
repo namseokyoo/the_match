@@ -48,7 +48,7 @@ export default function PlayersClient() {
                     logo_url: player.team.logo_url || undefined,
                     description: player.team.description || undefined,
                     captain_id: player.team.captain_id || undefined,
-                    match_id: player.team.tournament_id || undefined,
+                    match_id: undefined, // teams 테이블에는 tournament_id가 없음
                 } : undefined,
             }));
 
