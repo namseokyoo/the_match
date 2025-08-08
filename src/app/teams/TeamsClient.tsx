@@ -98,7 +98,7 @@ export default function TeamsClient() {
     // URL 파라미터 변경 감지
     useEffect(() => {
         fetchTeams(1, searchQuery, true);
-    }, [searchQuery, fetchTeams]);
+    }, [searchQuery]); // fetchTeams를 의존성에서 제거
 
     // 필터링된 팀 목록 (클라이언트 사이드 필터링)
     const filteredTeams = useMemo(() => {

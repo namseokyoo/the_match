@@ -222,7 +222,7 @@ export default function Home() {
                                             {match.start_date && (
                                                 <div className="flex items-center gap-2">
                                                     <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                                                    <span>{formatDate(match.start_date)}</span>
+                                                    <span className="whitespace-nowrap">{formatDate(match.start_date)}</span>
                                                 </div>
                                             )}
                                             {match.max_participants && (
@@ -333,12 +333,12 @@ export default function Home() {
                                                 <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
                                                     <div className="flex items-center gap-1">
                                                         <Clock className="w-4 h-4" />
-                                                        <span>{formatDate(match.start_date || '')}</span>
+                                                        <span className="whitespace-nowrap">{formatDate(match.start_date || '')}</span>
                                                     </div>
                                                     {match.registration_deadline && (
                                                         <div className="flex items-center gap-1 text-orange-600">
                                                             <Calendar className="w-4 h-4" />
-                                                            <span>마감 {formatDate(match.registration_deadline)}</span>
+                                                            <span className="whitespace-nowrap">마감 {formatDate(match.registration_deadline)}</span>
                                                         </div>
                                                     )}
                                                 </div>

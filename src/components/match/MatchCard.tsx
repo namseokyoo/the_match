@@ -75,28 +75,28 @@ export const MatchCard: React.FC<MatchCardProps> = ({
             </CardHeader>
 
             <CardContent className="pt-0">
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="space-y-2 mb-4">
                     {match.max_participants && (
-                        <div className="text-sm">
-                            <span className="text-gray-500">최대 참가:</span>
-                            <span className="font-medium ml-1">{match.max_participants}팀</span>
+                        <div className="text-sm flex items-center">
+                            <span className="text-gray-500 whitespace-nowrap">최대 참가:</span>
+                            <span className="font-medium ml-1 whitespace-nowrap">{match.max_participants}팀</span>
                         </div>
                     )}
                     {match.start_date && (
-                        <div className="text-sm">
-                            <span className="text-gray-500">시작일:</span>
-                            <span className="font-medium ml-1">{formatDate(match.start_date)}</span>
+                        <div className="text-sm flex items-center">
+                            <span className="text-gray-500 whitespace-nowrap">시작일:</span>
+                            <span className="font-medium ml-1 whitespace-nowrap">{formatDate(match.start_date)}</span>
                         </div>
                     )}
                     {match.registration_deadline && (
-                        <div className="text-sm">
-                            <span className="text-gray-500">등록 마감:</span>
-                            <span className="font-medium ml-1">{formatDate(match.registration_deadline)}</span>
+                        <div className="text-sm flex items-center">
+                            <span className="text-gray-500 whitespace-nowrap">등록 마감:</span>
+                            <span className="font-medium ml-1 whitespace-nowrap">{formatDate(match.registration_deadline)}</span>
                         </div>
                     )}
-                    <div className="text-sm">
-                        <span className="text-gray-500">생성일:</span>
-                        <span className="font-medium ml-1">{formatDate(match.created_at)}</span>
+                    <div className="text-sm flex items-center">
+                        <span className="text-gray-500 whitespace-nowrap">생성일:</span>
+                        <span className="font-medium ml-1 whitespace-nowrap">{formatDate(match.created_at)}</span>
                     </div>
                 </div>
 

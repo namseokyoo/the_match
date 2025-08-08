@@ -114,10 +114,10 @@ export const TeamCard: React.FC<TeamCardProps> = ({
 
                 {/* 팀 정보 푸터 + 소유자만 삭제/수정 버튼 */}
                 <div className="flex items-center justify-between text-xs text-gray-500 mt-4">
-                    <span>생성일: {formatDate(team.created_at)}</span>
+                    <span className="whitespace-nowrap">생성일: {formatDate(team.created_at)}</span>
                     <div className="flex items-center gap-2">
                         {team.updated_at !== team.created_at && (
-                            <span>수정: {formatDate(team.updated_at)}</span>
+                            <span className="whitespace-nowrap">수정: {formatDate(team.updated_at)}</span>
                         )}
                         {isOwner && (
                             <>

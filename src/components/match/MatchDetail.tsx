@@ -82,29 +82,29 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                             {match.start_date && (
                                 <div>
-                                    <span className="font-medium text-gray-700">📅 시작일:</span>
-                                    <p className="text-gray-600">{formatDate(match.start_date)}</p>
+                                    <span className="font-medium text-gray-700 whitespace-nowrap">📅 시작일:</span>
+                                    <p className="text-gray-600 whitespace-nowrap">{formatDate(match.start_date)}</p>
                                 </div>
                             )}
 
                             {match.end_date && (
                                 <div>
-                                    <span className="font-medium text-gray-700">📅 종료일:</span>
-                                    <p className="text-gray-600">{formatDate(match.end_date)}</p>
+                                    <span className="font-medium text-gray-700 whitespace-nowrap">📅 종료일:</span>
+                                    <p className="text-gray-600 whitespace-nowrap">{formatDate(match.end_date)}</p>
                                 </div>
                             )}
 
                             {match.registration_deadline && (
                                 <div>
-                                    <span className="font-medium text-gray-700">⏰ 등록 마감:</span>
-                                    <p className="text-gray-600">{formatDate(match.registration_deadline)}</p>
+                                    <span className="font-medium text-gray-700 whitespace-nowrap">⏰ 등록 마감:</span>
+                                    <p className="text-gray-600 whitespace-nowrap">{formatDate(match.registration_deadline)}</p>
                                 </div>
                             )}
 
                             {match.max_participants && (
                                 <div>
-                                    <span className="font-medium text-gray-700">👥 최대 참가팀:</span>
-                                    <p className="text-gray-600">{match.max_participants}팀</p>
+                                    <span className="font-medium text-gray-700 whitespace-nowrap">👥 최대 참가팀:</span>
+                                    <p className="text-gray-600 whitespace-nowrap">{match.max_participants}팀</p>
                                 </div>
                             )}
                         </div>
@@ -177,11 +177,11 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
             <Card className="p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">ℹ️ 경기 정보</h2>
                 <div className="text-sm text-gray-600 space-y-2">
-                    <p>
+                    <p className="whitespace-nowrap">
                         <span className="font-medium">생성일:</span> {formatDate(match.created_at)}
                     </p>
                     {match.updated_at !== match.created_at && (
-                        <p>
+                        <p className="whitespace-nowrap">
                             <span className="font-medium">수정일:</span> {formatDate(match.updated_at)}
                         </p>
                     )}

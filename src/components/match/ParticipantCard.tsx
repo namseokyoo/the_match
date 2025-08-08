@@ -76,11 +76,11 @@ const ParticipantCard: React.FC<ParticipantCardProps> = ({
                         <p className="text-sm text-gray-600">
                             주장 ID: {participant.team?.captain_id || '미지정'}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-500 whitespace-nowrap">
                             신청일: {formatDate(participant.applied_at)}
                         </p>
                         {participant.responded_at && (
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-500 whitespace-nowrap">
                                 응답일: {formatDate(participant.responded_at)}
                             </p>
                         )}
