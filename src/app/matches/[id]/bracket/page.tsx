@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { TournamentBracket } from '@/components/match/TournamentBracket';
 import { Button } from '@/components/ui';
@@ -15,7 +15,7 @@ export default function MatchBracketPage() {
     const params = useParams();
     const router = useRouter();
     const matchId = params.id as string;
-    const { user } = useAuth();
+    const { user, loading: authLoading, initialized } = useAuth();
     
     const [bracket, setBracket] = useState<BracketType | null>(null);
     const [loading, setLoading] = useState(true);
@@ -23,11 +23,7 @@ export default function MatchBracketPage() {
     const [selectedMatch, setSelectedMatch] = useState<BracketMatch | null>(null);
     const [showUpdateModal, setShowUpdateModal] = useState(false);
 
-    useEffect(() => {
-        fetchBracketData();
-    }, [matchId]);
-
-    const fetchBracketData = async () => {
+    const fetchBracketData = useCallback(async () => {
         try {
             setLoading(true);
 
@@ -121,7 +117,14 @@ export default function MatchBracketPage() {
             showToast('브라켓 정보를 불러오는데 실패했습니다', 'error');
             setLoading(false);
         }
-    };
+    }, [matchId, user]);
+    
+    useEffect(() => {
+        // 경기 ID가 있으면 바로 데이터를 로드 (로그인 여부와 관계없이)
+        if (matchId) {
+            fetchBracketData();
+        }
+    }, [matchId, fetchBracketData]);
 
     const handleMatchClick = (match: BracketMatch) => {
         if (!isOwner) {
@@ -163,6 +166,7 @@ export default function MatchBracketPage() {
         // TODO: 실제 데이터베이스에 저장
     };
 
+    // 데이터 로딩 중
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
