@@ -23,6 +23,17 @@ const getRoundName = (roundIndex: number, totalRounds: number): string => {
     }
 };
 
+// 매치 간격 계산 함수
+const getMatchSpacing = (roundIndex: number): number => {
+    // 각 라운드마다 매치 간격이 2배씩 증가
+    return Math.pow(2, roundIndex + 1) * 40;
+};
+
+// 매치 높이 계산 함수
+const getMatchHeight = (): number => {
+    return 80; // 매치 박스 높이
+};
+
 export const TournamentBracket: React.FC<TournamentBracketProps> = ({
     bracket,
     onMatchClick,
@@ -44,386 +55,233 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
         const team1Won = match.winner === match.team1?.id || (hasScore && team1Score > team2Score);
         const team2Won = match.winner === match.team2?.id || (hasScore && team2Score > team1Score);
         
+        // 매치 위치 계산
+        const matchSpacing = getMatchSpacing(roundIndex);
+        const matchTop = matchIndex * matchSpacing + (matchSpacing / 2 - 40);
+        
         return (
             <div
                 key={match.id}
-                className="bracket-match-wrapper"
+                className="absolute"
                 style={{
-                    marginBottom: roundIndex === 0 ? '32px' : 
-                                 roundIndex === 1 ? '80px' : 
-                                 roundIndex === 2 ? '176px' : '368px'
+                    top: `${matchTop}px`,
+                    width: '240px',
                 }}
             >
                 <div
-                    className={`bracket-match ${isEditable ? 'cursor-pointer' : ''} ${
-                        isFinal ? 'final-match' : ''
+                    className={`relative bg-white border-2 rounded-lg overflow-hidden shadow-sm transition-all duration-300 ${
+                        isEditable ? 'cursor-pointer hover:scale-105 hover:shadow-lg' : ''
+                    } ${
+                        isFinal ? 'border-yellow-400 border-3' : 'border-gray-300'
+                    } ${
+                        isInProgress ? 'border-yellow-500 shadow-yellow-200 shadow-lg' : ''
+                    } ${
+                        isCompleted ? 'bg-gray-50' : ''
                     }`}
                     onClick={() => isEditable && onMatchClick?.(match)}
                 >
-                    {/* 매치 번호 또는 라운드 정보 */}
+                    {/* 결승전 라벨 */}
                     {isFinal && (
-                        <div className="match-header">
-                            <div className="match-label">FINAL</div>
+                        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
+                            <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-4 py-1 rounded-full text-xs font-bold tracking-wider">
+                                FINAL
+                            </div>
                         </div>
                     )}
                     
-                    <div className={`match-container ${
-                        isCompleted ? 'completed' :
-                        isInProgress ? 'in-progress' :
-                        'upcoming'
-                    }`}>
-                        {/* Team 1 */}
-                        <div className={`team-row ${team1Won ? 'winner' : ''} ${
-                            hasScore && !team1Won ? 'loser' : ''
-                        }`}>
-                            <div className="team-seed">{match.team1?.seed || ''}</div>
-                            <div className="team-name">{team1Name}</div>
-                            <div className="team-score">
-                                {hasScore ? team1Score : '-'}
-                            </div>
-                        </div>
-                        
-                        {/* Team 2 */}
-                        <div className={`team-row ${team2Won ? 'winner' : ''} ${
-                            hasScore && !team2Won ? 'loser' : ''
-                        }`}>
-                            <div className="team-seed">{match.team2?.seed || ''}</div>
-                            <div className="team-name">{team2Name}</div>
-                            <div className="team-score">
-                                {hasScore ? team2Score : '-'}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {/* 경기 상태 표시 */}
+                    {/* LIVE 표시 */}
                     {isInProgress && (
-                        <div className="match-status in-progress">
-                            <span className="status-dot"></span>
-                            LIVE
+                        <div className="absolute -top-2 right-2 z-10">
+                            <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                                <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                                LIVE
+                            </div>
                         </div>
                     )}
-                </div>
-                
-                {/* 연결선 */}
-                {roundIndex < totalRounds - 1 && (
-                    <div className="connector-lines">
-                        <div className="horizontal-line"></div>
-                        {matchIndex % 2 === 0 && (
-                            <div className="vertical-line-wrapper">
-                                <div className="vertical-line"></div>
-                                <div className="horizontal-line-next"></div>
+                    
+                    {/* Team 1 */}
+                    <div className={`flex items-center px-3 py-2 border-b transition-all ${
+                        team1Won ? 'bg-gradient-to-r from-green-400 to-green-500 text-white font-semibold' : 
+                        hasScore && !team1Won ? 'bg-gray-100 opacity-60' : 
+                        'bg-white hover:bg-gray-50'
+                    }`}>
+                        {match.team1?.seed && (
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2 ${
+                                team1Won ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'
+                            }`}>
+                                {match.team1.seed}
                             </div>
                         )}
+                        <div className="flex-1 text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                            {team1Name}
+                        </div>
+                        <div className={`ml-2 px-2 py-1 rounded text-sm font-bold ${
+                            team1Won ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-700'
+                        }`}>
+                            {hasScore ? team1Score : '-'}
+                        </div>
                     </div>
-                )}
+                    
+                    {/* Team 2 */}
+                    <div className={`flex items-center px-3 py-2 transition-all ${
+                        team2Won ? 'bg-gradient-to-r from-green-400 to-green-500 text-white font-semibold' : 
+                        hasScore && !team2Won ? 'bg-gray-100 opacity-60' : 
+                        'bg-white hover:bg-gray-50'
+                    }`}>
+                        {match.team2?.seed && (
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2 ${
+                                team2Won ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'
+                            }`}>
+                                {match.team2.seed}
+                            </div>
+                        )}
+                        <div className="flex-1 text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                            {team2Name}
+                        </div>
+                        <div className={`ml-2 px-2 py-1 rounded text-sm font-bold ${
+                            team2Won ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-700'
+                        }`}>
+                            {hasScore ? team2Score : '-'}
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     };
+    
+    // SVG 연결선 렌더링
+    const renderConnections = (roundIndex: number, totalRounds: number) => {
+        if (roundIndex >= totalRounds - 1) return null;
+        
+        const matchCount = bracket.rounds[roundIndex].matches.length;
+        const nextMatchCount = bracket.rounds[roundIndex + 1].matches.length;
+        const matchSpacing = getMatchSpacing(roundIndex);
+        const nextMatchSpacing = getMatchSpacing(roundIndex + 1);
+        
+        const connections = [];
+        
+        for (let i = 0; i < nextMatchCount; i++) {
+            const sourceMatch1Index = i * 2;
+            const sourceMatch2Index = i * 2 + 1;
+            
+            if (sourceMatch1Index < matchCount) {
+                const source1Y = sourceMatch1Index * matchSpacing + (matchSpacing / 2);
+                const source2Y = sourceMatch2Index < matchCount 
+                    ? sourceMatch2Index * matchSpacing + (matchSpacing / 2)
+                    : source1Y;
+                const targetY = i * nextMatchSpacing + (nextMatchSpacing / 2);
+                
+                connections.push(
+                    <g key={`connection-${roundIndex}-${i}`}>
+                        {/* 첫 번째 매치에서 나오는 선 */}
+                        <line
+                            x1="0"
+                            y1={source1Y}
+                            x2="30"
+                            y2={source1Y}
+                            stroke="#d1d5db"
+                            strokeWidth="2"
+                        />
+                        {/* 두 번째 매치에서 나오는 선 (있는 경우) */}
+                        {sourceMatch2Index < matchCount && (
+                            <line
+                                x1="0"
+                                y1={source2Y}
+                                x2="30"
+                                y2={source2Y}
+                                stroke="#d1d5db"
+                                strokeWidth="2"
+                            />
+                        )}
+                        {/* 수직 연결선 */}
+                        <line
+                            x1="30"
+                            y1={source1Y}
+                            x2="30"
+                            y2={source2Y}
+                            stroke="#d1d5db"
+                            strokeWidth="2"
+                        />
+                        {/* 다음 라운드로 가는 선 */}
+                        <line
+                            x1="30"
+                            y1={targetY}
+                            x2="60"
+                            y2={targetY}
+                            stroke="#d1d5db"
+                            strokeWidth="2"
+                        />
+                    </g>
+                );
+            }
+        }
+        
+        return (
+            <svg
+                className="absolute"
+                style={{
+                    left: '240px',
+                    top: '0',
+                    width: '60px',
+                    height: `${Math.max(...bracket.rounds[roundIndex].matches.map((_, idx) => 
+                        idx * matchSpacing + matchSpacing
+                    ))}px`,
+                }}
+            >
+                {connections}
+            </svg>
+        );
+    };
+    
+    // 전체 브래킷 높이 계산
+    const calculateBracketHeight = () => {
+        const firstRoundMatches = bracket.rounds[0]?.matches.length || 0;
+        const spacing = getMatchSpacing(0);
+        return firstRoundMatches * spacing;
+    };
 
     return (
-        <div className="tournament-bracket-container">
-            <div className="tournament-bracket">
-                <div className="bracket-wrapper">
+        <div className="w-full overflow-x-auto bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl p-6">
+            <div className="inline-block min-w-max bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl p-8">
+                {/* 타이틀 */}
+                <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                        Tournament Bracket
+                    </h2>
+                    <p className="text-gray-600 mt-2">경기 대진표</p>
+                </div>
+                
+                {/* 브래킷 컨테이너 */}
+                <div 
+                    className="relative flex gap-16"
+                    style={{ minHeight: `${calculateBracketHeight()}px` }}
+                >
                     {bracket.rounds.map((round, roundIndex) => (
-                        <div key={round.round} className="bracket-column">
-                            <div className="round-header">
-                                <h3 className="round-title">
+                        <div 
+                            key={round.round} 
+                            className="relative"
+                            style={{ width: '240px' }}
+                        >
+                            {/* 라운드 헤더 */}
+                            <div className="absolute -top-12 left-0 right-0 text-center">
+                                <h3 className="inline-block px-4 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full text-sm font-bold uppercase tracking-wider">
                                     {getRoundName(roundIndex, bracket.rounds.length)}
                                 </h3>
                             </div>
-                            <div className="matches-container">
+                            
+                            {/* 매치들 */}
+                            <div className="relative" style={{ height: `${calculateBracketHeight()}px` }}>
                                 {round.matches.map((match, matchIndex) => 
                                     renderMatch(match, roundIndex, matchIndex, bracket.rounds.length)
                                 )}
                             </div>
+                            
+                            {/* SVG 연결선 */}
+                            {renderConnections(roundIndex, bracket.rounds.length)}
                         </div>
                     ))}
                 </div>
             </div>
-            
-            <style jsx>{`
-                .tournament-bracket-container {
-                    width: 100%;
-                    overflow-x: auto;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    border-radius: 16px;
-                    padding: 2rem;
-                    min-height: 600px;
-                }
-                
-                .tournament-bracket {
-                    min-width: max-content;
-                    padding: 20px;
-                    background: rgba(255, 255, 255, 0.95);
-                    border-radius: 12px;
-                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-                }
-                
-                .bracket-wrapper {
-                    display: flex;
-                    gap: 60px;
-                    align-items: flex-start;
-                    padding: 20px;
-                }
-                
-                .bracket-column {
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    min-width: 240px;
-                }
-                
-                .round-header {
-                    text-align: center;
-                    margin-bottom: 30px;
-                }
-                
-                .round-title {
-                    font-size: 18px;
-                    font-weight: 700;
-                    color: #1f2937;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                    padding-bottom: 8px;
-                    border-bottom: 3px solid #6366f1;
-                    display: inline-block;
-                }
-                
-                .matches-container {
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: space-around;
-                    flex: 1;
-                }
-                
-                .bracket-match-wrapper {
-                    position: relative;
-                }
-                
-                .bracket-match {
-                    position: relative;
-                    transition: all 0.3s ease;
-                }
-                
-                .bracket-match.cursor-pointer:hover {
-                    transform: scale(1.05);
-                }
-                
-                .match-container {
-                    background: white;
-                    border: 2px solid #e5e7eb;
-                    border-radius: 8px;
-                    overflow: hidden;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-                    transition: all 0.3s ease;
-                    width: 240px;
-                }
-                
-                .match-container.completed {
-                    background: #f9fafb;
-                    border-color: #9ca3af;
-                }
-                
-                .match-container.in-progress {
-                    border-color: #fbbf24;
-                    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
-                    animation: pulse 2s infinite;
-                }
-                
-                .match-container.upcoming:hover {
-                    border-color: #6366f1;
-                    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
-                }
-                
-                .final-match .match-container {
-                    border-width: 3px;
-                    border-color: #fbbf24;
-                    background: linear-gradient(135deg, #fef3c7 0%, #fff 100%);
-                    box-shadow: 0 8px 24px rgba(251, 191, 36, 0.3);
-                }
-                
-                .match-header {
-                    text-align: center;
-                    margin-bottom: 8px;
-                }
-                
-                .match-label {
-                    display: inline-block;
-                    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-                    color: white;
-                    padding: 4px 16px;
-                    border-radius: 20px;
-                    font-size: 12px;
-                    font-weight: 700;
-                    letter-spacing: 1px;
-                }
-                
-                .team-row {
-                    display: flex;
-                    align-items: center;
-                    padding: 12px;
-                    background: white;
-                    transition: all 0.3s ease;
-                    border-bottom: 1px solid #f3f4f6;
-                }
-                
-                .team-row:last-child {
-                    border-bottom: none;
-                }
-                
-                .team-row.winner {
-                    background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
-                    color: white;
-                    font-weight: 600;
-                }
-                
-                .team-row.loser {
-                    opacity: 0.6;
-                    background: #f9fafb;
-                }
-                
-                .team-seed {
-                    width: 24px;
-                    height: 24px;
-                    background: #f3f4f6;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 11px;
-                    font-weight: 600;
-                    color: #6b7280;
-                    margin-right: 12px;
-                    flex-shrink: 0;
-                }
-                
-                .team-row.winner .team-seed {
-                    background: rgba(255, 255, 255, 0.3);
-                    color: white;
-                }
-                
-                .team-name {
-                    flex: 1;
-                    font-size: 14px;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
-                
-                .team-score {
-                    min-width: 32px;
-                    text-align: center;
-                    font-size: 16px;
-                    font-weight: 700;
-                    padding: 4px 8px;
-                    background: rgba(0, 0, 0, 0.05);
-                    border-radius: 4px;
-                    margin-left: 8px;
-                }
-                
-                .team-row.winner .team-score {
-                    background: rgba(255, 255, 255, 0.3);
-                    color: white;
-                }
-                
-                .match-status {
-                    position: absolute;
-                    top: -10px;
-                    right: 10px;
-                    background: white;
-                    padding: 4px 12px;
-                    border-radius: 20px;
-                    font-size: 11px;
-                    font-weight: 700;
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                }
-                
-                .match-status.in-progress {
-                    background: #ef4444;
-                    color: white;
-                }
-                
-                .status-dot {
-                    width: 6px;
-                    height: 6px;
-                    background: white;
-                    border-radius: 50%;
-                    animation: blink 1.5s infinite;
-                }
-                
-                /* 연결선 스타일 */
-                .connector-lines {
-                    position: absolute;
-                    top: 50%;
-                    left: 100%;
-                    pointer-events: none;
-                }
-                
-                .horizontal-line {
-                    position: absolute;
-                    width: 30px;
-                    height: 2px;
-                    background: #d1d5db;
-                    top: -1px;
-                }
-                
-                .vertical-line-wrapper {
-                    position: absolute;
-                    left: 30px;
-                }
-                
-                .vertical-line {
-                    position: absolute;
-                    width: 2px;
-                    background: #d1d5db;
-                    height: 64px;
-                    top: -32px;
-                }
-                
-                .horizontal-line-next {
-                    position: absolute;
-                    width: 30px;
-                    height: 2px;
-                    background: #d1d5db;
-                    top: -1px;
-                    left: 0;
-                }
-                
-                @keyframes pulse {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.8; }
-                }
-                
-                @keyframes blink {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.3; }
-                }
-                
-                @media (max-width: 768px) {
-                    .tournament-bracket-container {
-                        padding: 1rem;
-                    }
-                    
-                    .bracket-column {
-                        min-width: 200px;
-                    }
-                    
-                    .match-container {
-                        width: 200px;
-                    }
-                    
-                    .team-row {
-                        padding: 8px;
-                    }
-                    
-                    .team-name {
-                        font-size: 13px;
-                    }
-                }
-            `}</style>
         </div>
     );
 };
