@@ -148,34 +148,32 @@ export default function Home() {
             {/* Onboarding Tour for new users */}
             <OnboardingTour autoStart={!!user} />
             
-            {/* Hero Section - Compact Design */}
+            {/* Hero Section - Compact Design with Centered Title */}
             <section className="bg-gradient-to-br from-primary-500 to-primary-700 px-4 py-6 sm:py-8">
                 <div className="mx-auto max-w-7xl">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        {/* 제목 */}
-                        <div className="text-white">
-                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                                The Match
-                            </h1>
-                            <p className="text-sm sm:text-base text-primary-100 mt-1">
-                                스포츠 경기 관리 플랫폼
-                            </p>
-                        </div>
+                    {/* 제목 - 중앙 정렬 */}
+                    <div className="text-center text-white mb-4">
+                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                            The Match
+                        </h1>
+                        <p className="text-sm sm:text-base text-primary-100 mt-1">
+                            스포츠 경기 관리 플랫폼
+                        </p>
+                    </div>
 
-                        {/* 통계 - 가로로 배치 */}
-                        <div className="flex gap-3 sm:gap-4">
-                            <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 sm:px-6 sm:py-3 text-center shadow">
-                                <div className="text-xl sm:text-2xl font-bold text-primary-600">{stats.totalMatches}</div>
-                                <div className="text-xs text-gray-600">경기</div>
-                            </div>
-                            <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 sm:px-6 sm:py-3 text-center shadow">
-                                <div className="text-xl sm:text-2xl font-bold text-primary-600">{stats.totalTeams}</div>
-                                <div className="text-xs text-gray-600">팀</div>
-                            </div>
-                            <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 sm:px-6 sm:py-3 text-center shadow">
-                                <div className="text-xl sm:text-2xl font-bold text-primary-600">{stats.totalPlayers}</div>
-                                <div className="text-xs text-gray-600">선수</div>
-                            </div>
+                    {/* 통계 - 가로로 배치, 중앙 정렬 */}
+                    <div className="flex justify-center gap-3 sm:gap-4">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 sm:px-6 sm:py-3 text-center shadow min-w-[80px] sm:min-w-[100px]">
+                            <div className="text-xl sm:text-2xl font-bold text-primary-600">{stats.totalMatches}</div>
+                            <div className="text-xs text-gray-600">경기</div>
+                        </div>
+                        <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 sm:px-6 sm:py-3 text-center shadow min-w-[80px] sm:min-w-[100px]">
+                            <div className="text-xl sm:text-2xl font-bold text-primary-600">{stats.totalTeams}</div>
+                            <div className="text-xs text-gray-600">팀</div>
+                        </div>
+                        <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 sm:px-6 sm:py-3 text-center shadow min-w-[80px] sm:min-w-[100px]">
+                            <div className="text-xl sm:text-2xl font-bold text-primary-600">{stats.totalPlayers}</div>
+                            <div className="text-xs text-gray-600">선수</div>
                         </div>
                     </div>
                 </div>
