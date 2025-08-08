@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { TournamentBracket } from '@/components/match/TournamentBracket';
 import { Button } from '@/components/ui';
+import ShareButton from '@/components/share/ShareButton';
 import { generateBracket, updateMatch } from '@/utils/bracketGenerator';
 import { TournamentBracket as BracketType, BracketMatch, BracketSeed } from '@/types/bracket';
 import { supabase } from '@/lib/supabase';

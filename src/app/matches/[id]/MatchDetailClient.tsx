@@ -12,7 +12,7 @@ import MatchStatusManager from '@/components/match/MatchStatusManager';
 import TournamentBracket from '@/components/bracket/TournamentBracket';
 import { showToast } from '@/components/ui/Toast';
 import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
-import { Trophy, Users, Calendar, Settings } from 'lucide-react';
+import { Trophy, Users, Calendar, Settings, QrCode } from 'lucide-react';
 
 interface MatchDetailClientProps {
     match: Match;
@@ -165,6 +165,16 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                             <div className="flex items-center gap-2">
                                 <Users className="w-4 h-4" />
                                 참가팀
+                            </div>
+                        </button>
+                        
+                        <button
+                            onClick={() => router.push(`/matches/${match.id}/checkin`)}
+                            className="px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                        >
+                            <div className="flex items-center gap-2">
+                                <QrCode className="w-4 h-4" />
+                                체크인
                             </div>
                         </button>
                         

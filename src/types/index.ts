@@ -247,6 +247,29 @@ export interface ApiResponse<T = any> {
     success: boolean;
 }
 
+// Check-in types
+export interface CheckIn {
+    id: string;
+    match_id: string;
+    team_id?: string;
+    player_id?: string;
+    user_id: string;
+    type: 'match' | 'team' | 'player';
+    status: 'checked_in' | 'checked_out' | 'absent';
+    checked_in_at: string;
+    checked_out_at?: string;
+    qr_code_data?: any;
+    created_at: string;
+    updated_at: string;
+    player?: Player;
+    team?: Team;
+    user?: {
+        id: string;
+        email: string;
+        full_name?: string;
+    };
+}
+
 export interface PaginatedResponse<T = any> {
     data: T[];
     pagination: {

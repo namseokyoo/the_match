@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button, Card } from '@/components/ui';
 import { MatchResultForm } from '@/components/match/MatchResultForm';
 import { MatchStatistics } from '@/components/stats';
+import ShareButton from '@/components/share/ShareButton';
 import { showToast } from '@/components/ui/Toast';
 import { Match, Team, GameResult, GameDetail, MatchStats, TeamStats, GameStatus } from '@/types';
 
@@ -254,10 +255,28 @@ export default function MatchResultsPage() {
                         </svg>
                         경기 상세로 돌아가기
                     </button>
-                    <h1 className="text-3xl font-bold text-gray-900">{match.title} - 경기 결과 및 통계</h1>
-                    <p className="mt-2 text-gray-600">
-                        경기 결과를 입력하고 통계를 확인할 수 있습니다.
-                    </p>
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900">{match.title} - 경기 결과 및 통계</h1>
+                            <p className="mt-2 text-gray-600">
+                                경기 결과를 입력하고 통계를 확인할 수 있습니다.
+                            </p>
+                        </div>
+                        {/* 공유 버튼 */}
+                        {teamStats.length > 0 && (
+                            <ShareButton
+                                match={match}
+                                winner={teamStats.sort((a, b) => b.win_rate - a.win_rate)[0] ? 
+                                    teams.find(t => t.id === teamStats.sort((a, b) => b.win_rate - a.win_rate)[0].team_id) : undefined
+                                }
+                                runnerUp={teamStats.sort((a, b) => b.win_rate - a.win_rate)[1] ? 
+                                    teams.find(t => t.id === teamStats.sort((a, b) => b.win_rate - a.win_rate)[1].team_id) : undefined
+                                }
+                                scores={Object.fromEntries(teamStats.map(ts => [ts.team_id, ts.points_for]))}
+                                className="ml-4"
+                            />
+                        )}
+                    </div>
                 </div>
 
                 {/* 통계 섹션 */}
