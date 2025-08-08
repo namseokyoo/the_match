@@ -30,18 +30,18 @@ export async function GET() {
                 .order('created_at', { ascending: false })
                 .limit(20),
 
-            // 3. 통계 데이터 - 개별 count 쿼리
+            // 3. 통계 데이터 - 개별 count 쿼리 (전체 카운트)
             supabaseAdmin
                 .from('matches')
-                .select('id', { count: 'exact', head: true }),
+                .select('*', { count: 'exact', head: true }),
             
             supabaseAdmin
                 .from('teams')
-                .select('id', { count: 'exact', head: true }),
+                .select('*', { count: 'exact', head: true }),
             
             supabaseAdmin
                 .from('players')
-                .select('id', { count: 'exact', head: true })
+                .select('*', { count: 'exact', head: true })
         ]);
 
         if (matchesError) {
