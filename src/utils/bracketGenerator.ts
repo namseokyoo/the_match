@@ -97,6 +97,7 @@ function createFirstRound(teams: BracketSeed[]): BracketMatch[] {
             match.team1 = {
                 id: positions[topPosition]!.teamId,
                 name: positions[topPosition]!.teamName,
+                seed: positions[topPosition]!.seed,
             };
         }
 
@@ -104,6 +105,7 @@ function createFirstRound(teams: BracketSeed[]): BracketMatch[] {
             match.team2 = {
                 id: positions[bottomPosition]!.teamId,
                 name: positions[bottomPosition]!.teamName,
+                seed: positions[bottomPosition]!.seed,
             };
         }
 

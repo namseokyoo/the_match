@@ -8,12 +8,16 @@ export interface BracketMatch {
         id: string;
         name: string;
         score?: number;
+        seed?: number; // 시드 번호 추가
     };
     team2?: {
         id: string;
         name: string;
         score?: number;
+        seed?: number; // 시드 번호 추가
     };
+    team1Score?: number; // 팀1 점수 (매치 레벨)
+    team2Score?: number; // 팀2 점수 (매치 레벨)
     winner?: string; // 승자 팀 ID
     status: 'pending' | 'in_progress' | 'completed';
     nextMatchId?: string; // 다음 라운드 매치 ID

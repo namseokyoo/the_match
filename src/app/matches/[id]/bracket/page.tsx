@@ -73,6 +73,40 @@ export default function MatchBracketPage() {
             // 브라켓 생성
             if (seeds.length >= 2) {
                 const generatedBracket = generateBracket(matchId, seeds, 'single_elimination');
+                
+                // 더미 점수 데이터 추가 (실제로는 DB에서 가져와야 함)
+                if (seeds.length >= 4) {
+                    // 8강 경기 결과 설정
+                    if (generatedBracket.rounds[0]) {
+                        generatedBracket.rounds[0].matches[0].team1Score = 3;
+                        generatedBracket.rounds[0].matches[0].team2Score = 1;
+                        generatedBracket.rounds[0].matches[0].status = 'completed';
+                        generatedBracket.rounds[0].matches[0].winner = generatedBracket.rounds[0].matches[0].team1?.id;
+                        
+                        if (generatedBracket.rounds[0].matches[1]) {
+                            generatedBracket.rounds[0].matches[1].team1Score = 2;
+                            generatedBracket.rounds[0].matches[1].team2Score = 2;
+                            generatedBracket.rounds[0].matches[1].status = 'in_progress';
+                        }
+                    }
+                    
+                    // 준결승 설정
+                    if (seeds.length >= 8 && generatedBracket.rounds[1]) {
+                        // 첫 번째 준결승 - 진행 완료
+                        if (generatedBracket.rounds[1].matches[0]) {
+                            generatedBracket.rounds[1].matches[0].team1 = {
+                                id: seeds[0].teamId,
+                                name: seeds[0].teamName,
+                                seed: seeds[0].seed
+                            };
+                            generatedBracket.rounds[1].matches[0].team1Score = 2;
+                            generatedBracket.rounds[1].matches[0].team2Score = 0;
+                            generatedBracket.rounds[1].matches[0].status = 'completed';
+                            generatedBracket.rounds[1].matches[0].winner = seeds[0].teamId;
+                        }
+                    }
+                }
+                
                 setBracket(generatedBracket);
             } else {
                 showToast('참가 팀이 2팀 이상이어야 브라켓을 생성할 수 있습니다', 'warning');
