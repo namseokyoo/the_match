@@ -37,7 +37,7 @@ const SimpleNavbar = () => {
     };
 
     // 초기 로딩 상태 (첫 초기화 전) - 스켈레톤 UI를 보여주되 전체 네비바 구조는 유지
-    const showSkeleton = !initialized;
+    const showSkeleton = !initialized || loading;
 
     return (
         <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -80,10 +80,10 @@ const SimpleNavbar = () => {
                         </Link>
 
                         {showSkeleton ? (
-                            // 초기 로딩 중
+                            // 초기 로딩 중 - 부드러운 스켈레톤 UI
                             <div className="flex items-center space-x-2">
-                                <div className="animate-pulse h-8 w-20 bg-gray-200 rounded"></div>
-                                <div className="animate-pulse h-8 w-20 bg-gray-200 rounded"></div>
+                                <div className="animate-pulse h-9 w-16 bg-gray-200 rounded-md"></div>
+                                <div className="animate-pulse h-9 w-20 bg-gray-200 rounded-md"></div>
                             </div>
                         ) : isAuthenticated ? (
                             // 로그인된 상태

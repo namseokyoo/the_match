@@ -38,7 +38,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true); // 초기값을 true로 변경
     const [initialized, setInitialized] = useState(false);
     const [isSigningOut, setIsSigningOut] = useState(false);
     const initializationRef = useRef(false);
@@ -87,6 +87,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
         
         initializationRef.current = true;
+        setLoading(true); // 초기화 시작 시 로딩 상태 설정
 
         try {
             // Supabase 설정 확인
@@ -95,13 +96,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 setUser(null);
                 setSession(null);
                 setInitialized(true);
+                setLoading(false);
                 return;
             }
 
-            // 세션 가져오기 (타임아웃 설정 - 2초로 단축)
+            // localStorage에서 캐시된 세션 정보 먼저 확인
+            const cachedAuth = localStorage.getItem('supabase.auth.token');
+            if (cachedAuth) {
+                try {
+                    const cached = JSON.parse(cachedAuth);
+                    if (cached?.currentSession?.user) {
+                        // 캐시된 세션 정보로 임시 설정 (UI 빠른 표시)
+                        setUser(cached.currentSession.user);
+                        setSession(cached.currentSession);
+                    }
+                } catch (e) {
+                    // 캐시 파싱 실패 시 무시
+                }
+            }
+
+            // 실제 세션 가져오기 (타임아웃 설정 - 500ms로 더 단축)
             const sessionPromise = supabase.auth.getSession();
             const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Session timeout')), 2000)
+                setTimeout(() => reject(new Error('Session timeout')), 500)
             );
 
             const { data: { session } } = await Promise.race([
@@ -115,17 +132,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setSession(session);
             setUser(session?.user ?? null);
 
-            // 프로필 확인 및 생성
+            // 프로필 확인 및 생성 (비동기로 처리하여 블로킹 방지)
             if (session?.user) {
-                const { data: existingProfile } = await supabase
+                // 프로필 생성은 백그라운드에서 처리
+                supabase
                     .from('profiles')
                     .select('user_id')
                     .eq('user_id', session.user.id)
-                    .single();
-                
-                if (!existingProfile) {
-                    await createUserProfile(session.user);
-                }
+                    .single()
+                    .then(({ data: existingProfile }) => {
+                        if (!existingProfile) {
+                            createUserProfile(session.user);
+                        }
+                    });
             }
         } catch (error) {
             console.error('Auth initialization error:', error);
@@ -133,6 +152,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setSession(null);
         } finally {
             setInitialized(true);
+            setLoading(false); // 초기화 완료 시 로딩 상태 해제
         }
     }, [createUserProfile]);
 
