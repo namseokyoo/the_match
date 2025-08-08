@@ -1,0 +1,186 @@
+-- 경기 참가 신청 및 대진표 더미 데이터 생성
+-- match_participants, bracket_nodes, games 테이블에 데이터 추가
+
+-- 1. 먼저 더 많은 팀 추가 (토너먼트를 위해 충분한 팀 필요)
+INSERT INTO public.teams (id, name, logo_url, description, captain_id, created_at)
+VALUES
+  -- 추가 축구팀 (토너먼트용)
+  ('a4444444-4444-4444-4444-444444444444', '대전 파이터스 FC', 'https://placehold.co/200x200/FF9F43/FFFFFF?text=Fighters', '대전 지역 축구 동호회. 열정 가득!', NULL, NOW() - INTERVAL '10 days'),
+  ('a5555555-5555-5555-5555-555555555555', '광주 샤이너스 FC', 'https://placehold.co/200x200/32C1CD/FFFFFF?text=Shiners', '광주 축구팀. 주말리그 우승 경력', NULL, NOW() - INTERVAL '7 days'),
+  ('a6666666-6666-6666-6666-666666666666', '울산 타이거스', 'https://placehold.co/200x200/FFA502/333333?text=Tigers', '울산 직장인 축구팀', NULL, NOW() - INTERVAL '5 days'),
+  ('a7777777-7777-7777-7777-777777777777', '수원 블루윙스', 'https://placehold.co/200x200/0984E3/FFFFFF?text=Bluewings', '수원 아마추어 축구팀', NULL, NOW() - INTERVAL '3 days'),
+  ('a8888888-8888-8888-8888-888888888888', '성남 FC 유나이티드', 'https://placehold.co/200x200/6C5CE7/FFFFFF?text=Seongnam', '성남 지역 강호', NULL, NOW() - INTERVAL '2 days'),
+  
+  -- 추가 농구팀
+  ('b4444444-4444-4444-4444-444444444444', '동대문 레이커스', 'https://placehold.co/200x200/8E44AD/FFFFFF?text=Lakers', '동대문 농구 동호회', NULL, NOW() - INTERVAL '8 days'),
+  ('b5555555-5555-5555-5555-555555555555', '노원 워리어스', 'https://placehold.co/200x200/E74C3C/FFFFFF?text=Warriors', '노원구 농구팀', NULL, NOW() - INTERVAL '6 days'),
+  ('b6666666-6666-6666-6666-666666666666', '중랑 불스', 'https://placehold.co/200x200/C0392B/FFFFFF?text=Bulls', '중랑구 3x3 농구팀', NULL, NOW() - INTERVAL '4 days'),
+  
+  -- 추가 배구팀
+  ('c3333333-3333-3333-3333-333333333333', '강동 세터스', 'https://placehold.co/200x200/27AE60/FFFFFF?text=Setters', '강동구 배구 동호회', NULL, NOW() - INTERVAL '12 days'),
+  ('c4444444-4444-4444-4444-444444444444', '관악 블로커스', 'https://placehold.co/200x200/16A085/FFFFFF?text=Blockers', '관악구 혼성 배구팀', NULL, NOW() - INTERVAL '9 days')
+ON CONFLICT (id) DO NOTHING;
+
+-- 2. 경기별 참가 신청 데이터 생성
+-- 축구 토너먼트 (8팀 참가)
+INSERT INTO public.match_participants (match_id, team_id, status, applied_at, responded_at)
+VALUES
+  -- 2024 서울 챔피언십 (single_elimination) - 8팀 토너먼트
+  ('m1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111', 'approved', NOW() - INTERVAL '20 days', NOW() - INTERVAL '19 days'),
+  ('m1111111-1111-1111-1111-111111111111', 'a2222222-2222-2222-2222-222222222222', 'approved', NOW() - INTERVAL '20 days', NOW() - INTERVAL '19 days'),
+  ('m1111111-1111-1111-1111-111111111111', 'a3333333-3333-3333-3333-333333333333', 'approved', NOW() - INTERVAL '19 days', NOW() - INTERVAL '18 days'),
+  ('m1111111-1111-1111-1111-111111111111', 'a4444444-4444-4444-4444-444444444444', 'approved', NOW() - INTERVAL '19 days', NOW() - INTERVAL '18 days'),
+  ('m1111111-1111-1111-1111-111111111111', 'a5555555-5555-5555-5555-555555555555', 'approved', NOW() - INTERVAL '18 days', NOW() - INTERVAL '17 days'),
+  ('m1111111-1111-1111-1111-111111111111', 'a6666666-6666-6666-6666-666666666666', 'approved', NOW() - INTERVAL '18 days', NOW() - INTERVAL '17 days'),
+  ('m1111111-1111-1111-1111-111111111111', 'a7777777-7777-7777-7777-777777777777', 'approved', NOW() - INTERVAL '17 days', NOW() - INTERVAL '16 days'),
+  ('m1111111-1111-1111-1111-111111111111', 'a8888888-8888-8888-8888-888888888888', 'approved', NOW() - INTERVAL '17 days', NOW() - INTERVAL '16 days'),
+  
+  -- 여름 리그전 (round_robin) - 6팀 리그
+  ('m2222222-2222-2222-2222-222222222222', 'a1111111-1111-1111-1111-111111111111', 'approved', NOW() - INTERVAL '15 days', NOW() - INTERVAL '14 days'),
+  ('m2222222-2222-2222-2222-222222222222', 'a2222222-2222-2222-2222-222222222222', 'approved', NOW() - INTERVAL '15 days', NOW() - INTERVAL '14 days'),
+  ('m2222222-2222-2222-2222-222222222222', 'a3333333-3333-3333-3333-333333333333', 'approved', NOW() - INTERVAL '14 days', NOW() - INTERVAL '13 days'),
+  ('m2222222-2222-2222-2222-222222222222', 'a4444444-4444-4444-4444-444444444444', 'approved', NOW() - INTERVAL '14 days', NOW() - INTERVAL '13 days'),
+  ('m2222222-2222-2222-2222-222222222222', 'a5555555-5555-5555-5555-555555555555', 'approved', NOW() - INTERVAL '13 days', NOW() - INTERVAL '12 days'),
+  ('m2222222-2222-2222-2222-222222222222', 'a6666666-6666-6666-6666-666666666666', 'pending', NOW() - INTERVAL '2 days', NULL),
+  
+  -- 강남구 농구 대회 - 4팀 토너먼트
+  ('m3333333-3333-3333-3333-333333333333', 'b1111111-1111-1111-1111-111111111111', 'approved', NOW() - INTERVAL '10 days', NOW() - INTERVAL '9 days'),
+  ('m3333333-3333-3333-3333-333333333333', 'b2222222-2222-2222-2222-222222222222', 'approved', NOW() - INTERVAL '10 days', NOW() - INTERVAL '9 days'),
+  ('m3333333-3333-3333-3333-333333333333', 'b3333333-3333-3333-3333-333333333333', 'approved', NOW() - INTERVAL '9 days', NOW() - INTERVAL '8 days'),
+  ('m3333333-3333-3333-3333-333333333333', 'b4444444-4444-4444-4444-444444444444', 'approved', NOW() - INTERVAL '9 days', NOW() - INTERVAL '8 days'),
+  
+  -- 전국 배구 토너먼트 - 대기/거절 포함
+  ('m4444444-4444-4444-4444-444444444444', 'c1111111-1111-1111-1111-111111111111', 'approved', NOW() - INTERVAL '12 days', NOW() - INTERVAL '11 days'),
+  ('m4444444-4444-4444-4444-444444444444', 'c2222222-2222-2222-2222-222222222222', 'approved', NOW() - INTERVAL '12 days', NOW() - INTERVAL '11 days'),
+  ('m4444444-4444-4444-4444-444444444444', 'c3333333-3333-3333-3333-333333333333', 'approved', NOW() - INTERVAL '11 days', NOW() - INTERVAL '10 days'),
+  ('m4444444-4444-4444-4444-444444444444', 'c4444444-4444-4444-4444-444444444444', 'pending', NOW() - INTERVAL '3 days', NULL),
+  
+  -- 가을 축구 리그 - 신청 대기중
+  ('m5555555-5555-5555-5555-555555555555', 'a1111111-1111-1111-1111-111111111111', 'pending', NOW() - INTERVAL '1 day', NULL),
+  ('m5555555-5555-5555-5555-555555555555', 'a2222222-2222-2222-2222-222222222222', 'pending', NOW() - INTERVAL '1 day', NULL),
+  ('m5555555-5555-5555-5555-555555555555', 'a3333333-3333-3333-3333-333333333333', 'approved', NOW() - INTERVAL '2 days', NOW() - INTERVAL '1 day'),
+  ('m5555555-5555-5555-5555-555555555555', 'a4444444-4444-4444-4444-444444444444', 'rejected', NOW() - INTERVAL '2 days', NOW() - INTERVAL '1 day')
+ON CONFLICT (match_id, team_id) DO NOTHING;
+
+-- 3. 토너먼트 대진표 생성 (bracket_nodes)
+-- 2024 서울 챔피언십 8강 토너먼트
+INSERT INTO public.bracket_nodes (id, match_id, round, position, team_id, parent_node_id, created_at)
+VALUES
+  -- 8강 (Quarter Finals)
+  ('bn111111-1111-1111-1111-111111111111', 'm1111111-1111-1111-1111-111111111111', 1, 1, 'a1111111-1111-1111-1111-111111111111', NULL, NOW() - INTERVAL '15 days'),
+  ('bn111111-2222-2222-2222-222222222222', 'm1111111-1111-1111-1111-111111111111', 1, 2, 'a2222222-2222-2222-2222-222222222222', NULL, NOW() - INTERVAL '15 days'),
+  ('bn111111-3333-3333-3333-333333333333', 'm1111111-1111-1111-1111-111111111111', 1, 3, 'a3333333-3333-3333-3333-333333333333', NULL, NOW() - INTERVAL '15 days'),
+  ('bn111111-4444-4444-4444-444444444444', 'm1111111-1111-1111-1111-111111111111', 1, 4, 'a4444444-4444-4444-4444-444444444444', NULL, NOW() - INTERVAL '15 days'),
+  ('bn111111-5555-5555-5555-555555555555', 'm1111111-1111-1111-1111-111111111111', 1, 5, 'a5555555-5555-5555-5555-555555555555', NULL, NOW() - INTERVAL '15 days'),
+  ('bn111111-6666-6666-6666-666666666666', 'm1111111-1111-1111-1111-111111111111', 1, 6, 'a6666666-6666-6666-6666-666666666666', NULL, NOW() - INTERVAL '15 days'),
+  ('bn111111-7777-7777-7777-777777777777', 'm1111111-1111-1111-1111-111111111111', 1, 7, 'a7777777-7777-7777-7777-777777777777', NULL, NOW() - INTERVAL '15 days'),
+  ('bn111111-8888-8888-8888-888888888888', 'm1111111-1111-1111-1111-111111111111', 1, 8, 'a8888888-8888-8888-8888-888888888888', NULL, NOW() - INTERVAL '15 days'),
+  
+  -- 4강 (Semi Finals) - 승자 진출
+  ('bn222222-1111-1111-1111-111111111111', 'm1111111-1111-1111-1111-111111111111', 2, 1, 'a1111111-1111-1111-1111-111111111111', 'bn111111-1111-1111-1111-111111111111', NOW() - INTERVAL '10 days'),
+  ('bn222222-2222-2222-2222-222222222222', 'm1111111-1111-1111-1111-111111111111', 2, 2, 'a3333333-3333-3333-3333-333333333333', 'bn111111-3333-3333-3333-333333333333', NOW() - INTERVAL '10 days'),
+  ('bn222222-3333-3333-3333-333333333333', 'm1111111-1111-1111-1111-111111111111', 2, 3, 'a5555555-5555-5555-5555-555555555555', 'bn111111-5555-5555-5555-555555555555', NOW() - INTERVAL '10 days'),
+  ('bn222222-4444-4444-4444-444444444444', 'm1111111-1111-1111-1111-111111111111', 2, 4, 'a7777777-7777-7777-7777-777777777777', 'bn111111-7777-7777-7777-777777777777', NOW() - INTERVAL '10 days'),
+  
+  -- 결승 (Finals)
+  ('bn333333-1111-1111-1111-111111111111', 'm1111111-1111-1111-1111-111111111111', 3, 1, 'a1111111-1111-1111-1111-111111111111', 'bn222222-1111-1111-1111-111111111111', NOW() - INTERVAL '5 days'),
+  ('bn333333-2222-2222-2222-222222222222', 'm1111111-1111-1111-1111-111111111111', 3, 2, 'a5555555-5555-5555-5555-555555555555', 'bn222222-3333-3333-3333-333333333333', NOW() - INTERVAL '5 days')
+ON CONFLICT (id) DO NOTHING;
+
+-- 4. 실제 경기 결과 (games)
+INSERT INTO public.games (id, match_id, home_team_id, away_team_id, home_score, away_score, status, scheduled_at, started_at, ended_at, round, bracket_position, created_at)
+VALUES
+  -- 2024 서울 챔피언십 8강전
+  ('g1111111-1111-1111-1111-111111111111', 'm1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111', 'a2222222-2222-2222-2222-222222222222', 3, 1, 'completed', NOW() - INTERVAL '14 days', NOW() - INTERVAL '14 days', NOW() - INTERVAL '14 days' + INTERVAL '90 minutes', 1, 1, NOW() - INTERVAL '15 days'),
+  ('g1111111-2222-2222-2222-222222222222', 'm1111111-1111-1111-1111-111111111111', 'a3333333-3333-3333-3333-333333333333', 'a4444444-4444-4444-4444-444444444444', 2, 1, 'completed', NOW() - INTERVAL '14 days', NOW() - INTERVAL '14 days', NOW() - INTERVAL '14 days' + INTERVAL '90 minutes', 1, 2, NOW() - INTERVAL '15 days'),
+  ('g1111111-3333-3333-3333-333333333333', 'm1111111-1111-1111-1111-111111111111', 'a5555555-5555-5555-5555-555555555555', 'a6666666-6666-6666-6666-666666666666', 4, 2, 'completed', NOW() - INTERVAL '13 days', NOW() - INTERVAL '13 days', NOW() - INTERVAL '13 days' + INTERVAL '90 minutes', 1, 3, NOW() - INTERVAL '15 days'),
+  ('g1111111-4444-4444-4444-444444444444', 'm1111111-1111-1111-1111-111111111111', 'a7777777-7777-7777-7777-777777777777', 'a8888888-8888-8888-8888-888888888888', 2, 3, 'completed', NOW() - INTERVAL '13 days', NOW() - INTERVAL '13 days', NOW() - INTERVAL '13 days' + INTERVAL '90 minutes', 1, 4, NOW() - INTERVAL '15 days'),
+  
+  -- 4강전
+  ('g2222222-1111-1111-1111-111111111111', 'm1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111', 'a3333333-3333-3333-3333-333333333333', 2, 0, 'completed', NOW() - INTERVAL '8 days', NOW() - INTERVAL '8 days', NOW() - INTERVAL '8 days' + INTERVAL '90 minutes', 2, 1, NOW() - INTERVAL '10 days'),
+  ('g2222222-2222-2222-2222-222222222222', 'm1111111-1111-1111-1111-111111111111', 'a5555555-5555-5555-5555-555555555555', 'a7777777-7777-7777-7777-777777777777', 3, 2, 'completed', NOW() - INTERVAL '8 days', NOW() - INTERVAL '8 days', NOW() - INTERVAL '8 days' + INTERVAL '90 minutes', 2, 2, NOW() - INTERVAL '10 days'),
+  
+  -- 결승전
+  ('g3333333-1111-1111-1111-111111111111', 'm1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111', 'a5555555-5555-5555-5555-555555555555', 1, 2, 'completed', NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days' + INTERVAL '90 minutes', 3, 1, NOW() - INTERVAL '5 days'),
+  
+  -- 여름 리그전 경기들 (round_robin)
+  ('g4444444-1111-1111-1111-111111111111', 'm2222222-2222-2222-2222-222222222222', 'a1111111-1111-1111-1111-111111111111', 'a2222222-2222-2222-2222-222222222222', 2, 2, 'completed', NOW() - INTERVAL '10 days', NOW() - INTERVAL '10 days', NOW() - INTERVAL '10 days' + INTERVAL '90 minutes', NULL, NULL, NOW() - INTERVAL '12 days'),
+  ('g4444444-2222-2222-2222-222222222222', 'm2222222-2222-2222-2222-222222222222', 'a3333333-3333-3333-3333-333333333333', 'a4444444-4444-4444-4444-444444444444', 1, 0, 'completed', NOW() - INTERVAL '10 days', NOW() - INTERVAL '10 days', NOW() - INTERVAL '10 days' + INTERVAL '90 minutes', NULL, NULL, NOW() - INTERVAL '12 days'),
+  ('g4444444-3333-3333-3333-333333333333', 'm2222222-2222-2222-2222-222222222222', 'a5555555-5555-5555-5555-555555555555', 'a1111111-1111-1111-1111-111111111111', 0, 3, 'completed', NOW() - INTERVAL '9 days', NOW() - INTERVAL '9 days', NOW() - INTERVAL '9 days' + INTERVAL '90 minutes', NULL, NULL, NOW() - INTERVAL '11 days'),
+  ('g4444444-4444-4444-4444-444444444444', 'm2222222-2222-2222-2222-222222222222', 'a2222222-2222-2222-2222-222222222222', 'a3333333-3333-3333-3333-333333333333', NULL, NULL, 'scheduled', NOW() + INTERVAL '2 days', NULL, NULL, NULL, NULL, NOW() - INTERVAL '5 days'),
+  ('g4444444-5555-5555-5555-555555555555', 'm2222222-2222-2222-2222-222222222222', 'a4444444-4444-4444-4444-444444444444', 'a5555555-5555-5555-5555-555555555555', NULL, NULL, 'scheduled', NOW() + INTERVAL '3 days', NULL, NULL, NULL, NULL, NOW() - INTERVAL '5 days'),
+  
+  -- 강남구 농구 대회 4강전
+  ('g5555555-1111-1111-1111-111111111111', 'm3333333-3333-3333-3333-333333333333', 'b1111111-1111-1111-1111-111111111111', 'b2222222-2222-2222-2222-222222222222', 78, 72, 'completed', NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days' + INTERVAL '2 hours', 1, 1, NOW() - INTERVAL '7 days'),
+  ('g5555555-2222-2222-2222-222222222222', 'm3333333-3333-3333-3333-333333333333', 'b3333333-3333-3333-3333-333333333333', 'b4444444-4444-4444-4444-444444444444', 65, 68, 'completed', NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days' + INTERVAL '2 hours', 1, 2, NOW() - INTERVAL '7 days'),
+  
+  -- 농구 결승전 (예정)
+  ('g5555555-3333-3333-3333-333333333333', 'm3333333-3333-3333-3333-333333333333', 'b1111111-1111-1111-1111-111111111111', 'b4444444-4444-4444-4444-444444444444', NULL, NULL, 'scheduled', NOW() + INTERVAL '1 day', NULL, NULL, 2, 1, NOW() - INTERVAL '3 days')
+ON CONFLICT (id) DO NOTHING;
+
+-- 5. 경기 통계 업데이트 (선수별 경기 기록)
+-- 이 부분은 선택사항이지만, 더 리얼한 데이터를 위해 추가
+UPDATE public.players 
+SET stats = jsonb_build_object(
+  'goals', floor(random() * 20)::int,
+  'assists', floor(random() * 15)::int,
+  'games', floor(random() * 25 + 5)::int,
+  'yellow_cards', floor(random() * 5)::int,
+  'red_cards', floor(random() * 2)::int
+)
+WHERE team_id IN (
+  SELECT id FROM teams WHERE id LIKE 'a%'  -- 축구팀만
+);
+
+UPDATE public.players 
+SET stats = jsonb_build_object(
+  'points', floor(random() * 300 + 100)::int,
+  'rebounds', floor(random() * 150 + 50)::int,
+  'assists', floor(random() * 100 + 20)::int,
+  'games', floor(random() * 20 + 5)::int,
+  'three_pointers', floor(random() * 50)::int
+)
+WHERE team_id IN (
+  SELECT id FROM teams WHERE id LIKE 'b%'  -- 농구팀만
+);
+
+-- 6. 체크인 데이터 추가 (QR 체크인 기능 테스트용)
+INSERT INTO public.team_checkins (id, match_id, team_id, player_id, checked_in_at, checked_in_by)
+SELECT 
+  gen_random_uuid(),
+  'g1111111-1111-1111-1111-111111111111',  -- 첫 8강전
+  p.team_id,
+  p.id,
+  NOW() - INTERVAL '14 days' - INTERVAL '30 minutes',
+  p.id  -- 선수 본인이 체크인
+FROM public.players p
+WHERE p.team_id IN ('a1111111-1111-1111-1111-111111111111', 'a2222222-2222-2222-2222-222222222222')
+LIMIT 10
+ON CONFLICT DO NOTHING;
+
+-- 대회별 참가팀 수와 상태 확인
+SELECT 
+  m.title,
+  m.type,
+  m.status,
+  COUNT(mp.team_id) as participant_count,
+  COUNT(CASE WHEN mp.status = 'approved' THEN 1 END) as approved_count,
+  COUNT(CASE WHEN mp.status = 'pending' THEN 1 END) as pending_count,
+  COUNT(CASE WHEN mp.status = 'rejected' THEN 1 END) as rejected_count
+FROM matches m
+LEFT JOIN match_participants mp ON m.id = mp.match_id
+GROUP BY m.id, m.title, m.type, m.status
+ORDER BY m.created_at DESC;
+
+-- 대진표가 있는 경기 확인
+SELECT 
+  m.title,
+  COUNT(DISTINCT bn.id) as bracket_nodes_count,
+  COUNT(DISTINCT g.id) as games_count,
+  MAX(bn.round) as max_round
+FROM matches m
+LEFT JOIN bracket_nodes bn ON m.id = bn.match_id
+LEFT JOIN games g ON m.id = g.match_id
+WHERE bn.id IS NOT NULL OR g.id IS NOT NULL
+GROUP BY m.id, m.title
+ORDER BY m.created_at DESC;
