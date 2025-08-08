@@ -252,32 +252,51 @@ export async function POST() {
             console.error('Games insert error:', gamesError);
         }
 
-        // 5. 통계 확인
+        // 5. 통계 확인 - 단순화된 쿼리
         const { data: matchStats, error: statsError } = await supabase
             .from('matches')
-            .select(`
-                id,
-                title,
-                type,
-                status,
-                match_participants!inner(status),
-                bracket_nodes(id),
-                games(id)
-            `);
+            .select('id, title, type, status');
 
         if (statsError) {
             console.error('Stats query error:', statsError);
         }
 
-        const summary = matchStats?.map(match => ({
-            title: match.title,
-            type: match.type,
-            status: match.status,
-            participants: match.match_participants?.length || 0,
-            approved: match.match_participants?.filter((p: any) => p.status === 'approved').length || 0,
-            bracketNodes: match.bracket_nodes?.length || 0,
-            games: match.games?.length || 0
-        }));
+        // 각 match에 대한 참가팀 수 가져오기
+        interface MatchStat {
+            id: string;
+            title: string;
+            type: string;
+            status: string;
+        }
+
+        const summary = await Promise.all(
+            ((matchStats || []) as MatchStat[]).map(async (match: MatchStat) => {
+                const { data: participants } = await supabase
+                    .from('match_participants')
+                    .select('status')
+                    .eq('match_id', match.id);
+
+                const { data: bracketNodes } = await supabase
+                    .from('bracket_nodes')
+                    .select('id')
+                    .eq('match_id', match.id);
+
+                const { data: games } = await supabase
+                    .from('games')
+                    .select('id')
+                    .eq('match_id', match.id);
+
+                return {
+                    title: match.title,
+                    type: match.type,
+                    status: match.status,
+                    participants: participants?.length || 0,
+                    approved: participants?.filter((p: any) => p.status === 'approved').length || 0,
+                    bracketNodes: bracketNodes?.length || 0,
+                    games: games?.length || 0
+                };
+            })
+        );
 
         return NextResponse.json({
             success: true,
