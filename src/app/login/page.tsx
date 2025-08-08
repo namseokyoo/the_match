@@ -72,7 +72,7 @@ function LoginContent() {
         return (
             <div className="flex min-h-screen items-center justify-center bg-gray-50">
                 <div className="text-center">
-                    <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-match-blue border-t-transparent"></div>
+                    <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent"></div>
                     <p className="text-sm text-gray-600">로딩 중...</p>
                 </div>
             </div>
@@ -84,7 +84,7 @@ function LoginContent() {
             <div className="w-full max-w-md space-y-8">
                 {/* Header */}
                 <div className="text-center">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-match-blue">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-500 shadow-lg">
                         <Trophy className="h-8 w-8 text-white" />
                     </div>
                     <h2 className="mt-6 text-3xl font-bold tracking-tight text-gray-900">
@@ -207,7 +207,7 @@ function LoginContent() {
                                 계정이 없으신가요?{' '}
                                 <Link
                                     href="/signup"
-                                    className="font-medium text-match-blue hover:text-blue-600"
+                                    className="font-medium text-primary-600 hover:text-primary-700 transition-colors"
                                 >
                                     회원가입
                                 </Link>
@@ -218,7 +218,7 @@ function LoginContent() {
                         <div className="text-center">
                             <Link
                                 href="/forgot-password"
-                                className="text-sm font-medium text-match-blue hover:text-blue-600"
+                                className="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
                             >
                                 비밀번호를 잊으셨나요?
                             </Link>
@@ -235,7 +235,7 @@ export default function LoginPage() {
         <Suspense fallback={
             <div className="flex min-h-screen items-center justify-center bg-gray-50">
                 <div className="text-center">
-                    <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-match-blue border-t-transparent"></div>
+                    <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent"></div>
                     <p className="text-sm text-gray-600">로딩 중...</p>
                 </div>
             </div>

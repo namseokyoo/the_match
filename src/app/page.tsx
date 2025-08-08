@@ -260,7 +260,7 @@ export default function Home() {
                         <h2 className="text-2xl font-bold text-gray-900">
                             👥 팀원 모집 중
                         </h2>
-                        <Link href="/teams" className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                        <Link href="/teams" className="text-primary-600 hover:text-primary-700 flex items-center gap-1 text-sm font-medium transition-colors">
                             모든 팀 보기 <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
@@ -285,7 +285,7 @@ export default function Home() {
                                         <p className="text-sm text-gray-600 line-clamp-2">
                                             {team.description || '팀원을 모집하고 있습니다'}
                                         </p>
-                                        <div className="mt-3 flex items-center text-blue-600 text-sm">
+                                        <div className="mt-3 flex items-center text-primary-600 text-sm font-medium">
                                             <UserPlus className="w-4 h-4 mr-1" />
                                             <span>참가 신청</span>
                                         </div>
@@ -298,7 +298,7 @@ export default function Home() {
                             <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-600 mb-4">팀원을 모집 중인 팀이 없습니다</p>
                             {user && (
-                                <Link href="/teams/create" className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                <Link href="/teams/create" className="inline-flex items-center px-4 py-2 bg-success-600 text-white rounded-lg hover:bg-success-700 transition-colors shadow-sm">
                                     팀 만들기
                                 </Link>
                             )}
@@ -315,7 +315,7 @@ export default function Home() {
                             <h2 className="text-2xl font-bold text-gray-900">
                                 📅 곧 시작될 경기
                             </h2>
-                            <Link href="/matches?status=registration" className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                            <Link href="/matches?status=registration" className="text-primary-600 hover:text-primary-700 flex items-center gap-1 text-sm font-medium transition-colors">
                                 참가 가능한 경기 <ArrowRight className="w-4 h-4" />
                             </Link>
                         </div>
@@ -364,19 +364,19 @@ export default function Home() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         {user ? (
                             <>
-                                <Link href="/matches/create" className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                                <Link href="/matches/create" className="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-semibold transition-colors shadow-sm">
                                     경기 만들기
                                 </Link>
-                                <Link href="/teams/create" className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold">
+                                <Link href="/teams/create" className="px-8 py-3 bg-success-600 text-white rounded-lg hover:bg-success-700 font-semibold transition-colors shadow-sm">
                                     팀 만들기
                                 </Link>
                             </>
                         ) : (
                             <>
-                                <Link href="/signup" className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                                <Link href="/signup" className="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-semibold transition-colors shadow-sm">
                                     무료 회원가입
                                 </Link>
-                                <Link href="/login" className="px-8 py-3 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 font-semibold">
+                                <Link href="/login" className="px-8 py-3 bg-white text-primary-600 border-2 border-primary-600 rounded-lg hover:bg-primary-50 font-semibold transition-colors">
                                     로그인
                                 </Link>
                             </>
