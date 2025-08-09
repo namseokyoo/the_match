@@ -133,16 +133,10 @@ export default function MatchesClient() {
         if (!confirmDelete) return;
 
         try {
-            const token = await getAccessToken();
-            if (!token) {
-                alert('인증 토큰을 가져올 수 없습니다.');
-                return;
-            }
-
             const response = await fetch(`/api/matches/${id}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
             });
 
