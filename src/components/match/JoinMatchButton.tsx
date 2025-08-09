@@ -16,7 +16,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
     onJoined,
     className = '',
 }) => {
-    const { user, getAccessToken } = useAuth();
+    const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [myParticipation, setMyParticipation] = useState<MatchParticipant | null>(null);
     const [checkingParticipation, setCheckingParticipation] = useState(true);
@@ -76,8 +76,8 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
         try {
             setLoading(true);
 
-            const token = await getAccessToken();
-            if (!token) {
+            // Token removed - using cookie auth
+            if (!user) {
                 alert('인증 토큰을 가져올 수 없습니다.');
                 return;
             }
@@ -86,7 +86,6 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     notes: notes.trim() || undefined,
@@ -126,8 +125,8 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
         try {
             setLoading(true);
 
-            const token = await getAccessToken();
-            if (!token) {
+            // Token removed - using cookie auth
+            if (!user) {
                 alert('인증 토큰을 가져올 수 없습니다.');
                 return;
             }
@@ -135,7 +134,6 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
             const response = await fetch(`/api/matches/${match.id}/participants/${myParticipation.team_id}`, {
                 method: 'DELETE',
                 headers: {
-                    Authorization: `Bearer ${token}`,
                 },
             });
 

@@ -35,7 +35,7 @@ export default function ParticipantManagement({
     isCreator,
     onUpdate 
 }: ParticipantManagementProps) {
-    const { user, getAccessToken } = useAuth();
+    const { user } = useAuth();
     const [participants, setParticipants] = useState<Participant[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -68,8 +68,7 @@ export default function ParticipantManagement({
     };
 
     const handleStatusUpdate = async (participantId: string, newStatus: 'approved' | 'rejected', reason?: string) => {
-        const token = await getAccessToken();
-        if (!token) {
+        if (!user) {
             setError('로그인이 필요합니다.');
             return;
         }
@@ -84,7 +83,6 @@ export default function ParticipantManagement({
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
                     },
                     body: JSON.stringify({ status: newStatus, reason }),
                 }
@@ -116,8 +114,7 @@ export default function ParticipantManagement({
     };
 
     const handleDelete = async (participantId: string) => {
-        const token = await getAccessToken();
-        if (!token) {
+        if (!user) {
             setError('로그인이 필요합니다.');
             return;
         }
@@ -135,7 +132,6 @@ export default function ParticipantManagement({
                 {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                     },
                 }
             );

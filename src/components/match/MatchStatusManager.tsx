@@ -42,7 +42,7 @@ export default function MatchStatusManager({
     isCreator,
     onStatusChange 
 }: MatchStatusManagerProps) {
-    const { getAccessToken } = useAuth();
+    const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [statusInfo, setStatusInfo] = useState<any>(null);
@@ -93,8 +93,7 @@ export default function MatchStatusManager({
     };
 
     const updateStatus = async (newStatus: MatchStatus) => {
-        const token = await getAccessToken();
-        if (!token) {
+        if (!user) {
             setError('로그인이 필요합니다.');
             return;
         }
@@ -109,7 +108,6 @@ export default function MatchStatusManager({
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
                     },
                     body: JSON.stringify({ 
                         status: newStatus,

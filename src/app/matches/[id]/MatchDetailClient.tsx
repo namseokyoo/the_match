@@ -20,7 +20,7 @@ interface MatchDetailClientProps {
 
 export default function MatchDetailClient({ match: initialMatch }: MatchDetailClientProps) {
     const router = useRouter();
-    const { user, getAccessToken } = useAuth();
+    const { user } = useAuth();
     const [refreshKey, setRefreshKey] = useState(0);
     const [match, setMatch] = useState(initialMatch);
     const [activeTab, setActiveTab] = useState<'overview' | 'bracket' | 'participants' | 'settings'>('overview');

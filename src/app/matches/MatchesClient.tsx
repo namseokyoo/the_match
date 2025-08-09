@@ -21,7 +21,7 @@ export default function MatchesClient() {
         sortOrder: 'desc' as 'asc' | 'desc',
     });
     
-    const { user, getAccessToken, loading: authLoading } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const searchQuery = searchParams.get('q') || '';

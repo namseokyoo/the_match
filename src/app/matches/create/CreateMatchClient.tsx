@@ -12,7 +12,7 @@ export default function CreateMatchClient() {
     const [isLoading, setIsLoading] = useState(false);
     const [template, setTemplate] = useState<MatchTemplate | null>(null);
     const [loadingTemplate, setLoadingTemplate] = useState(false);
-    const { user, getAccessToken, loading: authLoading } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const { showNotification } = useNotification();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -54,8 +54,8 @@ export default function CreateMatchClient() {
         try {
             setIsLoading(true);
 
-            const token = await getAccessToken();
-            if (!token) {
+            // Token removed - using cookie auth
+            if (!user) {
                 showNotification('인증 토큰을 가져올 수 없습니다.', 'error');
                 return;
             }
@@ -64,7 +64,6 @@ export default function CreateMatchClient() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify(formData),
             });

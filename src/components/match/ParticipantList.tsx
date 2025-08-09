@@ -23,7 +23,7 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
     isOwner = false,
     className = '',
 }) => {
-    const { user, getAccessToken } = useAuth();
+    const { user } = useAuth();
     const [participants, setParticipants] = useState<MatchParticipant[]>([]);
     const [stats, setStats] = useState<ParticipantStats>({ total: 0, pending: 0, approved: 0, rejected: 0 });
     const [loading, setLoading] = useState(true);
@@ -64,8 +64,8 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
         if (reason === null) return; // 취소
 
         try {
-            const token = await getAccessToken();
-            if (!token) {
+            // Token removed - using cookie auth
+            if (!user) {
                 alert('인증 토큰을 가져올 수 없습니다.');
                 return;
             }
@@ -74,7 +74,6 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     status: ParticipantStatus.APPROVED,
@@ -110,8 +109,8 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
         }
 
         try {
-            const token = await getAccessToken();
-            if (!token) {
+            // Token removed - using cookie auth
+            if (!user) {
                 alert('인증 토큰을 가져올 수 없습니다.');
                 return;
             }
@@ -120,7 +119,6 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     status: ParticipantStatus.REJECTED,
@@ -154,8 +152,8 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
         }
 
         try {
-            const token = await getAccessToken();
-            if (!token) {
+            // Token removed - using cookie auth
+            if (!user) {
                 alert('인증 토큰을 가져올 수 없습니다.');
                 return;
             }
@@ -163,7 +161,6 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
             const response = await fetch(`/api/matches/${matchId}/participants/${teamId}`, {
                 method: 'DELETE',
                 headers: {
-                    Authorization: `Bearer ${token}`,
                 },
             });
 
