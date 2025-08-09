@@ -15,7 +15,7 @@ export default function MatchBracketPage() {
     const params = useParams();
     const router = useRouter();
     const matchId = params.id as string;
-    const { user, loading: authLoading, initialized } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     
     const [bracket, setBracket] = useState<BracketType | null>(null);
     const [loading, setLoading] = useState(true);

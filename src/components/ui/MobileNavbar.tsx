@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 
 const MobileNavbar = () => {
-    const { user, signOut, initialized, isAuthenticated, isSigningOut } = useAuth();
+    const { user, signOut, loading, isAuthenticated } = useAuth();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const router = useRouter();
@@ -60,27 +60,24 @@ const MobileNavbar = () => {
     }, [isMenuOpen]);
 
     const handleSignOut = async () => {
-        if (isLoggingOut || isSigningOut) {
+        if (isLoggingOut) {
             return;
         }
 
         try {
             setIsLoggingOut(true);
-            const { error } = await signOut();
-            
-            if (!error) {
-                router.push('/');
-                setIsMenuOpen(false);
-            } else {
-                console.error('Logout error:', error);
-                alert('로그아웃 중 오류가 발생했습니다.');
-            }
+            await signOut();
+            router.push('/');
+            setIsMenuOpen(false);
+        } catch (error) {
+            console.error('Logout error:', error);
+            alert('로그아웃 중 오류가 발생했습니다.');
         } finally {
             setIsLoggingOut(false);
         }
     };
 
-    const showSkeleton = !initialized;
+    const showSkeleton = loading;
 
     // 메뉴 아이템 스타일
     const menuItemClass = "flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors";

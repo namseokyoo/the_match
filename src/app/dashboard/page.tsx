@@ -23,7 +23,7 @@ interface DashboardData {
 
 export default function DashboardPage() {
     const router = useRouter();
-    const { user, loading, initialized } = useAuth();
+    const { user, loading } = useAuth();
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [dataLoading, setDataLoading] = useState(true);
 
@@ -80,17 +80,17 @@ export default function DashboardPage() {
     };
 
     useEffect(() => {
-        // 인증이 초기화되고 사용자가 있을 때만 데이터 로드
-        if (initialized && user) {
+        // 로딩이 완료되고 사용자가 있을 때만 데이터 로드
+        if (!loading && user) {
             fetchDashboardData();
-        } else if (initialized && !user) {
-            // 인증이 완료되었는데 사용자가 없으면 로그인 페이지로
+        } else if (!loading && !user) {
+            // 로딩이 완료되었는데 사용자가 없으면 로그인 페이지로
             router.push('/login');
         }
-    }, [initialized, user, router]);
+    }, [loading, user, router]);
 
     // 인증 로딩 중
-    if (!initialized || loading) {
+    if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-500"></div>
