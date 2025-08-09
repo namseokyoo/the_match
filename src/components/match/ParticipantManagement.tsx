@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { ParticipantStatus } from '@/types';
 import { Button } from '@/components/ui';
@@ -236,10 +237,13 @@ export default function ParticipantManagement({
                                     <div className="flex items-center space-x-3">
                                         {/* 팀 로고 */}
                                         {participant.team.logo_url ? (
-                                            <img 
+                                            <Image 
                                                 src={participant.team.logo_url} 
                                                 alt={participant.team.name}
+                                                width={48}
+                                                height={48}
                                                 className="w-12 h-12 rounded-lg object-cover"
+                                                unoptimized={true}
                                             />
                                         ) : (
                                             <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">

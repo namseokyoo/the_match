@@ -8,36 +8,31 @@ import InstallPWAButton from '@/components/pwa/InstallPWAButton';
 import { Menu, X } from 'lucide-react';
 
 const SimpleNavbar = () => {
-    const { user, signOut, loading, initialized, isAuthenticated, isSigningOut } = useAuth();
+    const { user, signOut, loading, isAuthenticated } = useAuth();
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const router = useRouter();
 
     const handleSignOut = async () => {
         // 이미 로그아웃 중이면 중복 실행 방지
-        if (isLoggingOut || isSigningOut) {
+        if (isLoggingOut) {
             return;
         }
 
         try {
             setIsLoggingOut(true);
-            const { error } = await signOut();
+            await signOut();
             
-            if (!error) {
-                // 로그아웃 성공 시 홈으로 이동
-                router.push('/');
-                setIsMobileMenuOpen(false);
-            } else {
-                console.error('Logout error:', error);
-                alert('로그아웃 중 오류가 발생했습니다.');
-            }
+            // 로그아웃 성공 시 홈으로 이동
+            router.push('/');
+            setIsMobileMenuOpen(false);
         } finally {
             setIsLoggingOut(false);
         }
     };
 
-    // 초기 로딩 상태 (첫 초기화 전) - 스켈레톤 UI를 보여주되 전체 네비바 구조는 유지
-    const showSkeleton = !initialized || loading;
+    // 초기 로딩 상태 - 스켈레톤 UI를 보여주되 전체 네비바 구조는 유지
+    const showSkeleton = loading;
 
     return (
         <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -117,14 +112,14 @@ const SimpleNavbar = () => {
                                 </Link>
                                 <button
                                     onClick={handleSignOut}
-                                    disabled={isLoggingOut || isSigningOut}
+                                    disabled={isLoggingOut}
                                     className={`px-2 xl:px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
-                                        isLoggingOut || isSigningOut
+                                        isLoggingOut
                                             ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                                     }`}
                                 >
-                                    {isLoggingOut || isSigningOut ? (
+                                    {isLoggingOut ? (
                                         <span className="flex items-center">
                                             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24">
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -249,14 +244,14 @@ const SimpleNavbar = () => {
                                     </Link>
                                     <button
                                         onClick={handleSignOut}
-                                        disabled={isLoggingOut || isSigningOut}
+                                        disabled={isLoggingOut}
                                         className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${
-                                            isLoggingOut || isSigningOut
+                                            isLoggingOut
                                                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                                 : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                                         }`}
                                     >
-                                        {isLoggingOut || isSigningOut ? '로그아웃 중...' : '로그아웃'}
+                                        {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
                                     </button>
                                 </>
                             )}

@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { TournamentBracket } from '@/components/match/TournamentBracket';
 import { Button } from '@/components/ui';
-import ShareButton from '@/components/share/ShareButton';
 import { generateBracket, updateMatch } from '@/utils/bracketGenerator';
 import { TournamentBracket as BracketType, BracketMatch, BracketSeed } from '@/types/bracket';
 import { supabase } from '@/lib/supabase';
@@ -15,7 +14,7 @@ export default function MatchBracketPage() {
     const params = useParams();
     const router = useRouter();
     const matchId = params.id as string;
-    const { user, loading: authLoading } = useAuth();
+    const { user } = useAuth();
     
     const [bracket, setBracket] = useState<BracketType | null>(null);
     const [loading, setLoading] = useState(true);

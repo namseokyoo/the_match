@@ -116,7 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // 로그인
     const signIn = async (email: string, password: string) => {
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
@@ -135,13 +135,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     // 회원가입
-    const signUp = async (email: string, password: string, metadata?: Record<string, any>) => {
+    const signUp = async (userEmail: string, userPassword: string, userMetadata?: Record<string, any>) => {
         try {
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
+            const { error } = await supabase.auth.signUp({
+                email: userEmail,
+                password: userPassword,
                 options: {
-                    data: metadata,
+                    data: userMetadata,
                 },
             });
 

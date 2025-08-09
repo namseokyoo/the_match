@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { Button, Card } from '@/components/ui';
 import { QRCodeGenerator, QRCodeScanner, CheckInList } from '@/components/checkin';
 import { showToast } from '@/components/ui/Toast';
-import { QrCode, Scan, Users, Clock, Download } from 'lucide-react';
+import { QrCode, Scan, Users } from 'lucide-react';
 import { Match } from '@/types';
 
 export default function MatchCheckInPage() {
@@ -22,11 +22,7 @@ export default function MatchCheckInPage() {
   const [activeTab, setActiveTab] = useState<'qr' | 'list' | 'scan'>('qr');
   const [showScanner, setShowScanner] = useState(false);
 
-  useEffect(() => {
-    fetchMatchData();
-  }, [matchId]);
-
-  const fetchMatchData = async () => {
+  const fetchMatchData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -55,7 +51,11 @@ export default function MatchCheckInPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [matchId, user]);
+
+  useEffect(() => {
+    fetchMatchData();
+  }, [fetchMatchData]);
 
   const handleScan = async (data: any) => {
     try {

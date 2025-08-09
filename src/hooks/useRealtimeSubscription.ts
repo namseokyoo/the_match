@@ -11,10 +11,10 @@ interface UseRealtimeSubscriptionOptions {
     schema?: string;
     table: string;
     filter?: string;
-    onInsert?: (payload: RealtimePostgresChangesPayload<any>) => void;
-    onUpdate?: (payload: RealtimePostgresChangesPayload<any>) => void;
-    onDelete?: (payload: RealtimePostgresChangesPayload<any>) => void;
-    onChange?: (payload: RealtimePostgresChangesPayload<any>) => void;
+    onInsert?: (data: RealtimePostgresChangesPayload<any>) => void;
+    onUpdate?: (data: RealtimePostgresChangesPayload<any>) => void;
+    onDelete?: (data: RealtimePostgresChangesPayload<any>) => void;
+    onChange?: (data: RealtimePostgresChangesPayload<any>) => void;
 }
 
 export function useRealtimeSubscription({
@@ -43,22 +43,22 @@ export function useRealtimeSubscription({
                 table,
                 filter,
             },
-            (payload: RealtimePostgresChangesPayload<any>) => {
+            (data: RealtimePostgresChangesPayload<any>) => {
                 // 공통 onChange 핸들러
                 if (onChange) {
-                    onChange(payload);
+                    onChange(data);
                 }
 
                 // 이벤트별 핸들러
-                switch (payload.eventType) {
+                switch (data.eventType) {
                     case 'INSERT':
-                        if (onInsert) onInsert(payload);
+                        if (onInsert) onInsert(data);
                         break;
                     case 'UPDATE':
-                        if (onUpdate) onUpdate(payload);
+                        if (onUpdate) onUpdate(data);
                         break;
                     case 'DELETE':
-                        if (onDelete) onDelete(payload);
+                        if (onDelete) onDelete(data);
                         break;
                 }
             }
@@ -91,7 +91,7 @@ export function useRealtimeSubscription({
 export function useMatchRealtime(
     matchId: string,
     handlers: {
-        onUpdate?: (payload: RealtimePostgresChangesPayload<any>) => void;
+        onUpdate?: (data: RealtimePostgresChangesPayload<any>) => void;
     }
 ) {
     return useRealtimeSubscription({
@@ -104,8 +104,8 @@ export function useMatchRealtime(
 export function useTeamRealtime(
     teamId: string,
     handlers: {
-        onUpdate?: (payload: RealtimePostgresChangesPayload<any>) => void;
-        onDelete?: (payload: RealtimePostgresChangesPayload<any>) => void;
+        onUpdate?: (data: RealtimePostgresChangesPayload<any>) => void;
+        onDelete?: (data: RealtimePostgresChangesPayload<any>) => void;
     }
 ) {
     return useRealtimeSubscription({
@@ -118,9 +118,9 @@ export function useTeamRealtime(
 export function usePlayersRealtime(
     teamId: string,
     handlers: {
-        onInsert?: (payload: RealtimePostgresChangesPayload<any>) => void;
-        onUpdate?: (payload: RealtimePostgresChangesPayload<any>) => void;
-        onDelete?: (payload: RealtimePostgresChangesPayload<any>) => void;
+        onInsert?: (data: RealtimePostgresChangesPayload<any>) => void;
+        onUpdate?: (data: RealtimePostgresChangesPayload<any>) => void;
+        onDelete?: (data: RealtimePostgresChangesPayload<any>) => void;
     }
 ) {
     return useRealtimeSubscription({

@@ -37,7 +37,7 @@ export const MatchResultForm: React.FC<MatchResultFormProps> = ({
             ? team2.id 
             : undefined;
 
-        const result: Partial<GameDetail> = {
+        const gameResult: Partial<GameDetail> = {
             game_id: gameId,
             team1_score: team1Score,
             team2_score: team2Score,
@@ -51,7 +51,7 @@ export const MatchResultForm: React.FC<MatchResultFormProps> = ({
         };
 
         try {
-            await onSubmit(result);
+            await onSubmit(gameResult);
         } finally {
             setLoading(false);
         }

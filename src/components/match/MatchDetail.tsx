@@ -161,8 +161,6 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                     <NaverMap
                         address={match.venue_address || match.venue || ''}
                         title={match.title}
-                        lat={match.venue_lat}
-                        lng={match.venue_lng}
                         phoneNumber={match.venue_phone}
                         openingHours={match.venue_hours}
                         additionalInfo={match.venue_info}

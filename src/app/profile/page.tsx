@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Team, Match, Player } from '@/types';
 import { Button, Input } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
@@ -207,10 +208,13 @@ export default function ProfilePage() {
                         <div className="flex items-end -mt-16 mb-4">
                             <div className="w-32 h-32 bg-white rounded-full border-4 border-white shadow-lg flex items-center justify-center">
                                 {profile?.avatar_url ? (
-                                    <img
+                                    <Image
                                         src={profile.avatar_url}
                                         alt={profile.full_name || '프로필'}
+                                        width={128}
+                                        height={128}
                                         className="w-full h-full rounded-full object-cover"
+                                        unoptimized={true}
                                     />
                                 ) : (
                                     <svg className="w-20 h-20 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -386,10 +390,13 @@ export default function ProfilePage() {
                                 >
                                     <div className="flex items-center space-x-3">
                                         {team.logo_url ? (
-                                            <img
+                                            <Image
                                                 src={team.logo_url}
                                                 alt={team.name}
+                                                width={40}
+                                                height={40}
                                                 className="w-10 h-10 rounded-full object-cover"
+                                                unoptimized={true}
                                             />
                                         ) : (
                                             <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">

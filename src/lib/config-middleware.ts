@@ -8,9 +8,9 @@ import { configValidator } from './config-validator';
  * 적절한 에러 응답을 반환합니다.
  */
 export async function withConfigValidation(
-    handler: (request: NextRequest) => Promise<NextResponse>
+    handler: (req: NextRequest) => Promise<NextResponse>
 ) {
-    return async (request: NextRequest) => {
+    return async (req: NextRequest) => {
         // 환경 설정 검증
         const validation = await configValidator.validateAll();
         
@@ -53,14 +53,14 @@ export async function withConfigValidation(
 
         // 느린 연결 경고 헤더 추가
         if (!validation.supabaseStatus.isHealthy) {
-            const response = await handler(request);
+            const response = await handler(req);
             response.headers.set('X-Database-Health', 'degraded');
             response.headers.set('X-Database-Latency', String(validation.supabaseStatus.latency));
             return response;
         }
 
         // 정상 처리
-        return handler(request);
+        return handler(req);
     };
 }
 

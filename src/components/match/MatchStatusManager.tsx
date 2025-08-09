@@ -92,7 +92,7 @@ export default function MatchStatusManager({
         await updateStatus(newStatus);
     };
 
-    const updateStatus = async (newStatus: MatchStatus) => {
+    const updateStatus = async (statusToUpdate: MatchStatus) => {
         if (!user) {
             setError('로그인이 필요합니다.');
             return;
@@ -110,8 +110,8 @@ export default function MatchStatusManager({
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ 
-                        status: newStatus,
-                        reason: newStatus === MatchStatus.CANCELLED ? cancellationReason : undefined
+                        status: statusToUpdate,
+                        reason: statusToUpdate === MatchStatus.CANCELLED ? cancellationReason : undefined
                     }),
                 }
             );
@@ -127,7 +127,7 @@ export default function MatchStatusManager({
             
             // 부모 컴포넌트에 알림
             if (onStatusChange) {
-                onStatusChange(newStatus);
+                onStatusChange(statusToUpdate);
             }
 
             // 성공 메시지

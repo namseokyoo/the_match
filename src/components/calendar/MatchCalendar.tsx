@@ -25,12 +25,10 @@ import {
     isSameMonth,
     isSameDay,
     isToday,
-    parseISO,
-    startOfDay,
-    endOfDay
+    parseISO
 } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { Match, MatchStatus, MatchType } from '@/types';
+import { MatchStatus, MatchType } from '@/types';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 

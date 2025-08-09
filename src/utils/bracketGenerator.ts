@@ -64,7 +64,6 @@ function nextPowerOfTwo(n: number): number {
 function createFirstRound(teams: BracketSeed[]): BracketMatch[] {
     const matches: BracketMatch[] = [];
     const bracketSize = nextPowerOfTwo(teams.length);
-    const byes = bracketSize - teams.length;
 
     // 시드 순서대로 팀 배치
     const sortedTeams = [...teams].sort((a, b) => a.seed - b.seed);

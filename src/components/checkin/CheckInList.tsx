@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Clock, Users, User, Search } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { CheckCircle, XCircle, Clock, Users, Search } from 'lucide-react';
 import { showToast } from '@/components/ui/Toast';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';

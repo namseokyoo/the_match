@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { configValidator, formatValidationResult } from '@/lib/config-validator';
 
 /**
@@ -7,7 +7,7 @@ import { configValidator, formatValidationResult } from '@/lib/config-validator'
  * 환경 설정을 검증하고 상태를 반환합니다.
  * 개발 환경에서만 상세 정보를 제공합니다.
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         // 환경 설정 검증
         const result = await configValidator.validateAll();

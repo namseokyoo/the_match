@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { format, addDays, addWeeks, addMonths, isBefore, startOfDay } from 'date-fns';
+import { format, addDays, addWeeks, addMonths } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Calendar, Clock, Repeat, MapPin, Users, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui';
@@ -120,7 +120,7 @@ export default function CreateRecurringMatchPage() {
       }
 
       // 모든 경기 생성
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('tournaments')
         .insert(matches)
         .select();

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar, Trophy, Users, Clock, ChevronRight, Plus } from 'lucide-react';
 import Link from 'next/link';
@@ -27,7 +27,7 @@ export default function DashboardPage() {
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [dataLoading, setDataLoading] = useState(true);
 
-    const fetchDashboardData = async () => {
+    const fetchDashboardData = useCallback(async () => {
         if (!user) {
             setDataLoading(false);
             return;
@@ -42,7 +42,7 @@ export default function DashboardPage() {
                 .limit(5);
 
             // 참가 중인 경기 조회
-            const { data: participatingMatches } = await supabase
+            await supabase
                 .from('match_participants')
                 .select(`
                     match_id,
@@ -77,7 +77,7 @@ export default function DashboardPage() {
         } finally {
             setDataLoading(false);
         }
-    };
+    }, [user]);
 
     useEffect(() => {
         // 로딩이 완료되고 사용자가 있을 때만 데이터 로드
@@ -87,7 +87,7 @@ export default function DashboardPage() {
             // 로딩이 완료되었는데 사용자가 없으면 로그인 페이지로
             router.push('/login');
         }
-    }, [loading, user, router]);
+    }, [loading, user, router, fetchDashboardData]);
 
     // 인증 로딩 중
     if (loading) {

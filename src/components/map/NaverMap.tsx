@@ -7,8 +7,6 @@ import { MapPin, Navigation, Phone, Clock, Info } from 'lucide-react';
 interface NaverMapProps {
   address: string;
   title?: string;
-  lat?: number;
-  lng?: number;
   onLocationSelect?: (lat: number, lng: number, address: string) => void;
   editable?: boolean;
   height?: string;
@@ -27,8 +25,6 @@ declare global {
 export default function NaverMap({
   address,
   title = '경기장 위치',
-  lat,
-  lng,
   onLocationSelect,
   editable = false,
   height = '400px',
@@ -42,7 +38,7 @@ export default function NaverMap({
   const [marker, setMarker] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchedAddress, setSearchedAddress] = useState(address);
-  const [coordinates, setCoordinates] = useState({ lat: lat || 37.5665, lng: lng || 126.9780 });
+  const [coordinates, setCoordinates] = useState({ lat: 37.5665, lng: 126.9780 });
 
   // 주소로 좌표 검색
   const searchAddressToCoordinate = (searchAddress: string) => {

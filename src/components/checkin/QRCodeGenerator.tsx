@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import QRCode from 'qrcode';
 import { Download, RefreshCw, Check } from 'lucide-react';
 import { showToast } from '@/components/ui/Toast';
@@ -96,10 +97,13 @@ export default function QRCodeGenerator({
         <>
           <div className="flex justify-center mb-4">
             <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
-              <img
+              <Image
                 src={qrCodeUrl}
                 alt="체크인 QR 코드"
+                width={256}
+                height={256}
                 className="w-64 h-64"
+                unoptimized={true}
               />
             </div>
           </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MatchForm } from '@/components/match';
 import { CreateMatchForm, MatchTemplate } from '@/types';
@@ -18,14 +18,7 @@ export default function CreateMatchClient() {
     const searchParams = useSearchParams();
     const templateId = searchParams.get('templateId');
 
-    // 템플릿 로드
-    useEffect(() => {
-        if (templateId) {
-            loadTemplate(templateId);
-        }
-    }, [templateId]);
-
-    const loadTemplate = async (id: string) => {
+    const loadTemplate = useCallback(async (id: string) => {
         try {
             setLoadingTemplate(true);
             const response = await fetch(`/api/templates/${id}`);
@@ -41,7 +34,14 @@ export default function CreateMatchClient() {
         } finally {
             setLoadingTemplate(false);
         }
-    };
+    }, [showNotification]);
+
+    // 템플릿 로드
+    useEffect(() => {
+        if (templateId) {
+            loadTemplate(templateId);
+        }
+    }, [templateId, loadTemplate]);
 
     // 경기 생성 핸들러
     const handleSubmit = async (formData: CreateMatchForm) => {

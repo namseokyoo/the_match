@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { TemplateCard } from '@/components/template/TemplateCard';
@@ -17,11 +17,7 @@ export default function TemplatesPage() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<FilterType>('all');
 
-    useEffect(() => {
-        fetchTemplates();
-    }, [filter]);
-
-    const fetchTemplates = async () => {
+    const fetchTemplates = useCallback(async () => {
         try {
             setLoading(true);
             const response = await fetch(`/api/templates?filter=${filter}`);
@@ -35,7 +31,11 @@ export default function TemplatesPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filter]);
+
+    useEffect(() => {
+        fetchTemplates();
+    }, [fetchTemplates]);
 
     const handleUseTemplate = async (template: MatchTemplate) => {
         // 사용 횟수 증가

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Game, getBracket, createSingleEliminationBracket, createRoundRobinSchedule } from '@/lib/tournament';
-import { Trophy, ChevronRight, Calendar, MapPin, Plus } from 'lucide-react';
+import { Trophy, Calendar, MapPin, Plus } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui';
 import Link from 'next/link';
@@ -24,13 +24,7 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
     const [approvedTeams, setApprovedTeams] = useState<any[]>([]);
     const [matchType, setMatchType] = useState<string>('');
 
-    useEffect(() => {
-        fetchBracket();
-        fetchApprovedTeams();
-        fetchMatchType();
-    }, [matchId]);
-
-    const fetchBracket = async () => {
+    const fetchBracket = useCallback(async () => {
         try {
             const data = await getBracket(matchId);
             setGames(data);
@@ -39,9 +33,9 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
         } finally {
             setLoading(false);
         }
-    };
+    }, [matchId]);
     
-    const fetchApprovedTeams = async () => {
+    const fetchApprovedTeams = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('match_participants')
@@ -54,9 +48,9 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
         } catch (error) {
             console.error('Error fetching approved teams:', error);
         }
-    };
+    }, [matchId]);
     
-    const fetchMatchType = async () => {
+    const fetchMatchType = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('matches')
@@ -69,7 +63,13 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
         } catch (error) {
             console.error('Error fetching match type:', error);
         }
-    };
+    }, [matchId]);
+
+    useEffect(() => {
+        fetchBracket();
+        fetchApprovedTeams();
+        fetchMatchType();
+    }, [fetchBracket, fetchApprovedTeams, fetchMatchType]);
     
     const handleCreateBracket = async () => {
         if (approvedTeams.length < 2) {
@@ -133,18 +133,6 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
         }
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'completed':
-                return 'bg-green-100 border-green-300';
-            case 'in_progress':
-                return 'bg-yellow-100 border-yellow-300';
-            case 'scheduled':
-                return 'bg-gray-50 border-gray-300';
-            default:
-                return 'bg-gray-50 border-gray-300';
-        }
-    };
 
     if (loading) {
         return (
@@ -211,7 +199,6 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
                                 <GameCard
                                     key={game.id}
                                     game={game}
-                                    isOrganizer={isOrganizer}
                                     onSelect={() => setSelectedGame(game)}
                                 />
                             ))}
@@ -234,7 +221,7 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
                                     marginTop: `${Math.pow(2, Number(round) - 1) * 40 - 40}px`
                                 }}
                             >
-                                {roundGames.map((game, index) => (
+                                {roundGames.map((game) => (
                                     <div
                                         key={game.id}
                                         className="relative"
@@ -244,7 +231,6 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
                                     >
                                         <GameCard
                                             game={game}
-                                            isOrganizer={isOrganizer}
                                             onSelect={() => setSelectedGame(game)}
                                         />
                                         
@@ -266,7 +252,6 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
                     game={selectedGame}
                     isOrganizer={isOrganizer}
                     onClose={() => setSelectedGame(null)}
-                    onUpdate={fetchBracket}
                 />
             )}
         </div>
@@ -275,11 +260,10 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
 
 interface GameCardProps {
     game: Game;
-    isOrganizer: boolean;
     onSelect: () => void;
 }
 
-const GameCard: React.FC<GameCardProps> = ({ game, isOrganizer, onSelect }) => {
+const GameCard: React.FC<GameCardProps> = ({ game, onSelect }) => {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'completed':
@@ -347,14 +331,12 @@ interface GameDetailModalProps {
     game: Game;
     isOrganizer: boolean;
     onClose: () => void;
-    onUpdate: () => void;
 }
 
 const GameDetailModal: React.FC<GameDetailModalProps> = ({
     game,
     isOrganizer,
     onClose,
-    onUpdate,
 }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">

@@ -50,14 +50,14 @@ export async function createSingleEliminationBracket(
     const teamCount = teamIds.length;
     
     // 2의 제곱수로 올림 (부전승 처리를 위해)
-    const bracketSize = Math.pow(2, Math.ceil(Math.log2(teamCount)));
-    const totalRounds = Math.log2(bracketSize);
+    const bracketPowerOfTwo = Math.pow(2, Math.ceil(Math.log2(teamCount)));
+    const totalRounds = Math.log2(bracketPowerOfTwo);
     
     // 팀 배열 섞기 (랜덤 시딩)
     const shuffledTeams = [...teamIds].sort(() => Math.random() - 0.5);
     
     // 부전승을 위한 빈 슬롯 추가
-    while (shuffledTeams.length < bracketSize) {
+    while (shuffledTeams.length < bracketPowerOfTwo) {
         shuffledTeams.push('');
     }
     
@@ -68,7 +68,7 @@ export async function createSingleEliminationBracket(
     const firstRoundGames: Game[] = [];
     let gameNumber = 1;
     
-    for (let i = 0; i < bracketSize / 2; i++) {
+    for (let i = 0; i < bracketPowerOfTwo / 2; i++) {
         const team1 = shuffledTeams[i * 2] || '';
         const team2 = shuffledTeams[i * 2 + 1] || '';
         
@@ -131,7 +131,7 @@ export async function createSingleEliminationBracket(
     }
     
     // 데이터베이스에 저장
-    const { data, error } = await supabase
+    const { error } = await supabase
         .from('games')
         .insert(games)
         .select();
@@ -156,17 +156,14 @@ export async function createDoubleEliminationBracket(
     teamIds: string[]
 ): Promise<TournamentBracket> {
     // 위너스 브라켓과 루저스 브라켓 생성
-    const teamCount = teamIds.length;
-    const bracketSize = Math.pow(2, Math.ceil(Math.log2(teamCount)));
-    
-    const games: Game[] = [];
-    const rounds: Game[][] = [];
+    const doubleElimGames: Game[] = [];
+    const doubleElimRounds: Game[][] = [];
     
     // TODO: 더블 엘리미네이션 로직 구현
     // 복잡한 로직이므로 추후 구현
     
     return {
-        rounds,
+        rounds: doubleElimRounds,
         totalRounds: 0,
         totalGames: 0,
     };
@@ -202,7 +199,7 @@ export async function createRoundRobinSchedule(
     }
     
     // 데이터베이스에 저장
-    const { data, error } = await supabase
+    const { error } = await supabase
         .from('games')
         .insert(games)
         .select();

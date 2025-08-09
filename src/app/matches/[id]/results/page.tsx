@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
@@ -28,11 +28,7 @@ export default function MatchResultsPage() {
     const [selectedGame, setSelectedGame] = useState<GameResult | null>(null);
     const [showResultForm, setShowResultForm] = useState(false);
 
-    useEffect(() => {
-        fetchMatchData();
-    }, [matchId]);
-
-    const fetchMatchData = async () => {
+    const fetchMatchData = useCallback(async () => {
         try {
             setLoading(true);
 
@@ -82,7 +78,11 @@ export default function MatchResultsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [matchId, user]);
+
+    useEffect(() => {
+        fetchMatchData();
+    }, [fetchMatchData]);
 
     // 임시 통계 데이터 생성 (실제 구현 시 DB에서 가져와야 함)
     const generateMockStats = (matchId: string, teams: Team[]) => {

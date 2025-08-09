@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 import { Player, Team } from '@/types';
 import { Button } from '@/components/ui';
 import { EditPlayerModal } from '@/components/player';
@@ -253,10 +254,13 @@ export default function PlayerProfilePage() {
                         <div className="flex items-end -mt-16 mb-4">
                             <div className="w-32 h-32 bg-white rounded-full border-4 border-white shadow-lg flex items-center justify-center">
                                 {player.avatar_url ? (
-                                    <img
+                                    <Image
                                         src={player.avatar_url}
                                         alt={player.name}
+                                        width={128}
+                                        height={128}
                                         className="w-full h-full rounded-full object-cover"
+                                        unoptimized={true}
                                     />
                                 ) : (
                                     <svg className="w-20 h-20 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -223,16 +223,16 @@ const MobileNavbar = () => {
                                 <div className="p-4 border-t border-gray-200">
                                     <button
                                         onClick={handleSignOut}
-                                        disabled={isLoggingOut || isSigningOut}
+                                        disabled={isLoggingOut}
                                         className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg transition-colors ${
-                                            isLoggingOut || isSigningOut
+                                            isLoggingOut
                                                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                         }`}
                                     >
                                         <LogOut className="w-5 h-5" />
                                         <span className="font-medium">
-                                            {isLoggingOut || isSigningOut ? '로그아웃 중...' : '로그아웃'}
+                                            {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
                                         </span>
                                     </button>
                                 </div>
@@ -354,14 +354,14 @@ const MobileNavbar = () => {
                                     </Link>
                                     <button
                                         onClick={handleSignOut}
-                                        disabled={isLoggingOut || isSigningOut}
+                                        disabled={isLoggingOut}
                                         className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                                            isLoggingOut || isSigningOut
+                                            isLoggingOut
                                                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                                         }`}
                                     >
-                                        {isLoggingOut || isSigningOut ? '로그아웃 중...' : '로그아웃'}
+                                        {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
                                     </button>
                                 </div>
                             ) : (

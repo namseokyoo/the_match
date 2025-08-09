@@ -8,17 +8,14 @@ import {
     Trophy, 
     Play, 
     Pause, 
-    StopCircle, 
     RotateCcw, 
     Plus, 
     Minus,
     Wifi,
     WifiOff,
-    Timer,
     ChevronUp,
     ChevronDown,
     X,
-    Check,
     AlertCircle,
     Smartphone
 } from 'lucide-react';
@@ -64,6 +61,27 @@ export default function MobileScoreInput({ game }: MobileScoreInputProps) {
         }
     };
 
+    // 대기 중인 액션 동기화
+    const syncPendingActions = useCallback(async () => {
+        if (pendingActions.length === 0) return;
+        
+        try {
+            // 모든 대기 중인 액션 적용
+            await supabase
+                .from('games')
+                .update({
+                    team1_score: team1Score,
+                    team2_score: team2Score,
+                })
+                .eq('id', game.id);
+            
+            setPendingActions([]);
+            showToast('오프라인 점수 동기화 완료', 'success');
+        } catch (error) {
+            console.error('Sync error:', error);
+        }
+    }, [pendingActions, team1Score, team2Score, game.id]);
+
     // 온라인 상태 체크
     useEffect(() => {
         const handleOnline = () => {
@@ -84,7 +102,7 @@ export default function MobileScoreInput({ game }: MobileScoreInputProps) {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, []);
+    }, [syncPendingActions]);
 
     // 타이머
     useEffect(() => {
@@ -120,67 +138,8 @@ export default function MobileScoreInput({ game }: MobileScoreInputProps) {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
-    // 점수 변경 with Undo
-    const handleScoreChange = useCallback((team: 'team1' | 'team2', delta: number) => {
-        if (gameStatus !== 'in_progress') return;
-        
-        vibrate();
-        
-        // 이전 Undo 타이머 취소
-        if (undoTimeout) {
-            clearTimeout(undoTimeout);
-        }
-        
-        const newScore = team === 'team1' 
-            ? Math.max(0, team1Score + delta)
-            : Math.max(0, team2Score + delta);
-        
-        if (team === 'team1') {
-            setTeam1Score(newScore);
-        } else {
-            setTeam2Score(newScore);
-        }
-        
-        // Undo를 위한 액션 저장
-        const action: ScoreAction = {
-            team,
-            delta,
-            timestamp: Date.now()
-        };
-        setLastAction(action);
-        
-        // 3초 후 자동 저장
-        const timeout = setTimeout(() => {
-            saveScore(
-                team === 'team1' ? newScore : team1Score,
-                team === 'team2' ? newScore : team2Score
-            );
-            setLastAction(null);
-        }, 3000);
-        
-        setUndoTimeout(timeout);
-    }, [team1Score, team2Score, gameStatus, undoTimeout]);
-
-    // Undo 기능
-    const handleUndo = () => {
-        if (!lastAction || !undoTimeout) return;
-        
-        vibrate([100, 50, 100]);
-        clearTimeout(undoTimeout);
-        
-        if (lastAction.team === 'team1') {
-            setTeam1Score(Math.max(0, team1Score - lastAction.delta));
-        } else {
-            setTeam2Score(Math.max(0, team2Score - lastAction.delta));
-        }
-        
-        setLastAction(null);
-        setUndoTimeout(null);
-        showToast('점수 변경 취소됨', 'info');
-    };
-
-    // 점수 저장
-    const saveScore = async (t1Score: number, t2Score: number) => {
+    // 점수 저장 (handleScoreChange보다 먼저 정의해야 함)
+    const saveScore = useCallback(async (t1Score: number, t2Score: number) => {
         if (isOnline) {
             try {
                 await supabase
@@ -221,28 +180,67 @@ export default function MobileScoreInput({ game }: MobileScoreInputProps) {
                 timestamp: Date.now()
             }]);
         }
+    }, [isOnline, game.id, period, timer, user?.id, game.team1_score]);
+
+    // 점수 변경 with Undo
+    const handleScoreChange = useCallback((team: 'team1' | 'team2', delta: number) => {
+        if (gameStatus !== 'in_progress') return;
+        
+        vibrate();
+        
+        // 이전 Undo 타이머 취소
+        if (undoTimeout) {
+            clearTimeout(undoTimeout);
+        }
+        
+        const newScore = team === 'team1' 
+            ? Math.max(0, team1Score + delta)
+            : Math.max(0, team2Score + delta);
+        
+        if (team === 'team1') {
+            setTeam1Score(newScore);
+        } else {
+            setTeam2Score(newScore);
+        }
+        
+        // Undo를 위한 액션 저장
+        const action: ScoreAction = {
+            team,
+            delta,
+            timestamp: Date.now()
+        };
+        setLastAction(action);
+        
+        // 3초 후 자동 저장
+        const timeout = setTimeout(() => {
+            saveScore(
+                team === 'team1' ? newScore : team1Score,
+                team === 'team2' ? newScore : team2Score
+            );
+            setLastAction(null);
+        }, 3000);
+        
+        setUndoTimeout(timeout);
+    }, [team1Score, team2Score, gameStatus, undoTimeout, saveScore]);
+
+    // Undo 기능
+    const handleUndo = () => {
+        if (!lastAction || !undoTimeout) return;
+        
+        vibrate([100, 50, 100]);
+        clearTimeout(undoTimeout);
+        
+        if (lastAction.team === 'team1') {
+            setTeam1Score(Math.max(0, team1Score - lastAction.delta));
+        } else {
+            setTeam2Score(Math.max(0, team2Score - lastAction.delta));
+        }
+        
+        setLastAction(null);
+        setUndoTimeout(null);
+        showToast('점수 변경 취소됨', 'info');
     };
 
-    // 대기 중인 액션 동기화
-    const syncPendingActions = async () => {
-        if (pendingActions.length === 0) return;
-        
-        try {
-            // 모든 대기 중인 액션 적용
-            await supabase
-                .from('games')
-                .update({
-                    team1_score: team1Score,
-                    team2_score: team2Score,
-                })
-                .eq('id', game.id);
-            
-            setPendingActions([]);
-            showToast('오프라인 점수 동기화 완료', 'success');
-        } catch (error) {
-            console.error('Sync error:', error);
-        }
-    };
 
     // 게임 시작
     const handleStartGame = async () => {

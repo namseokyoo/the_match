@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import { Player, Team } from '@/types';
 import { Button } from '@/components/ui';
 import { SearchBar } from '@/components/search';
@@ -168,10 +169,13 @@ export default function PlayersClient() {
                                         <div className="flex items-center space-x-4">
                                             <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                                                 {player.avatar_url ? (
-                                                    <img
+                                                    <Image
                                                         src={player.avatar_url}
                                                         alt={player.name}
+                                                        width={48}
+                                                        height={48}
                                                         className="w-full h-full rounded-full object-cover"
+                                                        unoptimized={true}
                                                     />
                                                 ) : (
                                                     <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

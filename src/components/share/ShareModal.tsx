@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { X, Download, Copy, Check, MessageCircle, Link } from 'lucide-react';
 import { showToast } from '@/components/ui/Toast';
 import { Match, Team } from '@/types';
@@ -159,10 +160,13 @@ export default function ShareModal({
               </div>
             </div>
           ) : imageUrl ? (
-            <img
+            <Image
               src={imageUrl}
               alt="경기 결과"
+              width={400}
+              height={600}
               className="w-full rounded-lg shadow-md"
+              unoptimized={true}
             />
           ) : (
             <div className="aspect-[3/4] bg-gray-100 rounded-lg flex items-center justify-center">

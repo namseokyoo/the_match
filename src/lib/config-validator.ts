@@ -56,7 +56,7 @@ export class ConfigValidator {
         this.warnings = [];
 
         // 1. 환경 변수 검증
-        const envVars = this.validateEnvironmentVariables();
+        this.validateEnvironmentVariables();
         
         // 2. Supabase 연결 테스트
         const supabaseStatus = await this.testSupabaseConnection();
