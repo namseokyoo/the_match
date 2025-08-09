@@ -7,6 +7,8 @@ interface FetchOptions extends RequestInit {
     retryDelay?: number;
     cacheStrategy?: 'cache-first' | 'network-first' | 'stale-while-revalidate';
     maxAge?: number;
+    requireAuth?: boolean;
+    accessToken?: string | null;
 }
 
 const DEFAULT_TIMEOUT = 8000; // 8초로 단축
@@ -43,8 +45,18 @@ class APIClient {
             timeout = DEFAULT_TIMEOUT,
             retries = DEFAULT_RETRIES,
             retryDelay = DEFAULT_RETRY_DELAY,
+            requireAuth = false,
+            accessToken = null,
             ...fetchOptions
         } = options;
+        
+        // 인증이 필요한 경우 Authorization 헤더 추가
+        if (requireAuth && accessToken) {
+            fetchOptions.headers = {
+                ...fetchOptions.headers,
+                'Authorization': `Bearer ${accessToken}`,
+            };
+        }
 
         const startTime = performance.now();
         this.metrics.requestCount++;
@@ -226,6 +238,44 @@ class APIClient {
 }
 
 export const apiClient = new APIClient();
+
+// 인증이 필요한 API 호출을 위한 헬퍼 함수
+export async function fetchWithAuth(
+    url: string,
+    accessToken: string | null,
+    options: Omit<FetchOptions, 'accessToken' | 'requireAuth'> = {}
+): Promise<Response> {
+    return apiClient.fetchWithRetry(url, {
+        ...options,
+        requireAuth: true,
+        accessToken,
+    });
+}
+
+// POST 요청을 위한 간단한 헬퍼
+export async function postWithAuth(
+    url: string,
+    accessToken: string | null,
+    body: any,
+    options: Omit<FetchOptions, 'accessToken' | 'requireAuth' | 'method' | 'body'> = {}
+): Promise<any> {
+    const response = await fetchWithAuth(url, accessToken, {
+        ...options,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers,
+        },
+        body: typeof body === 'string' ? body : JSON.stringify(body),
+    });
+    
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP ${response.status} 오류가 발생했습니다.`);
+    }
+    
+    return response.json();
+}
 
 // 특화된 API 함수들
 export const matchAPI = {

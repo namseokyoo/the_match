@@ -6,13 +6,14 @@ import { MatchForm } from '@/components/match';
 import { CreateMatchForm, MatchTemplate } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotification } from '@/contexts/NotificationContext';
+import { postWithAuth } from '@/lib/api-client';
 import Link from 'next/link';
 
 export default function CreateMatchClient() {
     const [isLoading, setIsLoading] = useState(false);
     const [template, setTemplate] = useState<MatchTemplate | null>(null);
     const [loadingTemplate, setLoadingTemplate] = useState(false);
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, getAccessToken } = useAuth();
     const { showNotification } = useNotification();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -54,25 +55,17 @@ export default function CreateMatchClient() {
         try {
             setIsLoading(true);
 
-            // Token removed - using cookie auth
-            if (!user) {
-                showNotification('인증 토큰을 가져올 수 없습니다.', 'error');
+            // 액세스 토큰 가져오기
+            const accessToken = getAccessToken();
+            
+            if (!accessToken) {
+                showNotification('인증 토큰을 가져올 수 없습니다. 다시 로그인해주세요.', 'error');
+                router.push('/login');
                 return;
             }
 
-            const response = await fetch('/api/matches', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || '경기 생성에 실패했습니다.');
-            }
+            // postWithAuth 헬퍼 함수 사용
+            const data = await postWithAuth('/api/matches', accessToken, formData);
 
             showNotification('경기가 성공적으로 생성되었습니다!', 'success');
             router.push(`/matches/${data.data.id}`);

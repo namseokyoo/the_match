@@ -1,0 +1,50 @@
+# Page snapshot
+
+```yaml
+- navigation:
+  - link "T The Match":
+    - /url: /
+  - link "경기":
+    - /url: /matches
+  - link "템플릿":
+    - /url: /matches/templates
+  - link "팀":
+    - /url: /teams
+  - link "선수":
+    - /url: /players
+  - link "통계":
+    - /url: /stats
+  - link "로그인":
+    - /url: /login
+  - link "회원가입":
+    - /url: /signup
+- main:
+  - heading "The Match" [level=1]
+  - paragraph: 스포츠 경기 관리 플랫폼
+  - text: 0 경기 0 팀 0 선수
+  - heading "진행 중인 경기" [level=2]
+  - link "모두 보기":
+    - /url: /matches
+    - text: 모두 보기
+    - img
+  - img
+  - paragraph: 아직 진행 중인 경기가 없습니다
+  - link "회원가입하고 시작하기":
+    - /url: /signup
+  - heading "👥 팀원 모집 중" [level=2]
+  - link "모든 팀 보기":
+    - /url: /teams
+    - text: 모든 팀 보기
+    - img
+  - img
+  - paragraph: 팀원을 모집 중인 팀이 없습니다
+  - heading "지금 시작하세요" [level=2]
+  - paragraph: 무료로 The Match를 체험해보고 경기 관리의 새로운 경험을 만나보세요
+  - link "무료 회원가입":
+    - /url: /signup
+  - link "로그인":
+    - /url: /login
+  - img
+  - text: The Match © 2024 The Match. All rights reserved.
+- alert
+```

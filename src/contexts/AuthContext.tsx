@@ -14,6 +14,7 @@ interface AuthContextType {
     signInWithGoogle: () => Promise<{ error: AuthError | null }>;
     resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
     isAuthenticated: boolean;
+    getAccessToken: () => string | null;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -228,6 +229,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
+    // 액세스 토큰 가져오기
+    const getAccessToken = () => {
+        return session?.access_token || null;
+    };
+
     const value = {
         user,
         session,
@@ -238,6 +244,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         signInWithGoogle,
         resetPassword,
         isAuthenticated: !!user && !!session,
+        getAccessToken,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
