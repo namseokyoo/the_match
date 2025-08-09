@@ -137,7 +137,7 @@ export default function ProfilePage() {
             // 인증이 완료되었는데 사용자가 없으면 로그인 페이지로
             router.push('/login');
         }
-    }, [initialized, user, router, fetchProfile]);
+    }, [initialized, user, router]);
 
     // 프로필 수정
     const handleSaveProfile = async () => {
