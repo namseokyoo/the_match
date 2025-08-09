@@ -6,7 +6,6 @@ import { Calendar, Trophy, Users, Clock, ChevronRight, Plus } from 'lucide-react
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui';
-import { Badge } from '@/components/ui/Badge';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { showToast } from '@/components/ui/Toast';
