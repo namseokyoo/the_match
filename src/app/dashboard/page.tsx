@@ -1,133 +1,109 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Calendar, Trophy, Users, Clock, ChevronRight, Plus } from 'lucide-react';
 import Link from 'next/link';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui';
+import { Badge } from '@/components/ui/Badge';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import { Card, Button } from '@/components/ui';
-import { Match, Team, MatchStatus } from '@/types';
-import { formatDate } from '@/lib/utils';
+import { showToast } from '@/components/ui/Toast';
 
-interface DashboardStats {
-    totalMatches: number;
-    activeMatches: number;
-    myTeams: number;
-    upcomingGames: number;
+interface DashboardData {
+    upcomingMatches: any[];
+    myTeams: any[];
+    recentActivities: any[];
+    stats: {
+        totalMatches: number;
+        totalTeams: number;
+        upcomingCount: number;
+    };
 }
 
 export default function DashboardPage() {
     const router = useRouter();
-    const { user, loading: authLoading, initialized } = useAuth();
-    const [stats, setStats] = useState<DashboardStats>({
-        totalMatches: 0,
-        activeMatches: 0,
-        myTeams: 0,
-        upcomingGames: 0,
-    });
-    const [myMatches, setMyMatches] = useState<Match[]>([]);
-    const [myTeams, setMyTeams] = useState<Team[]>([]);
-    const [recentMatches, setRecentMatches] = useState<Match[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [dataFetched, setDataFetched] = useState(false);
-
-    useEffect(() => {
-        // 인증이 초기화되고 사용자가 없으면 로그인 페이지로
-        if (initialized && !user) {
-            router.push('/login');
-            return;
-        }
-        
-        // 인증이 초기화되고 사용자가 있으며 데이터를 아직 가져오지 않았으면 fetch
-        if (initialized && user && !dataFetched) {
-            fetchDashboardData();
-        }
-    }, [user, initialized, router, dataFetched]);
+    const { user, loading, initialized } = useAuth();
+    const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+    const [dataLoading, setDataLoading] = useState(true);
 
     const fetchDashboardData = async () => {
-        if (!user) return;
+        if (!user) {
+            setDataLoading(false);
+            return;
+        }
 
         try {
-            setLoading(true);
-            setDataFetched(true);
-
-            // 내가 생성한 경기들
-            const { data: createdMatches, error: matchError } = await supabase
-                .from('matches')
-                .select('*')
-                .eq('creator_id', user.id)
-                .order('created_at', { ascending: false });
-
-            if (matchError) {
-                console.error('Matches fetch error:', matchError);
-            } else {
-                setMyMatches(createdMatches || []);
-            }
-
-            // 내가 캡틴인 팀들
-            const { data: captainTeams, error: teamError } = await supabase
+            // 사용자의 팀 목록 조회
+            const { data: teams } = await supabase
                 .from('teams')
                 .select('*')
                 .eq('captain_id', user.id)
-                .order('created_at', { ascending: false });
+                .limit(5);
 
-            if (teamError) {
-                console.error('Teams fetch error:', teamError);
-            } else {
-                setMyTeams(captainTeams || []);
-            }
+            // 참가 중인 경기 조회
+            const { data: participatingMatches } = await supabase
+                .from('match_participants')
+                .select(`
+                    match_id,
+                    matches!inner(*)
+                `)
+                .eq('team_id', teams?.[0]?.id || '')
+                .limit(5);
 
-            // 최근 경기들
-            const { data: recent, error: recentError } = await supabase
+            // 최근 생성한 경기 조회
+            const { data: createdMatches } = await supabase
                 .from('matches')
                 .select('*')
+                .eq('creator_id', user.id)
                 .order('created_at', { ascending: false })
                 .limit(5);
 
-            if (recentError) {
-                console.error('Recent matches fetch error:', recentError);
-            } else {
-                setRecentMatches(recent || []);
-            }
-
-            // 통계 계산
-            const activeCount = (createdMatches || []).filter(
-                m => m.status === MatchStatus.REGISTRATION || m.status === MatchStatus.IN_PROGRESS
-            ).length;
-
-            setStats({
-                totalMatches: createdMatches?.length || 0,
-                activeMatches: activeCount,
-                myTeams: captainTeams?.length || 0,
-                upcomingGames: 0, // TODO: 실제 게임 일정 데이터 연동
+            setDashboardData({
+                upcomingMatches: createdMatches || [],
+                myTeams: teams || [],
+                recentActivities: [],
+                stats: {
+                    totalMatches: createdMatches?.length || 0,
+                    totalTeams: teams?.length || 0,
+                    upcomingCount: createdMatches?.filter(m => 
+                        new Date(m.start_date) > new Date()
+                    ).length || 0,
+                }
             });
-
         } catch (error) {
             console.error('Dashboard data fetch error:', error);
+            showToast('대시보드 데이터를 불러오는데 실패했습니다', 'error');
         } finally {
-            setLoading(false);
+            setDataLoading(false);
         }
     };
 
-    // 초기 인증 로딩 중
-    if (!initialized) {
+    useEffect(() => {
+        // 인증이 초기화되고 사용자가 있을 때만 데이터 로드
+        if (initialized && user) {
+            fetchDashboardData();
+        } else if (initialized && !user) {
+            // 인증이 완료되었는데 사용자가 없으면 로그인 페이지로
+            router.push('/login');
+        }
+    }, [initialized, user, router]);
+
+    // 인증 로딩 중
+    if (!initialized || loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-match-blue"></div>
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-500"></div>
             </div>
         );
     }
 
-    // 인증 완료 후 사용자 없음 (로그인 페이지로 리다이렉트 중)
-    if (initialized && !user) {
-        return null;
-    }
-
     // 데이터 로딩 중
-    if (loading && !dataFetched) {
+    if (dataLoading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-match-blue"></div>
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-500"></div>
             </div>
         );
     }
@@ -139,220 +115,184 @@ export default function DashboardPage() {
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">대시보드</h1>
                     <p className="mt-2 text-gray-600">
-                        안녕하세요, {user?.email || '사용자'}님! 여기서 모든 활동을 한눈에 확인하세요.
+                        {user?.email?.split('@')[0]}님, 환영합니다!
                     </p>
                 </div>
 
                 {/* 통계 카드 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <Card className="p-6">
-                        <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                                <div className="p-3 bg-blue-100 rounded-lg">
-                                    <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <Card className="hover:shadow-lg transition-shadow">
+                        <CardContent className="p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">전체 경기</p>
+                                    <p className="text-2xl font-bold text-gray-900">
+                                        {dashboardData?.stats.totalMatches || 0}
+                                    </p>
                                 </div>
+                                <Trophy className="h-8 w-8 text-primary-500" />
                             </div>
-                            <div className="ml-5">
-                                <p className="text-sm font-medium text-gray-500">내 경기</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.totalMatches}</p>
-                            </div>
-                        </div>
+                        </CardContent>
                     </Card>
 
-                    <Card className="p-6">
-                        <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                                <div className="p-3 bg-green-100 rounded-lg">
-                                    <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                    <Card className="hover:shadow-lg transition-shadow">
+                        <CardContent className="p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">내 팀</p>
+                                    <p className="text-2xl font-bold text-gray-900">
+                                        {dashboardData?.stats.totalTeams || 0}
+                                    </p>
                                 </div>
+                                <Users className="h-8 w-8 text-success-500" />
                             </div>
-                            <div className="ml-5">
-                                <p className="text-sm font-medium text-gray-500">진행 중</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.activeMatches}</p>
-                            </div>
-                        </div>
+                        </CardContent>
                     </Card>
 
-                    <Card className="p-6">
-                        <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                                <div className="p-3 bg-purple-100 rounded-lg">
-                                    <svg className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM9 11a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
+                    <Card className="hover:shadow-lg transition-shadow">
+                        <CardContent className="p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">예정된 경기</p>
+                                    <p className="text-2xl font-bold text-gray-900">
+                                        {dashboardData?.stats.upcomingCount || 0}
+                                    </p>
                                 </div>
+                                <Calendar className="h-8 w-8 text-info-500" />
                             </div>
-                            <div className="ml-5">
-                                <p className="text-sm font-medium text-gray-500">내 팀</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.myTeams}</p>
-                            </div>
-                        </div>
+                        </CardContent>
                     </Card>
 
-                    <Link href="/matches/calendar">
-                        <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer">
-                            <div className="flex items-center">
-                                <div className="flex-shrink-0">
-                                    <div className="p-3 bg-orange-100 rounded-lg">
-                                        <svg className="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
+                    <Card className="hover:shadow-lg transition-shadow">
+                        <CardContent className="p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">이번 주</p>
+                                    <p className="text-2xl font-bold text-gray-900">0</p>
                                 </div>
-                                <div className="ml-5">
-                                    <p className="text-sm font-medium text-gray-500">캘린더 보기</p>
-                                    <p className="text-2xl font-bold text-gray-900">{stats.upcomingGames}</p>
-                                    <p className="text-xs text-gray-500 mt-1">예정 경기</p>
-                                </div>
+                                <Clock className="h-8 w-8 text-warning-500" />
                             </div>
-                        </Card>
-                    </Link>
+                        </CardContent>
+                    </Card>
                 </div>
 
-                {/* 내 경기 목록 */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* 내가 생성한 경기 */}
-                    <div>
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-bold text-gray-900">내가 주최한 경기</h2>
+                    {/* 예정된 경기 */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle>예정된 경기</CardTitle>
                             <Link href="/matches/create">
-                                <Button size="sm" variant="primary">
-                                    새 경기 만들기
+                                <Button size="sm" variant="outline">
+                                    <Plus className="h-4 w-4 mr-1" />
+                                    새 경기
                                 </Button>
                             </Link>
-                        </div>
-                        <div className="space-y-3">
-                            {myMatches.length > 0 ? (
-                                myMatches.slice(0, 5).map(match => (
-                                    <Card key={match.id} className="p-4">
-                                        <Link href={`/matches/${match.id}`}>
-                                            <div className="flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg">
+                        </CardHeader>
+                        <CardContent>
+                            {dashboardData?.upcomingMatches.length === 0 ? (
+                                <div className="text-center py-8 text-gray-500">
+                                    예정된 경기가 없습니다
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {dashboardData?.upcomingMatches.map((match) => (
+                                        <Link 
+                                            key={match.id} 
+                                            href={`/matches/${match.id}`}
+                                            className="block"
+                                        >
+                                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                                                 <div>
-                                                    <h3 className="font-semibold text-gray-900">{match.title}</h3>
-                                                    <p className="text-sm text-gray-600">
-                                                        {formatDate(match.created_at)}
+                                                    <h4 className="font-semibold text-gray-900">
+                                                        {match.title}
+                                                    </h4>
+                                                    <p className="text-sm text-gray-500">
+                                                        {new Date(match.start_date).toLocaleDateString()}
                                                     </p>
                                                 </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <span className={`px-2 py-1 text-xs rounded-full ${
-                                                        match.status === MatchStatus.REGISTRATION 
-                                                            ? 'bg-blue-100 text-blue-800'
-                                                            : match.status === MatchStatus.IN_PROGRESS
-                                                            ? 'bg-green-100 text-green-800'
-                                                            : match.status === MatchStatus.COMPLETED
-                                                            ? 'bg-purple-100 text-purple-800'
-                                                            : 'bg-gray-100 text-gray-800'
-                                                    }`}>
-                                                        {match.status}
-                                                    </span>
-                                                    <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                    </svg>
-                                                </div>
+                                                <ChevronRight className="h-5 w-5 text-gray-400" />
                                             </div>
                                         </Link>
-                                    </Card>
-                                ))
-                            ) : (
-                                <Card className="p-8 text-center">
-                                    <p className="text-gray-500">아직 생성한 경기가 없습니다.</p>
-                                    <Link href="/matches/create">
-                                        <Button className="mt-4" variant="primary">
-                                            첫 경기 만들기
-                                        </Button>
-                                    </Link>
-                                </Card>
+                                    ))}
+                                </div>
                             )}
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
 
-                    {/* 내 팀 목록 */}
-                    <div>
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-bold text-gray-900">내 팀</h2>
+                    {/* 내 팀 */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle>내 팀</CardTitle>
                             <Link href="/teams/create">
-                                <Button size="sm" variant="primary">
-                                    새 팀 만들기
+                                <Button size="sm" variant="outline">
+                                    <Plus className="h-4 w-4 mr-1" />
+                                    새 팀
                                 </Button>
                             </Link>
-                        </div>
-                        <div className="space-y-3">
-                            {myTeams.length > 0 ? (
-                                myTeams.slice(0, 5).map(team => (
-                                    <Card key={team.id} className="p-4">
-                                        <Link href={`/teams/${team.id}`}>
-                                            <div className="flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg">
-                                                <div>
-                                                    <h3 className="font-semibold text-gray-900">{team.name}</h3>
-                                                    <p className="text-sm text-gray-600">
-                                                        {team.description || '팀 설명 없음'}
-                                                    </p>
+                        </CardHeader>
+                        <CardContent>
+                            {dashboardData?.myTeams.length === 0 ? (
+                                <div className="text-center py-8 text-gray-500">
+                                    소속된 팀이 없습니다
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {dashboardData?.myTeams.map((team) => (
+                                        <Link 
+                                            key={team.id} 
+                                            href={`/teams/${team.id}`}
+                                            className="block"
+                                        >
+                                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                                        <Users className="h-5 w-5 text-primary-600" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-semibold text-gray-900">
+                                                            {team.name}
+                                                        </h4>
+                                                        <p className="text-sm text-gray-500">
+                                                            {team.sport_type || '미지정'}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                </svg>
+                                                <ChevronRight className="h-5 w-5 text-gray-400" />
                                             </div>
                                         </Link>
-                                    </Card>
-                                ))
-                            ) : (
-                                <Card className="p-8 text-center">
-                                    <p className="text-gray-500">아직 생성한 팀이 없습니다.</p>
-                                    <Link href="/teams/create">
-                                        <Button className="mt-4" variant="primary">
-                                            첫 팀 만들기
-                                        </Button>
-                                    </Link>
-                                </Card>
+                                    ))}
+                                </div>
                             )}
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
-                {/* 최근 경기 */}
-                <div className="mt-8">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-gray-900">최근 경기</h2>
-                        <Link href="/matches">
-                            <Button size="sm" variant="secondary">
-                                모든 경기 보기
-                            </Button>
-                        </Link>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {recentMatches.map(match => (
-                            <Card key={match.id} className="p-4">
-                                <Link href={`/matches/${match.id}`}>
-                                    <div className="hover:bg-gray-50 transition-colors rounded-lg">
-                                        <h3 className="font-semibold text-gray-900 mb-2">{match.title}</h3>
-                                        <p className="text-sm text-gray-600 mb-3">
-                                            {match.description || '설명 없음'}
-                                        </p>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs text-gray-500">
-                                                {formatDate(match.created_at)}
-                                            </span>
-                                            <span className={`px-2 py-1 text-xs rounded-full ${
-                                                match.status === MatchStatus.REGISTRATION 
-                                                    ? 'bg-blue-100 text-blue-800'
-                                                    : match.status === MatchStatus.IN_PROGRESS
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : match.status === MatchStatus.COMPLETED
-                                                    ? 'bg-purple-100 text-purple-800'
-                                                    : 'bg-gray-100 text-gray-800'
-                                            }`}>
-                                                {match.status}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </Link>
-                            </Card>
-                        ))}
-                    </div>
+                {/* 빠른 액션 */}
+                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Link href="/matches/create">
+                        <Button variant="outline" className="w-full justify-start">
+                            <Trophy className="h-4 w-4 mr-2" />
+                            새 경기 만들기
+                        </Button>
+                    </Link>
+                    <Link href="/teams/create">
+                        <Button variant="outline" className="w-full justify-start">
+                            <Users className="h-4 w-4 mr-2" />
+                            팀 생성하기
+                        </Button>
+                    </Link>
+                    <Link href="/matches">
+                        <Button variant="outline" className="w-full justify-start">
+                            <Calendar className="h-4 w-4 mr-2" />
+                            경기 둘러보기
+                        </Button>
+                    </Link>
+                    <Link href="/profile">
+                        <Button variant="outline" className="w-full justify-start">
+                            <Clock className="h-4 w-4 mr-2" />
+                            프로필 설정
+                        </Button>
+                    </Link>
                 </div>
             </div>
         </div>

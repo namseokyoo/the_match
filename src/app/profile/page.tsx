@@ -29,7 +29,7 @@ export default function ProfilePage() {
         bio: '',
     });
     
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, initialized } = useAuth();
     const router = useRouter();
 
     // 프로필 정보 조회
@@ -130,12 +130,14 @@ export default function ProfilePage() {
 
     // 컴포넌트 마운트 시 데이터 로드
     useEffect(() => {
-        if (user && !authLoading) {
+        // 인증이 초기화되고 사용자가 있을 때만 프로필 로드
+        if (initialized && user) {
             fetchProfile();
-        } else if (!authLoading && !user) {
-            router.push('/auth/signin');
+        } else if (initialized && !user) {
+            // 인증이 완료되었는데 사용자가 없으면 로그인 페이지로
+            router.push('/login');
         }
-    }, [user, authLoading]);
+    }, [initialized, user, router, fetchProfile]);
 
     // 프로필 수정
     const handleSaveProfile = async () => {
