@@ -103,6 +103,169 @@ src/
 - **Row Level Security**: Database-level access control
 - **Role-based permissions**: Match creators, team captains, participants
 
+## 🔐 Page Access Control & Permissions
+
+### Permission Levels
+
+#### 1. **Guest (비로그인)**
+- 공개 정보 조회만 가능
+- 회원가입/로그인 유도
+
+#### 2. **Authenticated User (로그인 사용자)**
+- 기본 사용자 권한
+- 프로필 관리 가능
+- 팀 생성 가능
+
+#### 3. **Team Captain (팀 주장)**
+- 팀 관리 권한
+- 선수 추가/수정/삭제
+- 경기 참가 신청
+
+#### 4. **Team Member (팀 멤버)**
+- 팀 정보 조회
+- 팀 채팅 참여
+- 체크인 가능
+
+#### 5. **Match Creator (경기 생성자)**
+- 경기 전체 관리
+- 참가 신청 승인/거절
+- 경기 진행 및 결과 입력
+
+#### 6. **Match Participant (경기 참가자)**
+- 경기 상세 정보 조회
+- 경기 진행 상황 확인
+- 결과 조회
+
+### Page-by-Page Access Control
+
+| Page | Path | Guest | Authenticated | Team Captain | Team Member | Match Creator | Match Participant |
+|------|------|-------|---------------|--------------|-------------|---------------|-------------------|
+| **홈** | `/` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **로그인** | `/login` | ✅ | ❌ (redirect) | ❌ (redirect) | ❌ (redirect) | ❌ (redirect) | ❌ (redirect) |
+| **회원가입** | `/signup` | ✅ | ❌ (redirect) | ❌ (redirect) | ❌ (redirect) | ❌ (redirect) | ❌ (redirect) |
+| **프로필** | `/profile` | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **대시보드** | `/dashboard` | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| | | | | | | | |
+| **경기 목록** | `/matches` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **경기 상세** | `/matches/[id]` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **경기 생성** | `/matches/create` | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **경기 수정** | `/matches/[id]/edit` | ❌ | ❌ | ❌ | ❌ | ✅ (본인) | ❌ |
+| **대진표** | `/matches/[id]/bracket` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **경기 결과** | `/matches/[id]/results` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **점수 입력** | `/matches/[id]/games/[gameId]/score` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| **체크인** | `/matches/[id]/checkin` | ❌ | ❌ | ✅ (참가팀) | ✅ (참가팀) | ✅ | ✅ |
+| **경기 캘린더** | `/matches/calendar` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **템플릿** | `/matches/templates` | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **템플릿 생성** | `/matches/templates/create` | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| | | | | | | | |
+| **팀 목록** | `/teams` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **팀 상세** | `/teams/[id]` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **팀 생성** | `/teams/create` | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **팀 채팅** | `/teams/[id]/chat` | ❌ | ❌ | ✅ (본인팀) | ✅ (본인팀) | ❌ | ❌ |
+| | | | | | | | |
+| **선수 목록** | `/players` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **선수 상세** | `/players/[id]` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| | | | | | | | |
+| **통계** | `/stats` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **체크인 관리** | `/checkin` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+
+### API Route Permissions
+
+| API Route | Method | Guest | Authenticated | Team Captain | Team Member | Match Creator | Match Participant |
+|-----------|--------|-------|---------------|--------------|-------------|---------------|-------------------|
+| `/api/matches` | GET | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/api/matches` | POST | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/api/matches/[id]` | GET | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/api/matches/[id]` | PUT | ❌ | ❌ | ❌ | ❌ | ✅ (본인) | ❌ |
+| `/api/matches/[id]` | DELETE | ❌ | ❌ | ❌ | ❌ | ✅ (본인) | ❌ |
+| `/api/matches/[id]/participants` | GET | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/api/matches/[id]/participants` | POST | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `/api/matches/[id]/participants/[pid]` | PUT | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| `/api/matches/[id]/status` | PUT | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| | | | | | | | |
+| `/api/teams` | GET | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/api/teams` | POST | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/api/teams/[id]` | GET | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/api/teams/[id]` | PUT | ❌ | ❌ | ✅ (본인팀) | ❌ | ❌ | ❌ |
+| `/api/teams/[id]` | DELETE | ❌ | ❌ | ✅ (본인팀) | ❌ | ❌ | ❌ |
+
+### Permission Check Implementation
+
+#### 1. Frontend Route Protection
+```typescript
+// src/middleware.ts
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const token = request.cookies.get('supabase-auth-token');
+  
+  // Guest-only pages (redirect if authenticated)
+  const guestOnlyPaths = ['/login', '/signup'];
+  if (guestOnlyPaths.includes(pathname) && token) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+  
+  // Auth-required pages
+  const authRequiredPaths = [
+    '/profile',
+    '/dashboard',
+    '/matches/create',
+    '/teams/create'
+  ];
+  if (authRequiredPaths.some(path => pathname.startsWith(path)) && !token) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+}
+```
+
+#### 2. API Route Protection
+```typescript
+// src/lib/auth-middleware.ts
+export async function checkPermission(
+  user: AuthUser,
+  resource: 'match' | 'team' | 'player',
+  action: 'view' | 'create' | 'update' | 'delete',
+  resourceId?: string
+): Promise<boolean> {
+  // Implementation based on permission matrix above
+}
+```
+
+#### 3. Component-Level Protection
+```typescript
+// src/components/ProtectedRoute.tsx
+export function ProtectedRoute({ 
+  children, 
+  requireAuth = false,
+  requireTeamCaptain = false,
+  requireMatchCreator = false 
+}) {
+  const { user, loading } = useAuth();
+  
+  if (loading) return <Loading />;
+  if (requireAuth && !user) return <Redirect to="/login" />;
+  // Additional permission checks...
+  
+  return children;
+}
+```
+
+### Permission Hierarchy
+
+1. **Match Creator** > All permissions for their match
+2. **Team Captain** > All permissions for their team
+3. **Team Member** > Limited team permissions
+4. **Match Participant** > Limited match permissions
+5. **Authenticated User** > Basic permissions
+6. **Guest** > Public read-only access
+
+### Security Best Practices
+
+1. **Double Validation**: Check permissions both on frontend and backend
+2. **Row Level Security**: Use Supabase RLS for database-level protection
+3. **API Middleware**: Validate all API requests with auth middleware
+4. **Session Management**: Implement proper session timeout and refresh
+5. **Error Handling**: Don't expose sensitive permission details in errors
+
 ## Development Guidelines
 
 ### Code Style
