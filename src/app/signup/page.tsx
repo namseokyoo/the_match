@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
+import { signIn } from '@/lib/supabase';
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { Trophy, Eye, EyeOff, Check } from 'lucide-react';
 
@@ -53,21 +54,30 @@ export default function SignupPage() {
         setIsLoading(true);
         setError('');
 
-        const { error } = await signUp(email, password, {
+        const { error: signUpError } = await signUp(email, password, {
             full_name: name,
         });
 
-        if (error) {
-            if (error.message.includes('already registered')) {
+        if (signUpError) {
+            if (signUpError.message.includes('already registered')) {
                 setError('이미 등록된 이메일 주소입니다.');
             } else {
                 setError('회원가입에 실패했습니다. 다시 시도해주세요.');
             }
+            setIsLoading(false);
         } else {
-            setSuccess(true);
+            // 회원가입 성공 후 자동 로그인 시도
+            const { error: signInError } = await signIn(email, password);
+            
+            if (signInError) {
+                // 로그인 실패시에도 회원가입은 성공했으므로 성공 메시지 표시
+                setSuccess(true);
+            } else {
+                // 로그인 성공시 바로 대시보드로 이동
+                router.push('/dashboard');
+            }
+            setIsLoading(false);
         }
-
-        setIsLoading(false);
     };
 
     const handleGoogleSignup = async () => {
@@ -104,8 +114,8 @@ export default function SignupPage() {
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">회원가입 완료!</h2>
                             <p className="text-gray-600 mb-6">
-                                이메일로 인증 링크를 보내드렸습니다.<br />
-                                이메일을 확인하고 계정을 활성화해주세요.
+                                회원가입이 완료되었습니다.<br />
+                                이제 로그인하여 서비스를 이용하실 수 있습니다.
                             </p>
                             <Button
                                 onClick={() => router.push('/login')}

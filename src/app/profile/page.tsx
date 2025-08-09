@@ -138,7 +138,7 @@ export default function ProfilePage() {
             // 로딩이 완료되었는데 사용자가 없으면 로그인 페이지로
             router.push('/login');
         }
-    }, [authLoading, user, router]);
+    }, [authLoading, user?.id]); // router와 fetchProfile을 의존성에서 제거
 
     // 프로필 수정
     const handleSaveProfile = async () => {
