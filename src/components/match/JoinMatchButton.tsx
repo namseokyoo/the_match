@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Match, MatchParticipant } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui';
+import { supabase } from '@/lib/supabase';
 
 interface JoinMatchButtonProps {
     match: Match;
@@ -20,6 +21,30 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
     const [loading, setLoading] = useState(false);
     const [myParticipation, setMyParticipation] = useState<MatchParticipant | null>(null);
     const [checkingParticipation, setCheckingParticipation] = useState(true);
+    const [userTeams, setUserTeams] = useState<any[]>([]);
+    const [checkingTeams, setCheckingTeams] = useState(true);
+
+    // 사용자가 주장인 팀 조회
+    const fetchUserTeams = useCallback(async () => {
+        if (!user) {
+            setCheckingTeams(false);
+            return;
+        }
+
+        try {
+            const { data: teams, error } = await supabase
+                .from('teams')
+                .select('*')
+                .eq('captain_id', user.id);
+            
+            if (error) throw error;
+            setUserTeams(teams || []);
+        } catch (error) {
+            console.error('팀 조회 오류:', error);
+        } finally {
+            setCheckingTeams(false);
+        }
+    }, [user]);
 
     // 현재 사용자의 참가 상태 확인
     const checkMyParticipation = useCallback(async () => {
@@ -53,6 +78,12 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
             return;
         }
 
+        // 팀 주장 확인
+        if (userTeams.length === 0) {
+            alert('참가 신청하려면 먼저 팀을 생성해야 합니다.\n팀 페이지에서 팀을 생성하신 후 다시 시도해주세요.');
+            return;
+        }
+
         // 경기 상태 확인
         if (match.status !== 'registration') {
             alert('현재 참가 신청을 받지 않는 경기입니다.');
@@ -76,9 +107,11 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
         try {
             setLoading(true);
 
-            // Token removed - using cookie auth
-            if (!user) {
-                alert('인증 토큰을 가져올 수 없습니다.');
+            // 세션 토큰 가져오기
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                alert('인증 세션을 가져올 수 없습니다. 다시 로그인해주세요.');
                 return;
             }
 
@@ -86,6 +119,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
                 },
                 body: JSON.stringify({
                     notes: notes.trim() || undefined,
@@ -125,15 +159,18 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
         try {
             setLoading(true);
 
-            // Token removed - using cookie auth
-            if (!user) {
-                alert('인증 토큰을 가져올 수 없습니다.');
+            // 세션 토큰 가져오기
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                alert('인증 세션을 가져올 수 없습니다. 다시 로그인해주세요.');
                 return;
             }
 
             const response = await fetch(`/api/matches/${match.id}/participants/${myParticipation.team_id}`, {
                 method: 'DELETE',
                 headers: {
+                    'Authorization': `Bearer ${session.access_token}`
                 },
             });
 
@@ -162,9 +199,10 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
     // 컴포넌트 마운트 시 참가 상태 확인
     useEffect(() => {
         checkMyParticipation();
-    }, [checkMyParticipation]);
+        fetchUserTeams();
+    }, [checkMyParticipation, fetchUserTeams]);
 
-    if (checkingParticipation) {
+    if (checkingParticipation || checkingTeams) {
         return (
             <Button disabled className={className}>
                 상태 확인 중...
@@ -254,6 +292,23 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
                         메모: {myParticipation.notes}
                     </div>
                 )}
+            </div>
+        );
+    }
+
+    // 팀이 없는 경우
+    if (userTeams.length === 0) {
+        return (
+            <div className={`${className}`}>
+                <Button
+                    onClick={() => window.location.href = '/teams/create'}
+                    className="bg-orange-600 hover:bg-orange-700"
+                >
+                    팀 생성 후 참가 신청
+                </Button>
+                <p className="text-sm text-gray-600 mt-2 text-center">
+                    경기 참가를 위해 먼저 팀을 생성해주세요
+                </p>
             </div>
         );
     }
