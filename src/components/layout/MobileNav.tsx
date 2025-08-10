@@ -74,7 +74,7 @@ const MobileNav: React.FC = () => {
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-40">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 w-full" style={{ maxWidth: '430px' }}>
             <nav className="flex items-center justify-around h-16">
                 {navItems.map((item) => {
                     const Icon = item.icon;
@@ -102,7 +102,7 @@ const MobileNav: React.FC = () => {
                 
                 {/* 플로팅 액션 버튼 */}
                 {user && (
-                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2" ref={subMenuRef}>
+                    <div className="absolute -top-6" style={{ left: '50%', transform: 'translateX(-50%)' }} ref={subMenuRef}>
                         {/* 서브메뉴 */}
                         {showSubMenu && (
                             <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden animate-fade-in-up">

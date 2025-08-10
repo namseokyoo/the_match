@@ -101,10 +101,10 @@ export default function RootLayout({
                                                 {children}
                                             </ErrorBoundary>
                                         </main>
-                                        
-                                        {/* 모바일 하단 네비게이션 */}
-                                        <MobileNav />
                                     </div>
+                                    
+                                    {/* 모바일 하단 네비게이션 - 컨테이너 내부에 위치 */}
+                                    <MobileNav />
                                 </div>
                             </div>
 

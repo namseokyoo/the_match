@@ -119,9 +119,9 @@ const MobileNavbar = () => {
                 </div>
 
                 {/* 모바일 메뉴 */}
-                <div className={`fixed inset-0 top-14 bg-white transform transition-transform duration-300 ${
+                <div className={`fixed top-14 left-0 right-0 bottom-0 bg-white transform transition-transform duration-300 z-50 ${
                     isMenuOpen ? 'translate-x-0' : 'translate-x-full'
-                }`}>
+                }`} style={{ maxWidth: '430px', margin: '0 auto' }}>
                     <div className="h-full overflow-y-auto">
                         {/* 메인 네비게이션 */}
                         <div className="border-b border-gray-200 pb-4 pt-2">
@@ -275,8 +275,8 @@ const MobileNavbar = () => {
                 />
             )}
 
-            {/* 데스크톱 네비게이션 바 (기존 유지) */}
-            <nav className="hidden lg:block bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+            {/* 데스크톱 네비게이션 바 - 모바일 크기에서는 숨김 */}
+            <nav className="hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         {/* 로고 */}

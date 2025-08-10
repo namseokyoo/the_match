@@ -209,7 +209,7 @@
   background-color: rgb(243 244 246);
   display: flex;
   justify-content: center;
-  overflow-x: hidden;
+  overflow: hidden;
   position: relative;
 }
 
@@ -223,6 +223,8 @@
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   position: relative;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 모바일 컨테이너 내부의 모든 요소는 최대 너비 제한 */
