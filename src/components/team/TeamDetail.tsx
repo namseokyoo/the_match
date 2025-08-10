@@ -20,10 +20,12 @@ interface TeamDetailProps {
     onAddPlayer?: () => void;
     onEditPlayer?: (player: Player) => void;
     onRemovePlayer?: (playerId: string) => void;
+    onJoinTeam?: () => void;
     isOwner?: boolean;
+    isMember?: boolean;
 }
 
-export const TeamDetail: React.FC<TeamDetailProps> = ({
+const TeamDetail: React.FC<TeamDetailProps> = ({
     team,
     players = [],
     match,
@@ -34,7 +36,9 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
     onAddPlayer,
     onEditPlayer,
     onRemovePlayer,
+    onJoinTeam,
     isOwner = false,
+    isMember = false,
 }) => {
     const [expandedPlayer, setExpandedPlayer] = useState<string | null>(null);
 
@@ -114,6 +118,16 @@ export const TeamDetail: React.FC<TeamDetailProps> = ({
                                 📊 팀 통계
                             </Button>
                         </Link>
+                        {!isOwner && !isMember && onJoinTeam && (
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                onClick={() => onJoinTeam()}
+                                disabled={loading}
+                            >
+                                팀 가입 신청
+                            </Button>
+                        )}
                         {isOwner && (
                             <>
                                 <Button
