@@ -148,7 +148,7 @@ export default function Home() {
             {/* Onboarding Tour for new users */}
             <OnboardingTour autoStart={!!user} />
 
-            {/* 현재 진행 중인 경기 */}
+            {/* 1. 진행 중인 경기 */}
             <section className="py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-7xl">
                     <div className="flex justify-between items-center mb-4">
@@ -179,9 +179,11 @@ export default function Home() {
                                             <h3 className="font-medium text-base text-gray-900 flex-1">
                                                 {match.title}
                                             </h3>
-                                            <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${getStatusColor(match.status)}`}>
-                                                {getStatusLabel(match.status)}
-                                            </span>
+                                            {match.status === 'in_progress' && (
+                                                <span className="px-2 py-0.5 text-xs rounded-md font-medium bg-success-50 text-success-700 border border-success-200">
+                                                    진행중
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="space-y-1 text-sm text-gray-500">
                                             <div className="flex items-center gap-2">
@@ -232,65 +234,8 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* 팀원 모집 중 */}
+            {/* 2. 참가 팀 모집 */}
             <section className="py-4 sm:py-6 px-4 sm:px-6 lg:px-8 bg-white">
-                <div className="mx-auto max-w-7xl">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                            팀원 모집 중
-                        </h2>
-                        <Link href="/teams" className="text-primary-600 hover:text-primary-700 flex items-center gap-1 text-sm font-medium transition-colors">
-                            모든 팀 보기 <ArrowRight className="w-4 h-4" />
-                        </Link>
-                    </div>
-
-                    {loading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {[1, 2, 3, 4].map(i => (
-                                <div key={i} className="bg-gray-50 rounded-lg p-4 animate-pulse">
-                                    <div className="h-6 bg-gray-200 rounded mb-3"></div>
-                                    <div className="h-4 bg-gray-200 rounded"></div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : recruitingTeams.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {recruitingTeams.map(team => (
-                                <Link key={team.id} href={`/teams/${team.id}`}>
-                                    <div className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors cursor-pointer">
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold text-gray-900 mb-1">
-                                                    {team.name}
-                                                </h3>
-                                                <p className="text-sm text-gray-600 line-clamp-2">
-                                                    {team.description || '팀원을 모집하고 있습니다'}
-                                                </p>
-                                            </div>
-                                            <span className="px-2 py-0.5 text-xs rounded-md font-medium bg-green-50 text-green-700 border border-green-200 ml-2">
-                                                모집중
-                                            </span>
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8 bg-gray-50 rounded-lg">
-                            <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-600 mb-4">팀원을 모집 중인 팀이 없습니다</p>
-                            {user && (
-                                <Link href="/teams/create" className="inline-flex items-center px-4 py-2 bg-success-600 text-white rounded-lg hover:bg-success-700 transition-colors shadow-sm">
-                                    팀 만들기
-                                </Link>
-                            )}
-                        </div>
-                    )}
-                </div>
-            </section>
-
-            {/* 참가 팀 모집 */}
-            <section className="py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-7xl">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -355,6 +300,70 @@ export default function Home() {
                             {user && (
                                 <Link href="/matches/create" className="inline-flex items-center px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors shadow-sm">
                                     경기 만들기
+                                </Link>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* 3. 선수 모집 */}
+            <section className="py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-7xl">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                            선수 모집
+                        </h2>
+                        <Link href="/teams?recruiting=true" className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 text-sm">
+                            모두 보기 <ArrowRight className="w-4 h-4" />
+                        </Link>
+                    </div>
+
+                    {loading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="bg-white rounded-lg p-3 animate-pulse border border-gray-200">
+                                    <div className="h-5 bg-gray-200 rounded mb-2"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : recruitingTeams.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {recruitingTeams.map(team => (
+                                <Link key={team.id} href={`/teams/${team.id}`}>
+                                    <div className="bg-white rounded-lg p-3 border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <h3 className="font-medium text-base text-gray-900">
+                                                    {team.name}
+                                                </h3>
+                                                <p className="text-sm text-gray-500 mt-1">
+                                                    {team.description || '팀 설명이 없습니다'}
+                                                </p>
+                                            </div>
+                                            <div className="flex flex-col items-end">
+                                                <span className="px-2 py-0.5 text-xs rounded-md font-medium bg-green-50 text-green-700 border border-green-200">
+                                                    모집중
+                                                </span>
+                                                {(team as any).recruitment_count && (
+                                                    <span className="text-xs text-gray-500 mt-1">
+                                                        ({(team as any).current_members || 0}/{(team as any).recruitment_count})
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 bg-white rounded-lg">
+                            <UserPlus className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-600 mb-4">선수를 모집 중인 팀이 없습니다</p>
+                            {user && (
+                                <Link href="/teams/create" className="inline-flex items-center px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors shadow-sm">
+                                    팀 만들기
                                 </Link>
                             )}
                         </div>

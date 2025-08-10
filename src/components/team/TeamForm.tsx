@@ -10,7 +10,7 @@ interface TeamFormProps {
     team?: Team;
     matches?: Match[];
     loading?: boolean;
-    onSubmit: (formData: CreateTeamForm & { match_id?: string }) => Promise<void>;
+    onSubmit: (formData: CreateTeamForm & { match_id?: string; recruitment_count?: number }) => Promise<void>;
     onCancel?: () => void;
 }
 
@@ -21,11 +21,12 @@ export const TeamForm: React.FC<TeamFormProps> = ({
     onSubmit,
     onCancel,
 }) => {
-    const [formData, setFormData] = useState<CreateTeamForm & { match_id?: string }>({
+    const [formData, setFormData] = useState<CreateTeamForm & { match_id?: string; recruitment_count?: number }>({
         name: team?.name || '',
         description: team?.description || '',
         logo_url: team?.logo_url || '',
         match_id: team?.match_id || '',
+        recruitment_count: team?.recruitment_count || undefined,
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -39,12 +40,13 @@ export const TeamForm: React.FC<TeamFormProps> = ({
                 description: team.description || '',
                 logo_url: team.logo_url || '',
                 match_id: team.match_id || '',
+                recruitment_count: team.recruitment_count || undefined,
             });
         }
     }, [team]);
 
     // 입력값 변경 핸들러
-    const handleChange = (field: string, value: string) => {
+    const handleChange = (field: string, value: string | number | undefined) => {
         setFormData(prev => ({
             ...prev,
             [field]: value,
@@ -79,6 +81,14 @@ export const TeamForm: React.FC<TeamFormProps> = ({
             newErrors.logo_url = '올바른 URL 형식이 아닙니다.';
         }
 
+        if (formData.recruitment_count !== undefined && formData.recruitment_count !== null) {
+            if (formData.recruitment_count < 1) {
+                newErrors.recruitment_count = '모집 인원은 1명 이상이어야 합니다.';
+            } else if (formData.recruitment_count > 100) {
+                newErrors.recruitment_count = '모집 인원은 100명 이하여야 합니다.';
+            }
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -109,6 +119,7 @@ export const TeamForm: React.FC<TeamFormProps> = ({
                 description: formData.description?.trim() || undefined,
                 logo_url: formData.logo_url?.trim() || undefined,
                 match_id: formData.match_id || undefined,
+                recruitment_count: formData.recruitment_count || undefined,
             });
         } catch (error) {
             console.error('Form submission error:', error);
@@ -189,6 +200,30 @@ export const TeamForm: React.FC<TeamFormProps> = ({
                         )}
                         <p className="mt-1 text-sm text-gray-500">
                             팀 로고 이미지 URL을 입력하세요 (선택사항)
+                        </p>
+                    </div>
+
+                    {/* 모집 인원 */}
+                    <div>
+                        <label htmlFor="recruitment_count" className="block text-sm font-medium text-gray-700 mb-2">
+                            모집 인원
+                        </label>
+                        <Input
+                            id="recruitment_count"
+                            type="number"
+                            placeholder="선수 모집 인원을 입력하세요"
+                            value={formData.recruitment_count?.toString() || ''}
+                            onChange={(value) => handleChange('recruitment_count', value ? parseInt(value) : undefined)}
+                            disabled={isDisabled}
+                            min="1"
+                            max="100"
+                            className={errors.recruitment_count ? 'border-red-500' : ''}
+                        />
+                        {errors.recruitment_count && (
+                            <p className="mt-1 text-sm text-red-600">{errors.recruitment_count}</p>
+                        )}
+                        <p className="mt-1 text-sm text-gray-500">
+                            팀에서 모집할 선수 인원을 입력하세요 (선택사항)
                         </p>
                     </div>
 

@@ -86,6 +86,8 @@ export interface Team {
     description?: string;
     captain_id?: string;
     match_id?: string; // tournament_id에서 match_id로 변경
+    recruitment_count?: number; // 모집 인원
+    current_members?: number; // 현재 인원
     created_at: string;
     updated_at: string;
 }
@@ -306,6 +308,7 @@ export interface CreateTeamForm {
     name: string;
     description?: string;
     logo_url?: string;
+    recruitment_count?: number;
 }
 
 export interface CreatePlayerForm {
