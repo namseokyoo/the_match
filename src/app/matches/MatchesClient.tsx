@@ -10,6 +10,7 @@ import { Trophy, Search, Calendar, Plus } from 'lucide-react';
 import { SearchBar, FilterPanel } from '@/components/search';
 import { Match, MatchType, MatchStatus } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
+import { calculateMatchStatus } from '@/lib/match-utils';
 
 export default function MatchesClient() {
     const [matches, setMatches] = useState<Match[]>([]);
@@ -68,9 +69,18 @@ export default function MatchesClient() {
             result = result.filter(match => filters.type.includes(match.type as MatchType));
         }
 
-        // 상태 필터링
+        // 상태 필터링 - 날짜 기반으로 계산된 상태 사용
         if (filters.status.length > 0) {
-            result = result.filter(match => filters.status.includes(match.status as MatchStatus));
+            result = result.filter(match => {
+                const calculatedStatus = calculateMatchStatus(
+                    match.registration_start_date,
+                    match.registration_deadline,
+                    match.start_date,
+                    match.end_date,
+                    match.status
+                );
+                return filters.status.includes(calculatedStatus as MatchStatus);
+            });
         }
 
         // 날짜 범위 필터링
