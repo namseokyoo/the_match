@@ -36,6 +36,8 @@ export function generateBracket(
     }
 
     return {
+        id: matchId,
+        name: '',
         matchId,
         type,
         rounds: bracketRounds,
@@ -185,7 +187,7 @@ export function updateMatch(
                 match.status = 'completed';
                 
                 // 다음 라운드 매치에 승자 추가
-                if (match.nextMatchId) {
+                if (match.nextMatchId && match.position !== undefined) {
                     advanceWinner(updatedBracket, match.nextMatchId, update.winner, match.position);
                 }
             }

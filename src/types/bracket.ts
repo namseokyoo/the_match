@@ -3,7 +3,8 @@
 export interface BracketMatch {
     id: string;
     round: number;
-    position: number;
+    position?: number;
+    matchIndex?: number;
     team1?: {
         id: string;
         name: string;
@@ -19,7 +20,7 @@ export interface BracketMatch {
     team1Score?: number; // 팀1 점수 (매치 레벨)
     team2Score?: number; // 팀2 점수 (매치 레벨)
     winner?: string; // 승자 팀 ID
-    status: 'pending' | 'in_progress' | 'completed';
+    status: 'pending' | 'in_progress' | 'completed' | 'waiting';
     nextMatchId?: string; // 다음 라운드 매치 ID
 }
 
@@ -29,10 +30,12 @@ export interface BracketRound {
 }
 
 export interface TournamentBracket {
-    matchId: string;
-    type: 'single_elimination' | 'double_elimination' | 'round_robin' | 'group_stage';
+    id: string;
+    name: string;
+    matchId?: string;
+    type?: 'single_elimination' | 'double_elimination' | 'round_robin' | 'group_stage';
     rounds: BracketRound[];
-    totalTeams: number;
+    totalTeams?: number;
     currentRound: number;
 }
 

@@ -1,0 +1,49 @@
+# Page snapshot
+
+```yaml
+- navigation:
+  - link "T The Match":
+    - /url: /
+  - link "경기":
+    - /url: /matches
+  - link "템플릿":
+    - /url: /matches/templates
+  - link "팀":
+    - /url: /teams
+  - link "선수":
+    - /url: /players
+  - link "통계":
+    - /url: /stats
+  - link "로그인":
+    - /url: /login
+  - link "회원가입":
+    - /url: /signup
+- main:
+  - img
+  - heading "The Match 회원가입" [level=2]
+  - paragraph: 지금 가입하고 토너먼트 관리를 시작하세요
+  - heading "계정 만들기" [level=3]
+  - text: 이름
+  - textbox "이름"
+  - text: 이메일
+  - textbox "이메일": captain1@test.com
+  - text: 비밀번호
+  - textbox "비밀번호": Test1234!
+  - button:
+    - img
+  - paragraph: ✓ 비밀번호가 유효합니다
+  - text: 비밀번호 확인
+  - textbox "비밀번호 확인"
+  - button:
+    - img
+  - button "회원가입" [disabled]
+  - text: 또는
+  - button "Google로 회원가입":
+    - img
+    - text: Google로 회원가입
+  - paragraph:
+    - text: 이미 계정이 있으신가요?
+    - link "로그인":
+      - /url: /login
+- alert
+```

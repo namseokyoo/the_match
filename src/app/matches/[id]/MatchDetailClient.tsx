@@ -3,13 +3,13 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Match } from '@/types';
+import { Match, Team } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useMatchRealtime } from '@/hooks/useRealtimeSubscription';
 import { MatchDetail } from '@/components/match';
 import ParticipantManagement from '@/components/match/ParticipantManagement';
 import MatchStatusManager from '@/components/match/MatchStatusManager';
-import TournamentBracket from '@/components/bracket/TournamentBracket';
+import TournamentManager from '@/components/match/TournamentManager';
 import { showToast } from '@/components/ui/Toast';
 import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { Trophy, Users, Calendar, Settings, QrCode } from 'lucide-react';
@@ -24,6 +24,7 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
     const [refreshKey, setRefreshKey] = useState(0);
     const [match, setMatch] = useState(initialMatch);
     const [activeTab, setActiveTab] = useState<'overview' | 'bracket' | 'participants' | 'settings'>('overview');
+    const [teams, setTeams] = useState<Team[]>([]);
 
     // 실시간 업데이트 구독
     useMatchRealtime(match.id, {
@@ -90,7 +91,28 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
     const isOwner = user?.id === match.creator_id;
 
     // 대회 타입에 따라 대진표 탭 표시 여부 결정
-    const showBracket = ['single_elimination', 'double_elimination', 'round_robin'].includes(match.type);
+    const showBracket = ['single_elimination', 'double_elimination', 'round_robin'].includes((match as any).match_type || '');
+
+    // 참가 팀 조회
+    useEffect(() => {
+        const fetchTeams = async () => {
+            try {
+                // 참가 승인된 팀 목록 조회
+                const response = await fetch(`/api/matches/${match.id}/participants`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const approvedTeams = data.participants
+                        ?.filter((p: any) => p.status === 'approved')
+                        ?.map((p: any) => p.team) || [];
+                    setTeams(approvedTeams);
+                }
+            } catch (error) {
+                console.error('Failed to fetch teams:', error);
+            }
+        };
+        
+        fetchTeams();
+    }, [match.id, refreshKey]);
 
     return (
         <div className="max-w-7xl mx-auto space-y-6">
@@ -202,9 +224,11 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                     )}
                     
                     {activeTab === 'bracket' && showBracket && (
-                        <TournamentBracket
+                        <TournamentManager
                             matchId={match.id}
-                            isOrganizer={isOwner}
+                            matchData={match}
+                            teams={teams}
+                            isCreator={isOwner}
                         />
                     )}
                     

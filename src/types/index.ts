@@ -8,6 +8,14 @@ export type Json =
     | { [key: string]: Json | undefined }
     | Json[]
 
+// Export bracket types
+export { 
+    type BracketMatch, 
+    type BracketRound, 
+    type TournamentBracket, 
+    type BracketSeed 
+} from './bracket';
+
 export interface User {
     id: string;
     email: string;

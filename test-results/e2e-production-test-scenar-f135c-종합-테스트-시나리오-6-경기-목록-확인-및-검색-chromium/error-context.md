@@ -1,0 +1,66 @@
+# Page snapshot
+
+```yaml
+- navigation:
+  - link "T The Match":
+    - /url: /
+  - link "경기":
+    - /url: /matches
+  - link "템플릿":
+    - /url: /matches/templates
+  - link "팀":
+    - /url: /teams
+  - link "선수":
+    - /url: /players
+  - link "통계":
+    - /url: /stats
+  - link "로그인":
+    - /url: /login
+  - link "회원가입":
+    - /url: /signup
+- main:
+  - heading "경기 목록" [level=1]
+  - paragraph: 참가하고 싶은 경기를 찾아보세요
+  - button "캘린더":
+    - img
+    - text: 캘린더
+  - button "반복":
+    - img
+    - text: 반복
+  - button "경기 생성":
+    - img
+    - text: 경기 생성
+  - textbox "경기 제목이나 설명으로 검색..."
+  - button "검색" [disabled]:
+    - img
+    - text: 검색
+  - heading "필터" [level=3]
+  - button:
+    - img
+  - textbox "경기 제목 또는 설명 검색..."
+  - combobox:
+    - option "전체 상태" [selected]
+    - option "준비중"
+    - option "등록중"
+    - option "진행중"
+    - option "완료"
+    - option "취소"
+  - combobox:
+    - option "전체 유형" [selected]
+    - option "단일 토너먼트"
+    - option "더블 토너먼트"
+    - option "리그전"
+    - option "스위스"
+    - option "리그"
+  - checkbox "내 경기만"
+  - text: 내 경기만
+  - button "필터 초기화"
+  - img
+  - paragraph: 경기가 없습니다
+  - paragraph: 아직 생성된 경기가 없습니다.
+  - img
+  - heading "아직 경기가 없습니다" [level=3]
+  - paragraph: 첫 번째 경기를 생성하여 경쟁을 시작해보세요!
+  - button "첫 경기 만들기"
+- alert
+```

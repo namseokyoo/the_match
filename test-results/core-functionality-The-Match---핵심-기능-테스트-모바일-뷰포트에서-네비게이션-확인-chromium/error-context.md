@@ -1,0 +1,74 @@
+# Page snapshot
+
+```yaml
+- navigation:
+  - link "T The Match":
+    - /url: /
+  - button "메뉴":
+    - img
+  - link "홈":
+    - /url: /
+    - img
+    - text: 홈
+  - link "경기":
+    - /url: /matches
+    - img
+    - text: 경기
+  - link "팀":
+    - /url: /teams
+    - img
+    - text: 팀
+  - link "선수":
+    - /url: /players
+    - img
+    - text: 선수
+  - link "템플릿":
+    - /url: /matches/templates
+    - img
+    - text: 템플릿
+  - link "통계":
+    - /url: /stats
+    - img
+    - text: 통계
+  - link "로그인":
+    - /url: /login
+    - img
+    - text: 로그인
+  - link "회원가입":
+    - /url: /signup
+    - img
+    - text: 회원가입
+- main:
+  - heading "The Match" [level=1]
+  - paragraph: 스포츠 경기 관리 플랫폼
+  - text: 0 경기 1 팀 5 선수
+  - heading "진행 중인 경기" [level=2]
+  - link "모두 보기":
+    - /url: /matches
+    - text: 모두 보기
+    - img
+  - img
+  - paragraph: 아직 진행 중인 경기가 없습니다
+  - link "회원가입하고 시작하기":
+    - /url: /signup
+  - heading "👥 팀원 모집 중" [level=2]
+  - link "모든 팀 보기":
+    - /url: /teams
+    - text: 모든 팀 보기
+    - img
+  - link "FC 서울 유나이티드 서울 지역 축구 동호회입니다. 매주 토요일 오전에 모여서 운동합니다. 참가 신청":
+    - /url: /teams/6c5f854a-2521-4568-a7e5-e432ff6d6577
+    - heading "FC 서울 유나이티드" [level=3]
+    - paragraph: 서울 지역 축구 동호회입니다. 매주 토요일 오전에 모여서 운동합니다.
+    - img
+    - text: 참가 신청
+  - heading "지금 시작하세요" [level=2]
+  - paragraph: 무료로 The Match를 체험해보고 경기 관리의 새로운 경험을 만나보세요
+  - link "무료 회원가입":
+    - /url: /signup
+  - link "로그인":
+    - /url: /login
+  - img
+  - text: The Match © 2024 The Match. All rights reserved.
+- alert
+```

@@ -1,0 +1,62 @@
+# Page snapshot
+
+```yaml
+- navigation:
+  - link "T The Match":
+    - /url: /
+  - link "경기":
+    - /url: /matches
+  - link "템플릿":
+    - /url: /matches/templates
+  - link "팀":
+    - /url: /teams
+  - link "선수":
+    - /url: /players
+  - link "통계":
+    - /url: /stats
+  - link "대시보드":
+    - /url: /dashboard
+  - link "kimminsu2025님":
+    - /url: /profile
+  - link "팀 생성":
+    - /url: /teams/create
+  - link "경기 생성":
+    - /url: /matches/create
+  - button "로그아웃"
+- main:
+  - navigation:
+    - button "팀 목록"
+    - img
+    - text: 새 팀 만들기
+  - heading "새 팀 만들기" [level=1]
+  - paragraph: 새로운 팀을 생성하고 선수들을 관리하세요. 토너먼트에 참가할 팀이라면 토너먼트를 선택해주세요.
+  - img
+  - heading "팀 생성 안내" [level=3]
+  - list:
+    - listitem: 팀을 생성하면 자동으로 팀 주장이 됩니다.
+    - listitem: 팀 생성 후 선수를 추가하고 관리할 수 있습니다.
+    - listitem: 토너먼트에 참가할 팀이라면 참가할 토너먼트를 선택하세요.
+    - listitem: 팀 로고는 URL을 통해 설정할 수 있습니다.
+  - heading "새 팀 만들기" [level=2]
+  - text: 팀 이름 *
+  - textbox "팀 이름 *": FC 서울 유나이티드
+  - text: 팀 설명
+  - textbox "팀 설명"
+  - paragraph: 0/500
+  - text: 팀 로고 URL
+  - textbox "팀 로고 URL"
+  - paragraph: 팀 로고 이미지 URL을 입력하세요 (선택사항)
+  - button "팀 만들기"
+  - button "취소"
+  - heading "다음 단계" [level=3]
+  - text: "1"
+  - heading "선수 추가" [level=4]
+  - paragraph: 팀 생성 후 선수들을 추가하고 포지션을 설정하세요.
+  - text: "2"
+  - heading "토너먼트 참가" [level=4]
+  - paragraph: 완성된 팀으로 토너먼트에 참가하여 경기를 펼치세요.
+  - text: "3"
+  - heading "경기 관리" [level=4]
+  - paragraph: 경기 결과를 기록하고 팀 통계를 확인하세요.
+- alert
+```
