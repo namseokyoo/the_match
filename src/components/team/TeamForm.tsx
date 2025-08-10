@@ -1,33 +1,34 @@
 /* eslint-disable no-unused-vars */
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { Team, CreateTeamForm, Match } from '@/types';
+import { Team, CreateTeamForm } from '@/types';
 import { Button, Input, Card } from '@/components/ui';
+import { Upload, X } from 'lucide-react';
 
 interface TeamFormProps {
     team?: Team;
-    matches?: Match[];
     loading?: boolean;
-    onSubmit: (formData: CreateTeamForm & { match_id?: string; recruitment_count?: number }) => Promise<void>;
+    onSubmit: (formData: CreateTeamForm & { recruitment_count?: number; logo_file?: File }) => Promise<void>;
     onCancel?: () => void;
 }
 
 export const TeamForm: React.FC<TeamFormProps> = ({
     team,
-    matches = [],
     loading = false,
     onSubmit,
     onCancel,
 }) => {
-    const [formData, setFormData] = useState<CreateTeamForm & { match_id?: string; recruitment_count?: number }>({
+    const [formData, setFormData] = useState<CreateTeamForm & { recruitment_count?: number }>({
         name: team?.name || '',
         description: team?.description || '',
         logo_url: team?.logo_url || '',
-        match_id: team?.match_id || '',
         recruitment_count: team?.recruitment_count || undefined,
     });
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,9 +40,11 @@ export const TeamForm: React.FC<TeamFormProps> = ({
                 name: team.name || '',
                 description: team.description || '',
                 logo_url: team.logo_url || '',
-                match_id: team.match_id || '',
                 recruitment_count: team.recruitment_count || undefined,
             });
+            if (team.logo_url) {
+                setLogoPreview(team.logo_url);
+            }
         }
     }, [team]);
 
@@ -118,8 +121,8 @@ export const TeamForm: React.FC<TeamFormProps> = ({
                 name: formData.name.trim(),
                 description: formData.description?.trim() || undefined,
                 logo_url: formData.logo_url?.trim() || undefined,
-                match_id: formData.match_id || undefined,
                 recruitment_count: formData.recruitment_count || undefined,
+                logo_file: logoFile || undefined,
             });
         } catch (error) {
             console.error('Form submission error:', error);
@@ -181,26 +184,79 @@ export const TeamForm: React.FC<TeamFormProps> = ({
                         </p>
                     </div>
 
-                    {/* 팀 로고 URL */}
+                    {/* 팀 로고 업로드 */}
                     <div>
-                        <label htmlFor="logo_url" className="block text-sm font-medium text-gray-700 mb-2">
-                            팀 로고 URL
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            팀 로고
                         </label>
-                        <Input
-                            id="logo_url"
-                            type="url"
-                            placeholder="https://example.com/logo.png"
-                            value={formData.logo_url}
-                            onChange={(value) => handleChange('logo_url', value)}
-                            disabled={isDisabled}
-                            className={errors.logo_url ? 'border-red-500' : ''}
-                        />
-                        {errors.logo_url && (
-                            <p className="mt-1 text-sm text-red-600">{errors.logo_url}</p>
-                        )}
-                        <p className="mt-1 text-sm text-gray-500">
-                            팀 로고 이미지 URL을 입력하세요 (선택사항)
-                        </p>
+                        <div className="flex items-center gap-4">
+                            {logoPreview ? (
+                                <div className="relative">
+                                    <Image
+                                        src={logoPreview}
+                                        alt="팀 로고 미리보기"
+                                        width={80}
+                                        height={80}
+                                        className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setLogoFile(null);
+                                            setLogoPreview(null);
+                                            setFormData(prev => ({ ...prev, logo_url: '' }));
+                                            if (fileInputRef.current) {
+                                                fileInputRef.current.value = '';
+                                            }
+                                        }}
+                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <Upload className="w-8 h-8 text-gray-400" />
+                                </div>
+                            )}
+                            <div className="flex-1">
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            if (file.size > 5 * 1024 * 1024) {
+                                                alert('파일 크기는 5MB 이하여야 합니다.');
+                                                return;
+                                            }
+                                            setLogoFile(file);
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                setLogoPreview(reader.result as string);
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                    disabled={isDisabled}
+                                    className="hidden"
+                                    id="logo-upload"
+                                />
+                                <label
+                                    htmlFor="logo-upload"
+                                    className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-match-blue cursor-pointer ${
+                                        isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
+                                >
+                                    <Upload className="w-4 h-4 mr-2" />
+                                    로고 업로드
+                                </label>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    JPG, PNG, GIF 형식, 최대 5MB
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     {/* 모집 인원 */}
@@ -227,50 +283,6 @@ export const TeamForm: React.FC<TeamFormProps> = ({
                         </p>
                     </div>
 
-                    {/* 경기 선택 */}
-                    {matches.length > 0 && (
-                        <div>
-                            <label htmlFor="match_id" className="block text-sm font-medium text-gray-700 mb-2">
-                                참가할 경기
-                            </label>
-                            <select
-                                id="match_id"
-                                value={formData.match_id}
-                                onChange={(e) => handleChange('match_id', e.target.value)}
-                                disabled={isDisabled}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                            >
-                                <option value="">경기를 선택하세요 (선택사항)</option>
-                                {matches.map((match) => (
-                                    <option key={match.id} value={match.id}>
-                                        {match.title}
-                                    </option>
-                                ))}
-                            </select>
-                            <p className="mt-1 text-sm text-gray-500">
-                                특정 경기에 참가할 팀이라면 선택하세요
-                            </p>
-                        </div>
-                    )}
-
-                    {/* 로고 미리보기 */}
-                    {formData.logo_url && isValidUrl(formData.logo_url) && (
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                로고 미리보기
-                            </label>
-                            <Image
-                                src={formData.logo_url}
-                                alt="팀 로고 미리보기"
-                                width={64}
-                                height={64}
-                                className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-                                onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                }}
-                            />
-                        </div>
-                    )}
 
                     {/* 버튼 그룹 */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-4">

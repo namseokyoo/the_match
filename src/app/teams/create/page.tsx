@@ -1,71 +1,20 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Match, CreateTeamForm } from '@/types';
+import { CreateTeamForm } from '@/types';
 import { TeamForm } from '@/components/team';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { supabase } from '@/lib/supabase';
 
 export default function CreateTeamPage() {
-    const [tournaments, setTournaments] = useState<Match[]>([]);
     const [loading, setLoading] = useState(false);
-    const [tournamentsLoading, setTournamentsLoading] = useState(true);
-
     const { user, loading: authLoading } = useRequireAuth();
     const router = useRouter();
 
-    // 매치 목록 조회 (팀이 참가할 수 있는 매치들)
-    const fetchTournaments = async () => {
-        try {
-            setTournamentsLoading(true);
-
-            const { data, error } = await supabase
-                .from('matches')
-                .select('id, title, status, type, creator_id, created_at, updated_at')
-                .in('status', ['draft', 'registration'])
-                .order('created_at', { ascending: false })
-                .limit(50);
-
-            if (error) {
-                console.error('Matches fetch error:', error);
-                setTournaments([]);
-            } else {
-                // 타입 변환
-                const matches: Match[] = (data || []).map((item: any) => ({
-                    id: item.id,
-                    title: item.title,
-                    status: item.status,
-                    type: item.type,
-                    creator_id: item.creator_id,
-                    created_at: item.created_at,
-                    updated_at: item.updated_at,
-                    description: undefined,
-                    max_participants: undefined,
-                    registration_deadline: undefined,
-                    start_date: undefined,
-                    end_date: undefined,
-                    rules: undefined,
-                    settings: undefined,
-                }));
-                setTournaments(matches);
-            }
-        } catch (error) {
-            console.error('Matches fetch error:', error);
-            setTournaments([]);
-        } finally {
-            setTournamentsLoading(false);
-        }
-    };
-
-    // 컴포넌트 마운트 시 토너먼트 목록 로드
-    useEffect(() => {
-        fetchTournaments();
-    }, []);
-
 
     // 팀 생성 핸들러
-    const handleCreateTeam = async (formData: CreateTeamForm & { match_id?: string }) => {
+    const handleCreateTeam = async (formData: CreateTeamForm & { recruitment_count?: number; logo_file?: File }) => {
         if (!user) {
             alert('로그인이 필요합니다.');
             router.push('/login');
@@ -75,14 +24,36 @@ export default function CreateTeamPage() {
         setLoading(true);
 
         try {
+            let logoUrl = formData.logo_url;
+
+            // 로고 파일이 있으면 업로드
+            if (formData.logo_file) {
+                const uploadFormData = new FormData();
+                uploadFormData.append('file', formData.logo_file);
+
+                const uploadResponse = await fetch('/api/teams/upload-logo', {
+                    method: 'POST',
+                    body: uploadFormData,
+                });
+
+                const uploadResult = await uploadResponse.json();
+
+                if (!uploadResponse.ok || !uploadResult.success) {
+                    alert('로고 업로드에 실패했습니다.');
+                    return;
+                }
+
+                logoUrl = uploadResult.url;
+            }
+
             // 클라이언트에서 직접 Supabase 접근
             const { data: team, error } = await supabase
                 .from('teams')
                 .insert({
                     name: formData.name,
                     description: formData.description,
-                    logo_url: formData.logo_url,
-                    match_id: formData.match_id,
+                    logo_url: logoUrl,
+                    recruitment_count: formData.recruitment_count,
                     captain_id: user.id,
                 })
                 .select()
@@ -91,7 +62,7 @@ export default function CreateTeamPage() {
             if (error) {
                 if (error.code === '23505') {
                     // 중복 키 에러 (팀 이름 중복)
-                    alert('이미 동일한 이름의 팀이 해당 토너먼트에 존재합니다.');
+                    alert('이미 동일한 이름의 팀이 존재합니다.');
                 } else {
                     console.error('Team creation error:', error);
                     alert('팀 생성에 실패했습니다: ' + error.message);
@@ -171,8 +142,8 @@ export default function CreateTeamPage() {
                                 <ul className="list-disc list-inside space-y-1">
                                     <li>팀을 생성하면 자동으로 팀 주장이 됩니다.</li>
                                     <li>팀 생성 후 선수를 추가하고 관리할 수 있습니다.</li>
-                                    <li>토너먼트에 참가할 팀이라면 참가할 토너먼트를 선택하세요.</li>
-                                    <li>팀 로고는 URL을 통해 설정할 수 있습니다.</li>
+                                    <li>팀 로고를 업로드하여 설정할 수 있습니다.</li>
+                                    <li>선수 모집 인원을 설정하여 팀 모집을 관리할 수 있습니다.</li>
                                 </ul>
                             </div>
                         </div>
@@ -181,8 +152,7 @@ export default function CreateTeamPage() {
 
                 {/* 팀 생성 폼 */}
                 <TeamForm
-                    matches={tournaments}
-                    loading={loading || tournamentsLoading}
+                    loading={loading}
                     onSubmit={handleCreateTeam}
                     onCancel={handleCancel}
                 />
