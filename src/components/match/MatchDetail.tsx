@@ -7,6 +7,7 @@ import { Card } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
 import JoinMatchButton from './JoinMatchButton';
 import { MapPin } from 'lucide-react';
+import { calculateMatchStatus, getMatchStatusLabel, getMatchStatusColor } from '@/lib/match-utils';
 
 // 네이버 지도는 클라이언트 사이드에서만 로드
 const NaverMap = dynamic(() => import('@/components/map/NaverMap'), {
@@ -27,21 +28,22 @@ interface MatchDetailProps {
 }
 
 const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
+    // 날짜 기반으로 상태 자동 계산
+    const calculatedStatus = calculateMatchStatus(
+        match.registration_start_date,
+        match.registration_deadline,
+        match.start_date,
+        match.end_date,
+        match.status
+    );
+    
     const getStatusBadge = (status: string) => {
-        const statusConfig = {
-            planning: { text: '계획 중', className: 'bg-gray-100 text-gray-800' },
-            registration: { text: '참가 신청 중', className: 'bg-blue-100 text-blue-800' },
-            ongoing: { text: '진행 중', className: 'bg-green-100 text-green-800' },
-            completed: { text: '완료', className: 'bg-purple-100 text-purple-800' },
-            cancelled: { text: '취소됨', className: 'bg-red-100 text-red-800' },
-        };
-
-        const config = statusConfig[status as keyof typeof statusConfig] ||
-            { text: status, className: 'bg-gray-100 text-gray-800' };
+        const statusText = getMatchStatusLabel(status);
+        const statusColor = getMatchStatusColor(status);
 
         return (
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.className}`}>
-                {config.text}
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}`}>
+                {statusText}
             </span>
         );
     };
@@ -67,7 +69,7 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900">{match.title}</h1>
                                 <div className="flex items-center gap-2 mt-1">
-                                    {getStatusBadge(match.status)}
+                                    {getStatusBadge(calculatedStatus)}
                                     <span className="text-sm text-gray-500">
                                         {match.type.charAt(0).toUpperCase() + match.type.slice(1)}
                                     </span>

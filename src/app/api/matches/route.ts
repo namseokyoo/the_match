@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { MatchType, MatchStatus } from '@/types';
 import { verifyAuth, requireEmailVerified } from '@/lib/auth-middleware';
 import { getSupabaseAdmin } from '@/lib/supabase-server';
+import { calculateMatchStatus } from '@/lib/match-utils';
 
 // GET /api/matches - 경기 목록 조회
 export async function GET(request: NextRequest) {
@@ -143,12 +144,20 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // 상태 자동 계산
+        const calculatedStatus = calculateMatchStatus(
+            body.registration_start_date,
+            body.registration_deadline,
+            body.start_date,
+            body.end_date
+        );
+
         // 경기 생성 데이터 준비
         const matchData = {
             title: body.title.trim(),
             description: body.description?.trim() || null,
             type: body.type,
-            status: body.status || MatchStatus.DRAFT, // status를 body에서 받거나 기본값 사용
+            status: calculatedStatus, // 자동 계산된 상태 사용
             creator_id: userId, // 인증된 사용자 ID 사용
             max_participants: body.max_participants || null,
             registration_start_date: body.registration_start_date || null,

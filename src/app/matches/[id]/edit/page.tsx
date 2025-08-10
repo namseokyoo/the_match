@@ -6,6 +6,7 @@ import { Match, MatchType, MatchStatus } from '@/types';
 import { Button, Input, Textarea } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
+import { calculateMatchStatus, getMatchStatusLabel, getMatchStatusColor } from '@/lib/match-utils';
 
 export default function EditMatchPage() {
     const router = useRouter();
@@ -22,8 +23,8 @@ export default function EditMatchPage() {
         title: '',
         description: '',
         type: MatchType.SINGLE_ELIMINATION,
-        status: MatchStatus.DRAFT,
         max_participants: 16,
+        registration_start_date: '',
         registration_deadline: '',
         start_date: '',
         end_date: '',
@@ -62,8 +63,9 @@ export default function EditMatchPage() {
                     title: data.title || '',
                     description: data.description || '',
                     type: data.type || MatchType.SINGLE_ELIMINATION,
-                    status: data.status || MatchStatus.DRAFT,
                     max_participants: data.max_participants || 16,
+                    registration_start_date: data.registration_start_date ? 
+                        new Date(data.registration_start_date).toISOString().slice(0, 16) : '',
                     registration_deadline: data.registration_deadline ? 
                         new Date(data.registration_deadline).toISOString().slice(0, 16) : '',
                     start_date: data.start_date ? 
@@ -117,12 +119,22 @@ export default function EditMatchPage() {
                 }
             }
 
+            // 상태 자동 계산
+            const calculatedStatus = calculateMatchStatus(
+                formData.registration_start_date,
+                formData.registration_deadline,
+                formData.start_date,
+                formData.end_date,
+                match?.status
+            );
+
             const updateData = {
                 title: formData.title.trim(),
                 description: formData.description?.trim() || null,
                 type: formData.type,
-                status: formData.status,
+                status: calculatedStatus,
                 max_participants: formData.max_participants,
+                registration_start_date: formData.registration_start_date || null,
                 registration_deadline: formData.registration_deadline || null,
                 start_date: formData.start_date || null,
                 end_date: formData.end_date || null,
@@ -235,23 +247,33 @@ export default function EditMatchPage() {
                                     <option value={MatchType.LEAGUE}>리그</option>
                                 </select>
                             </div>
+                        </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    상태
-                                </label>
-                                <select
-                                    value={formData.status}
-                                    onChange={(e) => handleInputChange('status', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue"
-                                >
-                                    <option value={MatchStatus.DRAFT}>준비중</option>
-                                    <option value={MatchStatus.REGISTRATION}>등록중</option>
-                                    <option value={MatchStatus.IN_PROGRESS}>진행중</option>
-                                    <option value={MatchStatus.COMPLETED}>완료</option>
-                                    <option value={MatchStatus.CANCELLED}>취소</option>
-                                </select>
+                        {/* 자동 계산된 상태 표시 */}
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-gray-700">현재 상태</span>
+                                <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                                    getMatchStatusColor(calculateMatchStatus(
+                                        formData.registration_start_date,
+                                        formData.registration_deadline,
+                                        formData.start_date,
+                                        formData.end_date,
+                                        match?.status
+                                    ))
+                                }`}>
+                                    {getMatchStatusLabel(calculateMatchStatus(
+                                        formData.registration_start_date,
+                                        formData.registration_deadline,
+                                        formData.start_date,
+                                        formData.end_date,
+                                        match?.status
+                                    ))}
+                                </span>
                             </div>
+                            <p className="text-xs text-gray-500 mt-2">
+                                상태는 설정한 날짜에 따라 자동으로 변경됩니다.
+                            </p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -270,6 +292,20 @@ export default function EditMatchPage() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    등록 시작일
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    value={formData.registration_start_date}
+                                    onChange={(e) => handleInputChange('registration_start_date', e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
                                     등록 마감일
                                 </label>
                                 <input
@@ -279,12 +315,10 @@ export default function EditMatchPage() {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue"
                                 />
                             </div>
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    시작일
+                                    경기 시작일
                                 </label>
                                 <input
                                     type="datetime-local"
@@ -294,9 +328,12 @@ export default function EditMatchPage() {
                                 />
                             </div>
 
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    종료일
+                                    경기 종료일
                                 </label>
                                 <input
                                     type="datetime-local"

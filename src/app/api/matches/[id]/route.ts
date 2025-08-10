@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { MatchType, MatchStatus, CreateMatchForm } from '@/types';
+import { calculateMatchStatus } from '@/lib/match-utils';
 
 // Supabase 클라이언트 생성 (서버용)
 const supabaseAdmin = createClient(
@@ -147,15 +148,29 @@ export async function PUT(
             );
         }
 
+        // 상태 자동 계산 (취소된 경기는 유지)
+        const calculatedStatus = calculateMatchStatus(
+            body.registration_start_date,
+            body.registration_deadline,
+            body.start_date,
+            body.end_date,
+            existingMatch.status
+        );
+
         // 경기 수정 데이터 준비
         const updateData = {
             title: body.title.trim(),
             description: body.description?.trim() || null,
             type: body.type,
+            status: calculatedStatus, // 자동 계산된 상태 사용
             max_participants: body.max_participants || null,
+            registration_start_date: body.registration_start_date || null,
             registration_deadline: body.registration_deadline || null,
             start_date: body.start_date || null,
             end_date: body.end_date || null,
+            venue: body.venue?.trim() || null,
+            rules: body.rules || {},
+            prizes: body.prizes?.trim() || null,
             updated_at: new Date().toISOString(),
         };
 
@@ -342,6 +357,14 @@ function validateMatchData(data: CreateMatchForm): string[] {
 
     // 날짜 검증
     const now = new Date();
+    
+    // 등록 시작일 검증
+    if (data.registration_start_date) {
+        const regStartDate = new Date(data.registration_start_date);
+        if (isNaN(regStartDate.getTime())) {
+            errors.push('올바른 등록 시작일을 입력해주세요.');
+        }
+    }
 
     if (data.registration_deadline) {
         const regDeadline = new Date(data.registration_deadline);
@@ -360,6 +383,15 @@ function validateMatchData(data: CreateMatchForm): string[] {
             errors.push('시작일은 현재 시간 이후여야 합니다.');
         }
 
+        // 등록 시작일과 마감일 비교
+        if (data.registration_start_date && data.registration_deadline) {
+            const regStartDate = new Date(data.registration_start_date);
+            const regDeadline = new Date(data.registration_deadline);
+            if (regStartDate > regDeadline) {
+                errors.push('등록 마감일은 등록 시작일 이후여야 합니다.');
+            }
+        }
+        
         if (data.registration_deadline) {
             const regDeadline = new Date(data.registration_deadline);
             if (regDeadline > startDate) {
@@ -380,6 +412,16 @@ function validateMatchData(data: CreateMatchForm): string[] {
                 errors.push('종료일은 시작일 이후여야 합니다.');
             }
         }
+    }
+    
+    // 장소 검증
+    if (data.venue && data.venue.length > 200) {
+        errors.push('장소는 200글자를 초과할 수 없습니다.');
+    }
+    
+    // 상품 검증
+    if (data.prizes && data.prizes.length > 1000) {
+        errors.push('시상 내역은 1000글자를 초과할 수 없습니다.');
     }
 
     return errors;

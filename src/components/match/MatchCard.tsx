@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@/components/ui';
 import { Match } from '@/types';
 import { formatDate } from '@/lib/utils';
+import { calculateMatchStatus, getMatchStatusLabel, getMatchStatusColor } from '@/lib/match-utils';
 
 interface MatchCardProps {
     match: Match;
@@ -27,17 +28,21 @@ const getMatchTypeText = (type: string): string => {
 
 // 경기 상태 표시 텍스트와 색상 - 새로운 디자인 시스템
 const getMatchStatusInfo = (status: string) => {
-    const statusMap: Record<string, { text: string; color: string }> = {
-        'draft': { text: '준비중', color: 'bg-gray-50 text-gray-600 border border-gray-200' },
-        'registration': { text: '등록중', color: 'bg-primary-50 text-primary-700 border border-primary-200' },
-        'recruiting': { text: '모집중', color: 'bg-primary-50 text-primary-700 border border-primary-200' },
-        'in_progress': { text: '진행중', color: 'bg-success-50 text-success-700 border border-success-200' },
-        'active': { text: '진행중', color: 'bg-success-50 text-success-700 border border-success-200' },
-        'completed': { text: '완료', color: 'bg-gray-50 text-gray-700 border border-gray-200' },
-        'cancelled': { text: '취소', color: 'bg-error-50 text-error-700 border border-error-200' },
-        'upcoming': { text: '예정', color: 'bg-warning-50 text-warning-700 border border-warning-200' },
+    const colorMap: Record<string, string> = {
+        'draft': 'bg-gray-50 text-gray-600 border border-gray-200',
+        'registration': 'bg-primary-50 text-primary-700 border border-primary-200',
+        'recruiting': 'bg-primary-50 text-primary-700 border border-primary-200',
+        'in_progress': 'bg-success-50 text-success-700 border border-success-200',
+        'active': 'bg-success-50 text-success-700 border border-success-200',
+        'completed': 'bg-gray-50 text-gray-700 border border-gray-200',
+        'cancelled': 'bg-error-50 text-error-700 border border-error-200',
+        'upcoming': 'bg-warning-50 text-warning-700 border border-warning-200',
     };
-    return statusMap[status] || { text: status, color: 'bg-gray-50 text-gray-600 border border-gray-200' };
+    
+    return {
+        text: getMatchStatusLabel(status),
+        color: colorMap[status] || 'bg-gray-50 text-gray-600 border border-gray-200'
+    };
 };
 
 export const MatchCard: React.FC<MatchCardProps> = ({
@@ -48,7 +53,15 @@ export const MatchCard: React.FC<MatchCardProps> = ({
     showActions = true,
     isOwner = false,
 }) => {
-    const statusInfo = getMatchStatusInfo(match.status);
+    // 날짜 기반으로 상태 자동 계산
+    const calculatedStatus = calculateMatchStatus(
+        match.registration_start_date,
+        match.registration_deadline,
+        match.start_date,
+        match.end_date,
+        match.status
+    );
+    const statusInfo = getMatchStatusInfo(calculatedStatus);
     const typeText = getMatchTypeText(match.type);
 
     return (
