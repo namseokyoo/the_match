@@ -7,11 +7,19 @@ module.exports = {
         './src/app/**/*.{js,ts,jsx,tsx,mdx}',
     ],
     theme: {
+        // 모든 반응형 breakpoint 제거 - 모바일 고정
+        screens: {
+            'sm': '9999px', // 절대 도달하지 않을 값으로 설정
+            'md': '9999px',
+            'lg': '9999px',
+            'xl': '9999px',
+            '2xl': '9999px',
+        },
         container: {
             center: true,
-            padding: "2rem",
+            padding: "1rem",
             screens: {
-                "2xl": "1400px",
+                DEFAULT: '430px',
             },
         },
         extend: {
@@ -124,9 +132,6 @@ module.exports = {
             animation: {
                 "accordion-down": "accordion-down 0.2s ease-out",
                 "accordion-up": "accordion-up 0.2s ease-out",
-            },
-            screens: {
-                'xs': '480px',
             },
         },
     },

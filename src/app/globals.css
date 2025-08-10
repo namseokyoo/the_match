@@ -92,22 +92,22 @@
     @apply bg-gray-500 dark:bg-gray-500;
 }
 
-/* Mobile-first responsive typography */
+/* Fixed mobile typography - no responsive changes */
 @layer base {
     h1 {
-        @apply text-2xl font-bold leading-tight tracking-tight md:text-3xl lg:text-4xl;
+        @apply text-2xl font-bold leading-tight tracking-tight;
     }
 
     h2 {
-        @apply text-xl font-semibold leading-tight tracking-tight md:text-2xl lg:text-3xl;
+        @apply text-xl font-semibold leading-tight tracking-tight;
     }
 
     h3 {
-        @apply text-lg font-semibold leading-tight md:text-xl lg:text-2xl;
+        @apply text-lg font-semibold leading-tight;
     }
 
     h4 {
-        @apply text-base font-semibold leading-tight md:text-lg;
+        @apply text-base font-semibold leading-tight;
     }
 }
 
@@ -203,22 +203,26 @@
   }
 }
 
-/* Mobile Container Fixed Size */
+/* Mobile Container Fixed Size - 완전 고정 */
 .mobile-wrapper {
   min-height: 100vh;
   background-color: rgb(243 244 246);
   display: flex;
   justify-content: center;
+  overflow-x: hidden;
+  position: relative;
 }
 
 .mobile-container {
-  width: 430px;
-  max-width: 430px;
+  width: 430px !important;
+  min-width: 430px !important;
+  max-width: 430px !important;
   min-height: 100vh;
   background: var(--background);
   font-family: system-ui, -apple-system, sans-serif;
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   position: relative;
+  overflow-x: hidden;
 }
 
 /* 모바일 컨테이너 내부의 모든 요소는 최대 너비 제한 */
@@ -226,14 +230,24 @@
   max-width: 100%;
 }
 
-/* 데스크톱에서도 모바일 뷰 유지 */
-@media (min-width: 431px) {
+/* 모든 화면 크기에서 동일한 레이아웃 유지 */
+@media screen {
   .mobile-wrapper {
     background-color: rgb(243 244 246);
   }
   
   .mobile-container {
-    width: 430px;
-    max-width: 430px;
+    width: 430px !important;
+    min-width: 430px !important;
+    max-width: 430px !important;
+  }
+  
+  /* 반응형 클래스 무효화 */
+  [class*="sm:"],
+  [class*="md:"],
+  [class*="lg:"],
+  [class*="xl:"],
+  [class*="2xl:"] {
+    /* 반응형 속성 무시 */
   }
 }
