@@ -72,14 +72,6 @@
 
     body {
         @apply bg-background text-foreground;
-        /* Prevent horizontal scroll and fix viewport */
-        overflow-x: hidden;
-        width: 100vw;
-    }
-    
-    /* Override any responsive breakpoints globally */
-    html {
-        overflow-x: hidden;
     }
 }
 
@@ -100,22 +92,22 @@
     @apply bg-gray-500 dark:bg-gray-500;
 }
 
-/* Fixed mobile typography (no responsive changes) */
+/* Mobile-first responsive typography */
 @layer base {
     h1 {
-        @apply text-2xl font-bold leading-tight tracking-tight;
+        @apply text-2xl font-bold leading-tight tracking-tight md:text-3xl lg:text-4xl;
     }
 
     h2 {
-        @apply text-xl font-semibold leading-tight tracking-tight;
+        @apply text-xl font-semibold leading-tight tracking-tight md:text-2xl lg:text-3xl;
     }
 
     h3 {
-        @apply text-lg font-semibold leading-tight;
+        @apply text-lg font-semibold leading-tight md:text-xl lg:text-2xl;
     }
 
     h4 {
-        @apply text-base font-semibold leading-tight;
+        @apply text-base font-semibold leading-tight md:text-lg;
     }
 }
 
@@ -208,5 +200,40 @@
   
   .btn-match {
     @apply gradient-primary text-white font-semibold px-6 py-3 rounded-lg shadow-match hover:shadow-xl transition-all duration-200 transform hover:scale-105;
+  }
+}
+
+/* Mobile Container Fixed Size */
+.mobile-wrapper {
+  min-height: 100vh;
+  background-color: rgb(243 244 246);
+  display: flex;
+  justify-content: center;
+}
+
+.mobile-container {
+  width: 430px;
+  max-width: 430px;
+  min-height: 100vh;
+  background: var(--background);
+  font-family: system-ui, -apple-system, sans-serif;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  position: relative;
+}
+
+/* 모바일 컨테이너 내부의 모든 요소는 최대 너비 제한 */
+.mobile-container * {
+  max-width: 100%;
+}
+
+/* 데스크톱에서도 모바일 뷰 유지 */
+@media (min-width: 431px) {
+  .mobile-wrapper {
+    background-color: rgb(243 244 246);
+  }
+  
+  .mobile-container {
+    width: 430px;
+    max-width: 430px;
   }
 }
