@@ -1,0 +1,284 @@
+{
+  "accounts": [
+    {
+      "id": 1,
+      "name": "김민수",
+      "email": "test1@thematch.test",
+      "password": "TestPassword123!",
+      "role": "organizer",
+      "team": null,
+      "description": "대회 주최 전문가, 축구팀 감독 경험 5년",
+      "preferences": {
+        "sports": ["축구", "농구"],
+        "skill_level": "고급",
+        "availability": ["주말", "평일저녁"]
+      }
+    },
+    {
+      "id": 2,
+      "name": "박영희",
+      "email": "test2@thematch.test",
+      "password": "TestPassword123!",
+      "role": "captain",
+      "team": "불꽃 축구단",
+      "description": "팀 관리 및 커뮤니케이션 전문, 리더십 우수",
+      "preferences": {
+        "sports": ["축구", "배구"],
+        "skill_level": "중급",
+        "availability": ["토요일", "일요일"]
+      }
+    },
+    {
+      "id": 3,
+      "name": "이철수",
+      "email": "test3@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "불꽃 축구단",
+      "description": "열정적인 플레이어, 팀워크 중시",
+      "preferences": {
+        "sports": ["축구"],
+        "skill_level": "중급",
+        "availability": ["주말"]
+      }
+    },
+    {
+      "id": 4,
+      "name": "정미영",
+      "email": "test4@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "불꽃 축구단",
+      "description": "신속한 판단력과 정확한 패스가 장점",
+      "preferences": {
+        "sports": ["축구", "테니스"],
+        "skill_level": "고급",
+        "availability": ["평일저녁", "주말"]
+      }
+    },
+    {
+      "id": 5,
+      "name": "최현우",
+      "email": "test5@thematch.test",
+      "password": "TestPassword123!",
+      "role": "captain",
+      "team": "번개 농구팀",
+      "description": "농구 코치 자격증 보유, 전략적 사고 뛰어남",
+      "preferences": {
+        "sports": ["농구"],
+        "skill_level": "고급",
+        "availability": ["매일"]
+      }
+    },
+    {
+      "id": 6,
+      "name": "강소영",
+      "email": "test6@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "번개 농구팀",
+      "description": "뛰어난 운동신경과 승부욕",
+      "preferences": {
+        "sports": ["농구", "배드민턴"],
+        "skill_level": "중급",
+        "availability": ["주말"]
+      }
+    },
+    {
+      "id": 7,
+      "name": "윤태준",
+      "email": "test7@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "번개 농구팀",
+      "description": "키가 크고 수비에 특화된 플레이어",
+      "preferences": {
+        "sports": ["농구"],
+        "skill_level": "초급",
+        "availability": ["토요일"]
+      }
+    },
+    {
+      "id": 8,
+      "name": "임지은",
+      "email": "test8@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "번개 농구팀",
+      "description": "빠른 속도와 정확한 슛이 특기",
+      "preferences": {
+        "sports": ["농구", "배구"],
+        "skill_level": "중급",
+        "availability": ["일요일"]
+      }
+    },
+    {
+      "id": 9,
+      "name": "홍길동",
+      "email": "test9@thematch.test",
+      "password": "TestPassword123!",
+      "role": "captain",
+      "team": "태풍 배구클럽",
+      "description": "배구 동호회 10년 경력, 기술 지도 전문",
+      "preferences": {
+        "sports": ["배구"],
+        "skill_level": "고급",
+        "availability": ["평일저녁", "주말"]
+      }
+    },
+    {
+      "id": 10,
+      "name": "오현아",
+      "email": "test10@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "태풍 배구클럽",
+      "description": "파워 어택이 강한 공격수",
+      "preferences": {
+        "sports": ["배구"],
+        "skill_level": "중급",
+        "availability": ["주말"]
+      }
+    },
+    {
+      "id": 11,
+      "name": "신동욱",
+      "email": "test11@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "태풍 배구클럽",
+      "description": "안정적인 리베로 포지션 전문",
+      "preferences": {
+        "sports": ["배구", "탁구"],
+        "skill_level": "고급",
+        "availability": ["평일저녁"]
+      }
+    },
+    {
+      "id": 12,
+      "name": "한지민",
+      "email": "test12@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "태풍 배구클럽",
+      "description": "세터 포지션으로 게임 조율 능력 우수",
+      "preferences": {
+        "sports": ["배구"],
+        "skill_level": "중급",
+        "availability": ["토요일", "일요일"]
+      }
+    },
+    {
+      "id": 13,
+      "name": "조성훈",
+      "email": "test13@thematch.test",
+      "password": "TestPassword123!",
+      "role": "captain",
+      "team": "천둥 야구단",
+      "description": "야구 심판 자격증 보유, 룰에 능통",
+      "preferences": {
+        "sports": ["야구"],
+        "skill_level": "고급",
+        "availability": ["주말"]
+      }
+    },
+    {
+      "id": 14,
+      "name": "송미라",
+      "email": "test14@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "천둥 야구단",
+      "description": "투수로 활동하며 구속이 빠른 편",
+      "preferences": {
+        "sports": ["야구", "소프트볼"],
+        "skill_level": "중급",
+        "availability": ["일요일"]
+      }
+    },
+    {
+      "id": 15,
+      "name": "백진우",
+      "email": "test15@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "천둥 야구단",
+      "description": "타율이 높고 장타력이 좋은 타자",
+      "preferences": {
+        "sports": ["야구"],
+        "skill_level": "중급",
+        "availability": ["토요일"]
+      }
+    },
+    {
+      "id": 16,
+      "name": "문혜진",
+      "email": "test16@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "천둥 야구단",
+      "description": "내야수로 수비가 안정적",
+      "preferences": {
+        "sports": ["야구", "축구"],
+        "skill_level": "초급",
+        "availability": ["주말"]
+      }
+    },
+    {
+      "id": 17,
+      "name": "양승호",
+      "email": "test17@thematch.test",
+      "password": "TestPassword123!",
+      "role": "captain",
+      "team": "폭풍 테니스팀",
+      "description": "테니스 강사로 활동 중, 기술 지도 가능",
+      "preferences": {
+        "sports": ["테니스"],
+        "skill_level": "고급",
+        "availability": ["평일저녁", "주말"]
+      }
+    },
+    {
+      "id": 18,
+      "name": "서정아",
+      "email": "test18@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "폭풍 테니스팀",
+      "description": "발리 기술이 우수한 올라운드 플레이어",
+      "preferences": {
+        "sports": ["테니스", "배드민턴"],
+        "skill_level": "중급",
+        "availability": ["토요일"]
+      }
+    },
+    {
+      "id": 19,
+      "name": "남기훈",
+      "email": "test19@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "폭풍 테니스팀",
+      "description": "서브가 강하고 경기 운영이 좋음",
+      "preferences": {
+        "sports": ["테니스"],
+        "skill_level": "고급",
+        "availability": ["일요일"]
+      }
+    },
+    {
+      "id": 20,
+      "name": "고은비",
+      "email": "test20@thematch.test",
+      "password": "TestPassword123!",
+      "role": "player",
+      "team": "폭풍 테니스팀",
+      "description": "민첩성이 뛰어나고 각도 있는 샷이 특기",
+      "preferences": {
+        "sports": ["테니스", "스쿼시"],
+        "skill_level": "중급",
+        "availability": ["평일저녁"]
+      }
+    }
+  ]
+}

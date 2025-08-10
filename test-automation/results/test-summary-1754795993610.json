@@ -1,0 +1,51 @@
+{
+  "timestamp": "2025-08-10T03:19:53.610Z",
+  "totalTests": 7,
+  "passedTests": 1,
+  "failedTests": 6,
+  "successRate": 14,
+  "details": [
+    {
+      "scenario": "팀 생성",
+      "success": false,
+      "duration": 195188,
+      "errorCount": 5
+    },
+    {
+      "scenario": "계정 생성 및 회원가입",
+      "success": true,
+      "duration": 158675,
+      "errorCount": 0
+    },
+    {
+      "scenario": "경기 참가 신청",
+      "success": false,
+      "duration": 137036,
+      "errorCount": 14
+    },
+    {
+      "scenario": "경기 생성",
+      "success": false,
+      "duration": 120058,
+      "errorCount": 3
+    },
+    {
+      "scenario": "팀 채팅 테스트",
+      "success": false,
+      "duration": 45093,
+      "errorCount": 0
+    },
+    {
+      "scenario": "경기 관리 (참가자 승인)",
+      "success": false,
+      "duration": 29787,
+      "errorCount": 0
+    },
+    {
+      "scenario": "경기 점수 입력",
+      "success": false,
+      "duration": 29560,
+      "errorCount": 0
+    }
+  ]
+}

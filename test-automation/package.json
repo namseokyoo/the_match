@@ -1,0 +1,30 @@
+{
+  "name": "the-match-test-automation",
+  "version": "1.0.0",
+  "description": "Comprehensive test automation suite for The Match platform",
+  "scripts": {
+    "test:comprehensive": "tsx run-comprehensive-test.ts",
+    "test:parallel": "tsx run-intelligent-parallel-test.ts",
+    "test:db-bot": "tsx run-db-aware-bot.ts",
+    "test:bot": "tsx scenarios/adaptive-bot-scenario.ts",
+    "test:quick": "tsx scenarios/comprehensive-match-lifecycle.ts",
+    "debug:signup": "tsx scenarios/debug-signup.ts",
+    "populate:data": "tsx scenarios/simple-data-generator.ts",
+    "setup": "npm install && mkdir -p results screenshots data",
+    "clean": "rm -rf results/* screenshots/* || true",
+    "report": "node -e \"const fs=require('fs');const path=require('path');const files=fs.readdirSync('./results').filter(f=>f.includes('report')).sort().reverse();if(files[0])console.log(fs.readFileSync(path.join('./results',files[0]),'utf8'));\"",
+    "monitor": "tsx run-intelligent-parallel-test.ts --monitor-only"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0",
+    "@playwright/test": "^1.40.0",
+    "typescript": "^5.3.0",
+    "tsx": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "keywords": ["testing", "automation", "playwright", "e2e"],
+  "author": "The Match Team",
+  "license": "MIT"
+}
