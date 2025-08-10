@@ -147,48 +147,15 @@ export default function Home() {
         <div className="flex min-h-screen flex-col bg-gray-50">
             {/* Onboarding Tour for new users */}
             <OnboardingTour autoStart={!!user} />
-            
-            {/* Hero CTA Section - 상단으로 이동 */}
-            <section className="bg-gradient-to-br from-primary-500 to-primary-700 px-4 py-12 sm:py-16">
-                <div className="mx-auto max-w-4xl text-center">
-                    <h1 className="mb-4 text-3xl sm:text-4xl font-bold text-white">
-                        The Match와 함께 시작하세요
-                    </h1>
-                    <p className="mb-8 text-lg sm:text-xl text-primary-100">
-                        무료로 경기를 만들고 팀을 관리하는 새로운 경험
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        {user ? (
-                            <>
-                                <Link href="/matches/create" className="px-8 py-3 bg-white text-primary-600 rounded-lg hover:bg-gray-100 font-semibold transition-colors shadow-lg">
-                                    경기 만들기
-                                </Link>
-                                <Link href="/teams/create" className="px-8 py-3 bg-primary-800 text-white rounded-lg hover:bg-primary-900 font-semibold transition-colors shadow-lg">
-                                    팀 만들기
-                                </Link>
-                            </>
-                        ) : (
-                            <>
-                                <Link href="/signup" className="px-8 py-3 bg-white text-primary-600 rounded-lg hover:bg-gray-100 font-semibold transition-colors shadow-lg">
-                                    무료 회원가입
-                                </Link>
-                                <Link href="/login" className="px-8 py-3 bg-primary-800 text-white rounded-lg hover:bg-primary-900 font-semibold transition-colors shadow-lg">
-                                    로그인
-                                </Link>
-                            </>
-                        )}
-                    </div>
-                </div>
-            </section>
 
             {/* 현재 진행 중인 경기 */}
-            <section className="py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+            <section className="py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-7xl">
-                    <div className="flex justify-between items-center mb-4 sm:mb-6">
-                        <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                             진행 중인 경기
                         </h2>
-                        <Link href="/matches" className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 text-xs sm:text-sm">
+                        <Link href="/matches" className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 text-sm">
                             모두 보기 <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
@@ -207,8 +174,8 @@ export default function Home() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {activeMatches.map(match => (
                                 <Link key={match.id} href={`/matches/${match.id}`}>
-                                    <div className="bg-white rounded-lg p-5 border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer">
-                                        <div className="flex justify-between items-start mb-3">
+                                    <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer">
+                                        <div className="flex justify-between items-start mb-2">
                                             <h3 className="font-medium text-base text-gray-900 flex-1">
                                                 {match.title}
                                             </h3>
@@ -216,7 +183,7 @@ export default function Home() {
                                                 {getStatusLabel(match.status)}
                                             </span>
                                         </div>
-                                        <div className="space-y-2 text-sm text-gray-500">
+                                        <div className="space-y-1 text-sm text-gray-500">
                                             <div className="flex items-center gap-2">
                                                 <Trophy className="w-3.5 h-3.5 text-gray-400" />
                                                 <span>{getTypeLabel(match.type)}</span>
@@ -225,12 +192,6 @@ export default function Home() {
                                                 <div className="flex items-center gap-2">
                                                     <Calendar className="w-3.5 h-3.5 text-gray-400" />
                                                     <span className="whitespace-nowrap">{formatDate(match.start_date)}</span>
-                                                </div>
-                                            )}
-                                            {match.max_participants && (
-                                                <div className="flex items-center gap-2">
-                                                    <Users className="w-3.5 h-3.5 text-gray-400" />
-                                                    <span>최대 {match.max_participants}팀</span>
                                                 </div>
                                             )}
                                         </div>
@@ -257,11 +218,11 @@ export default function Home() {
             </section>
 
             {/* 팀원 모집 중 */}
-            <section className="py-8 px-4 bg-white">
+            <section className="py-4 sm:py-6 px-4 sm:px-6 lg:px-8 bg-white">
                 <div className="mx-auto max-w-7xl">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900">
-                            👥 팀원 모집 중
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                            팀원 모집 중
                         </h2>
                         <Link href="/teams" className="text-primary-600 hover:text-primary-700 flex items-center gap-1 text-sm font-medium transition-colors">
                             모든 팀 보기 <ArrowRight className="w-4 h-4" />
@@ -281,14 +242,14 @@ export default function Home() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {recruitingTeams.map(team => (
                                 <Link key={team.id} href={`/teams/${team.id}`}>
-                                    <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors cursor-pointer">
-                                        <h3 className="font-semibold text-gray-900 mb-2">
+                                    <div className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors cursor-pointer">
+                                        <h3 className="font-semibold text-gray-900 mb-1">
                                             {team.name}
                                         </h3>
                                         <p className="text-sm text-gray-600 line-clamp-2">
                                             {team.description || '팀원을 모집하고 있습니다'}
                                         </p>
-                                        <div className="mt-3 flex items-center text-primary-600 text-sm font-medium">
+                                        <div className="mt-2 flex items-center text-primary-600 text-sm font-medium">
                                             <UserPlus className="w-4 h-4 mr-1" />
                                             <span>참가 신청</span>
                                         </div>
@@ -310,29 +271,38 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* 곧 시작될 경기 */}
-            {upcomingMatches.length > 0 && (
-                <section className="py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
-                    <div className="mx-auto max-w-7xl">
-                        <div className="flex justify-between items-center mb-4 sm:mb-6">
-                            <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
-                                📅 곧 시작될 경기
-                            </h2>
-                            <Link href="/matches?status=registration" className="text-primary-600 hover:text-primary-700 flex items-center gap-1 text-sm font-medium transition-colors">
-                                참가 가능한 경기 <ArrowRight className="w-4 h-4" />
-                            </Link>
-                        </div>
+            {/* 참가 팀 모집 */}
+            <section className="py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-7xl">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                            참가 팀 모집
+                        </h2>
+                        <Link href="/matches?status=registration" className="text-primary-600 hover:text-primary-700 flex items-center gap-1 text-sm font-medium transition-colors">
+                            모두 보기 <ArrowRight className="w-4 h-4" />
+                        </Link>
+                    </div>
 
+                    {loading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {[1, 2].map(i => (
+                                <div key={i} className="bg-white rounded-lg p-3 animate-pulse border border-gray-200">
+                                    <div className="h-5 bg-gray-200 rounded mb-2"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : upcomingMatches.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {upcomingMatches.map(match => (
                                 <Link key={match.id} href={`/matches/${match.id}`}>
-                                    <div className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer border border-gray-200">
+                                    <div className="bg-white rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer border border-gray-200">
                                         <div className="flex justify-between items-center">
                                             <div className="flex-1">
                                                 <h3 className="font-semibold text-gray-900">
                                                     {match.title}
                                                 </h3>
-                                                <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                                                <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
                                                     <div className="flex items-center gap-1">
                                                         <Clock className="w-4 h-4" />
                                                         <span className="whitespace-nowrap">{formatDate(match.start_date || '')}</span>
@@ -351,9 +321,19 @@ export default function Home() {
                                 </Link>
                             ))}
                         </div>
-                    </div>
-                </section>
-            )}
+                    ) : (
+                        <div className="text-center py-8 bg-white rounded-lg border border-gray-200">
+                            <Trophy className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-600 mb-4">참가 모집 중인 경기가 없습니다</p>
+                            {user && (
+                                <Link href="/matches/create" className="inline-flex items-center px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors shadow-sm">
+                                    경기 만들기
+                                </Link>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </section>
 
             {/* 통계 섹션 - 맨 아래로 이동 */}
             <section className="bg-gradient-to-br from-primary-500 to-primary-700 px-4 py-8 sm:py-12">
