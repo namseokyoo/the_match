@@ -7,26 +7,11 @@ import { supabase } from './supabase';
  */
 export async function checkEmailExists(email: string): Promise<boolean> {
     try {
-        // auth.users의 email은 직접 접근할 수 없으므로
-        // profiles 테이블의 user_id를 통해 확인하거나
-        // signIn을 시도해서 확인하는 방법을 사용
+        // Supabase Auth API는 이메일 중복 체크를 직접 제공하지 않음
+        // signUp을 시도하고 응답을 확인하는 방법이 더 정확함
+        // 여기서는 실제로 중복 체크를 건너뛰고 signUp 응답에서 처리
         
-        // 방법 1: 가짜 로그인 시도로 이메일 존재 여부 확인
-        const { error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: 'dummy_password_for_check_12345' // 일부러 틀린 비밀번호
-        });
-        
-        if (error) {
-            // "Invalid login credentials" = 이메일은 존재하지만 비밀번호가 틀림
-            // "Email not confirmed" = 이메일은 존재하지만 확인되지 않음
-            if (error.message.includes('Invalid login credentials') || 
-                error.message.includes('Email not confirmed')) {
-                console.log('Email already exists:', email);
-                return true;
-            }
-        }
-        
+        // 임시로 false 반환 (실제 체크는 signUp에서 처리)
         return false;
     } catch (error) {
         console.error('Email check error:', error);
@@ -44,19 +29,7 @@ export async function safeSignUp(
     metadata?: Record<string, any>
 ) {
     try {
-        // 1. 먼저 이메일 중복 체크
-        const emailExists = await checkEmailExists(email);
-        if (emailExists) {
-            return {
-                data: null,
-                error: {
-                    message: 'Email already registered',
-                    status: 400,
-                }
-            };
-        }
-
-        // 2. Supabase signUp 시도
+        // Supabase signUp 시도
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -68,12 +41,24 @@ export async function safeSignUp(
 
         if (error) {
             console.error('SignUp error:', error);
+            
+            // Supabase 에러 메시지 체크
+            // "User already registered" 에러는 이메일이 이미 존재할 때 발생
+            if (error.message?.includes('User already registered')) {
+                return {
+                    data: null,
+                    error: {
+                        message: 'Email already registered',
+                        status: 400,
+                    }
+                };
+            }
+            
             return { data: null, error };
         }
 
-        // 3. 응답 검증
+        // 응답 검증
         // Supabase는 이미 존재하는 이메일에 대해 에러 없이 응답할 수 있음
-        // identities가 비어있으면 이미 존재하는 사용자
         if (!data.user) {
             return {
                 data: null,
@@ -85,6 +70,7 @@ export async function safeSignUp(
         }
 
         // identities 체크 - 비어있으면 이미 존재하는 사용자
+        // Supabase는 이미 가입된 이메일로 재가입 시도시 identities를 빈 배열로 반환
         if (data.user.identities && data.user.identities.length === 0) {
             console.log('User already exists (empty identities)');
             return {

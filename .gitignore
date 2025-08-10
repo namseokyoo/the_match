@@ -82,4 +82,11 @@ logs
 .turbo
 
 # Supabase
-supabase/.env 
+supabase/.env
+
+# Test accounts and data
+test-accounts.json
+test-accounts.md
+test-data/
+test-results/
+*.test.json 
