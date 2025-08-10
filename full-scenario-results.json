@@ -1,0 +1,177 @@
+{
+  "timestamp": "2025-08-10T02:16:52.422Z",
+  "summary": [
+    {
+      "phase": "Team Creation",
+      "total": 8,
+      "successful": 0
+    },
+    {
+      "phase": "Match Creation",
+      "total": 2,
+      "successful": 0
+    },
+    {
+      "phase": "Team Joining",
+      "total": 3,
+      "successful": 0
+    },
+    {
+      "phase": "Match Participation",
+      "total": 12,
+      "successful": 0
+    }
+  ],
+  "details": [
+    {
+      "phase": "Team Creation",
+      "action": "Create FC 서울 유나이티드",
+      "user": "김민수",
+      "success": false
+    },
+    {
+      "phase": "Team Creation",
+      "action": "Create 블루 이글스",
+      "user": "이영희",
+      "success": false
+    },
+    {
+      "phase": "Team Creation",
+      "action": "Create 레드 라이온스",
+      "user": "박철수",
+      "success": false
+    },
+    {
+      "phase": "Team Creation",
+      "action": "Create 그린 호크스",
+      "user": "최지훈",
+      "success": false
+    },
+    {
+      "phase": "Team Creation",
+      "action": "Create 옐로우 타이거스",
+      "user": "정수진",
+      "success": false
+    },
+    {
+      "phase": "Team Creation",
+      "action": "Create 퍼플 팬더스",
+      "user": "임동현",
+      "success": false
+    },
+    {
+      "phase": "Team Creation",
+      "action": "Create 오렌지 피닉스",
+      "user": "한소희",
+      "success": false
+    },
+    {
+      "phase": "Team Creation",
+      "action": "Create 실버 울프스",
+      "user": "조현우",
+      "success": false
+    },
+    {
+      "phase": "Match Creation",
+      "action": "Create 2025 봄 챔피언십",
+      "user": "김민수",
+      "success": false
+    },
+    {
+      "phase": "Match Creation",
+      "action": "Create 주말 리그",
+      "user": "임동현",
+      "success": false
+    },
+    {
+      "phase": "Team Joining",
+      "action": "Join 블루 이글스",
+      "user": "강민정",
+      "success": false
+    },
+    {
+      "phase": "Team Joining",
+      "action": "Join 레드 라이온스",
+      "user": "윤서연",
+      "success": false
+    },
+    {
+      "phase": "Team Joining",
+      "action": "Join 그린 호크스",
+      "user": "서다은",
+      "success": false
+    },
+    {
+      "phase": "Match Participation",
+      "action": "Join 2025 봄 챔피언십",
+      "user": "이영희",
+      "success": false
+    },
+    {
+      "phase": "Match Participation",
+      "action": "Join 주말 리그",
+      "user": "이영희",
+      "success": false
+    },
+    {
+      "phase": "Match Participation",
+      "action": "Join 2025 봄 챔피언십",
+      "user": "박철수",
+      "success": false
+    },
+    {
+      "phase": "Match Participation",
+      "action": "Join 주말 리그",
+      "user": "박철수",
+      "success": false
+    },
+    {
+      "phase": "Match Participation",
+      "action": "Join 2025 봄 챔피언십",
+      "user": "최지훈",
+      "success": false
+    },
+    {
+      "phase": "Match Participation",
+      "action": "Join 주말 리그",
+      "user": "최지훈",
+      "success": false
+    },
+    {
+      "phase": "Match Participation",
+      "action": "Join 2025 봄 챔피언십",
+      "user": "정수진",
+      "success": false
+    },
+    {
+      "phase": "Match Participation",
+      "action": "Join 주말 리그",
+      "user": "정수진",
+      "success": false
+    },
+    {
+      "phase": "Match Participation",
+      "action": "Join 2025 봄 챔피언십",
+      "user": "한소희",
+      "success": false
+    },
+    {
+      "phase": "Match Participation",
+      "action": "Join 주말 리그",
+      "user": "한소희",
+      "success": false
+    },
+    {
+      "phase": "Match Participation",
+      "action": "Join 2025 봄 챔피언십",
+      "user": "조현우",
+      "success": false
+    },
+    {
+      "phase": "Match Participation",
+      "action": "Join 주말 리그",
+      "user": "조현우",
+      "success": false
+    }
+  ]
+}

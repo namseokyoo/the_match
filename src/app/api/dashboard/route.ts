@@ -40,7 +40,7 @@ export async function GET() {
                 .select('*', { count: 'exact', head: true }),
             
             supabaseAdmin
-                .from('players')
+                .from('profiles')
                 .select('*', { count: 'exact', head: true })
         ]);
 
@@ -67,22 +67,24 @@ export async function GET() {
             )
             .slice(0, 6);
 
-        // 곧 시작될 경기들
+        // 곧 시작될 경기들 (draft와 registration 상태 모두 포함)
         const upcomingMatches = (matches || [])
             .filter(match => {
-                if (match.status !== 'registration' && match.status !== 'draft') {
+                // draft, registration 상태의 경기들 포함
+                if (!['registration', 'draft'].includes(match.status)) {
                     return false;
                 }
                 
+                // 시작일이 설정된 경기만 (draft는 시작일이 없을 수도 있음)
                 if (!match.start_date) {
-                    return false;
+                    return match.status === 'draft'; // draft는 시작일 없어도 표시
                 }
                 
                 try {
                     const startDate = new Date(match.start_date as string);
                     return !isNaN(startDate.getTime()) && startDate >= now;
                 } catch {
-                    return false;
+                    return match.status === 'draft'; // 날짜 파싱 실패해도 draft는 포함
                 }
             })
             .sort((a, b) => {
@@ -92,9 +94,9 @@ export async function GET() {
             })
             .slice(0, 4);
 
-        // 팀원 모집 중인 팀들
+        // 팀원 모집 중인 팀들 (생성된 모든 팀 표시)
         const recruitingTeams = (teams || [])
-            .filter(team => team.captain_id !== null)
+            .filter(team => team.name && team.name.trim()) // 이름이 있는 팀만
             .slice(0, 4);
 
         // 통계 데이터 정리

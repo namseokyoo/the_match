@@ -46,22 +46,34 @@ async function registerUser(page: Page, account: TestAccount) {
     
     try {
         // Navigate to signup page
-        await page.goto(`${BASE_URL}/auth/signup`);
+        await page.goto(`${BASE_URL}/signup`);
         await page.waitForLoadState('networkidle');
         
-        // Fill registration form
-        await page.fill('input[name="email"]', account.email);
-        await page.fill('input[name="password"]', account.password);
-        await page.fill('input[name="confirmPassword"]', account.password);
-        await page.fill('input[name="name"]', account.name);
+        // Wait for form to be visible
+        await page.waitForSelector('form', { timeout: 10000 });
+        
+        // Fill registration form with more specific selectors
+        await page.fill('[placeholder*="홍길동"], input[id="name"]', account.name);
+        await page.fill('[placeholder*="example@email.com"], input[id="email"]', account.email);
+        await page.fill('[placeholder*="최소 8자"], input[id="password"]', account.password);
+        await page.fill('[placeholder*="비밀번호를 다시"], input[id="confirmPassword"]', account.password);
         
         // Submit form
         await page.click('button[type="submit"]');
         
         // Wait for navigation or success message
-        await page.waitForURL(`${BASE_URL}/dashboard`, { timeout: 10000 }).catch(() => {
-            console.log('   ⚠️  Registration might have failed or redirected elsewhere');
-        });
+        // Wait for success or redirect
+        try {
+            await page.waitForURL(`${BASE_URL}/dashboard`, { timeout: 10000 });
+        } catch {
+            // If not redirected to dashboard, check if there's a success message
+            const successElement = await page.locator('text=회원가입 완료').first();
+            if (await successElement.isVisible()) {
+                console.log('   ✅ Registration successful - confirmation page shown');
+            } else {
+                console.log('   ⚠️  Registration might have failed or redirected elsewhere');
+            }
+        }
         
         console.log(`   ✅ User ${account.name} registered successfully`);
         await delay(1000);
@@ -77,11 +89,11 @@ async function registerUser(page: Page, account: TestAccount) {
 async function login(page: Page, email: string, password: string) {
     console.log(`   🔐 Logging in as ${email}...`);
     
-    await page.goto(`${BASE_URL}/auth/login`);
+    await page.goto(`${BASE_URL}/login`);
     await page.waitForLoadState('networkidle');
     
-    await page.fill('input[name="email"]', email);
-    await page.fill('input[name="password"]', password);
+    await page.fill('[placeholder*="example@email.com"], input[id="email"]', email);
+    await page.fill('[placeholder*="비밀번호를 입력"], input[id="password"]', password);
     await page.click('button[type="submit"]');
     
     await page.waitForURL(`${BASE_URL}/dashboard`, { timeout: 10000 });
@@ -94,11 +106,11 @@ async function logout(page: Page) {
         const logoutButton = page.locator('button:has-text("로그아웃")').first();
         if (await logoutButton.isVisible()) {
             await logoutButton.click();
-            await page.waitForURL(`${BASE_URL}/auth/login`, { timeout: 5000 }).catch(() => {});
+            await page.waitForURL(`${BASE_URL}/login`, { timeout: 5000 }).catch(() => {});
         }
     } catch (error) {
         // If logout fails, just navigate to login page
-        await page.goto(`${BASE_URL}/auth/login`);
+        await page.goto(`${BASE_URL}/login`);
     }
 }
 

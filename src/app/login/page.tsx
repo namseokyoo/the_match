@@ -21,9 +21,10 @@ function LoginContent() {
     // Redirect if already logged in
     useEffect(() => {
         if (user && !loading) {
-            router.push('/matches');
+            const returnUrl = searchParams.get('returnUrl');
+            router.push(returnUrl || '/matches');
         }
-    }, [user, loading, router]);
+    }, [user, loading, router, searchParams]);
 
     // Check for error in URL params
     useEffect(() => {
@@ -49,7 +50,8 @@ function LoginContent() {
         if (error) {
             setError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
         } else {
-            router.push('/matches');
+            const returnUrl = searchParams.get('returnUrl');
+            router.push(returnUrl || '/matches');
         }
 
         setIsLoading(false);

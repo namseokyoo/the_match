@@ -67,12 +67,6 @@ const SimpleNavbar = () => {
                         >
                             팀
                         </Link>
-                        <Link
-                            href="/players"
-                            className="text-gray-600 hover:text-gray-900 px-2 xl:px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap"
-                        >
-                            선수
-                        </Link>
 
                         {showSkeleton ? (
                             // 초기 로딩 중 - 부드러운 스켈레톤 UI
@@ -217,13 +211,6 @@ const SimpleNavbar = () => {
                                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                             >
                                 팀
-                            </Link>
-                            <Link
-                                href="/players"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                            >
-                                선수
                             </Link>
                             
                             {isAuthenticated && (
