@@ -84,7 +84,7 @@ async function runInteractiveMode(bot: DbAwareIntelligentBot) {
     });
     
     const prompt = () => {
-        rl.question('🎛️ 명령어를 입력하세요: ', async (answer) => {
+        rl.question('🎛️ 명령어를 입력하세요: ', async (answer: string) => {
             const command = answer.trim().toLowerCase();
             
             switch (command) {

@@ -243,8 +243,45 @@ export default function TeamDetailPage() {
         }
     };
 
-    // 권한 확인
+    // 팀 가입 신청
+    const handleJoinTeam = async () => {
+        if (!user) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
+        if (!team) return;
+
+        try {
+            const { error } = await supabase
+                .from('players')
+                .insert([{
+                    name: user.user_metadata?.name || user.email?.split('@')[0] || '익명',
+                    email: user.email,
+                    team_id: team.id,
+                    user_id: user.id,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }]);
+
+            if (error) {
+                console.error('Team join error:', error);
+                alert('팀 가입 신청에 실패했습니다: ' + error.message);
+                return;
+            }
+
+            alert(`${team.name} 팀에 성공적으로 가입했습니다!`);
+            // 데이터 새로고침
+            fetchTeam();
+        } catch (error) {
+            console.error('Team join error:', error);
+            alert('팀 가입 중 오류가 발생했습니다.');
+        }
+    };
+
+    // 권한 및 멤버십 확인
     const isOwner = user && team && team.captain_id === user.id;
+    const isMember = user && players.some(player => player.id === user.id);
 
     // 로딩 상태 (인증 확인 중 또는 데이터 로딩 중)
     if (loading || authLoading) {
@@ -348,7 +385,9 @@ export default function TeamDetailPage() {
                     onAddPlayer={handleAddPlayer}
                     onEditPlayer={handleEditPlayer}
                     onRemovePlayer={handleRemovePlayer}
+                    onJoinTeam={handleJoinTeam}
                     isOwner={isOwner || false}
+                    isMember={isMember || false}
                 />
             </div>
 
