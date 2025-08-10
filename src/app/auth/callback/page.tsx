@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
-export default function AuthCallback() {
+function AuthCallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [message, setMessage] = useState('인증 처리 중...');
@@ -92,5 +92,23 @@ export default function AuthCallback() {
                 </p>
             </div>
         </div>
+    );
+}
+
+export default function AuthCallback() {
+    return (
+        <Suspense fallback={
+            <div className="flex min-h-screen items-center justify-center bg-gray-50">
+                <div className="text-center">
+                    <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-match-blue border-t-transparent"></div>
+                    <h2 className="text-lg font-semibold text-gray-900">인증 처리 중...</h2>
+                    <p className="mt-2 text-sm text-gray-600">
+                        잠시만 기다려주세요. 로그인을 완료하고 있습니다.
+                    </p>
+                </div>
+            </div>
+        }>
+            <AuthCallbackContent />
+        </Suspense>
     );
 } 
