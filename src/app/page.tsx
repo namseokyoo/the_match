@@ -179,9 +179,16 @@ export default function Home() {
                                             <h3 className="font-medium text-base text-gray-900 flex-1">
                                                 {match.title}
                                             </h3>
-                                            <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${getStatusColor(match.status)}`}>
-                                                {getStatusLabel(match.status)}
-                                            </span>
+                                            <div className="flex flex-col items-end">
+                                                <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${getStatusColor(match.status)}`}>
+                                                    {getStatusLabel(match.status)}
+                                                </span>
+                                                {match.max_participants && (
+                                                    <span className="text-xs text-gray-500 mt-1">
+                                                        ({match.current_participants || 0}/{match.max_participants})
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="space-y-1 text-sm text-gray-500">
                                             <div className="flex items-center gap-2">
@@ -243,15 +250,18 @@ export default function Home() {
                             {recruitingTeams.map(team => (
                                 <Link key={team.id} href={`/teams/${team.id}`}>
                                     <div className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors cursor-pointer">
-                                        <h3 className="font-semibold text-gray-900 mb-1">
-                                            {team.name}
-                                        </h3>
-                                        <p className="text-sm text-gray-600 line-clamp-2">
-                                            {team.description || '팀원을 모집하고 있습니다'}
-                                        </p>
-                                        <div className="mt-2 flex items-center text-primary-600 text-sm font-medium">
-                                            <UserPlus className="w-4 h-4 mr-1" />
-                                            <span>참가 신청</span>
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold text-gray-900 mb-1">
+                                                    {team.name}
+                                                </h3>
+                                                <p className="text-sm text-gray-600 line-clamp-2">
+                                                    {team.description || '팀원을 모집하고 있습니다'}
+                                                </p>
+                                            </div>
+                                            <span className="px-2 py-0.5 text-xs rounded-md font-medium bg-green-50 text-green-700 border border-green-200 ml-2">
+                                                모집중
+                                            </span>
                                         </div>
                                     </div>
                                 </Link>
@@ -297,7 +307,7 @@ export default function Home() {
                             {upcomingMatches.map(match => (
                                 <Link key={match.id} href={`/matches/${match.id}`}>
                                     <div className="bg-white rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer border border-gray-200">
-                                        <div className="flex justify-between items-center">
+                                        <div className="flex justify-between items-start">
                                             <div className="flex-1">
                                                 <h3 className="font-semibold text-gray-900">
                                                     {match.title}
@@ -315,7 +325,16 @@ export default function Home() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <ArrowRight className="w-5 h-5 text-gray-400" />
+                                            <div className="flex flex-col items-end">
+                                                <span className="px-2 py-0.5 text-xs rounded-md font-medium bg-primary-50 text-primary-700 border border-primary-200">
+                                                    모집중
+                                                </span>
+                                                {match.max_participants && (
+                                                    <span className="text-xs text-gray-500 mt-1">
+                                                        ({match.current_participants || 0}/{match.max_participants})
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </Link>
