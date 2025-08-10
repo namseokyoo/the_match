@@ -8,6 +8,7 @@ import { OnboardingTour } from '@/components/onboarding';
 import { Match, Team, MatchStatus, MatchType } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { dashboardAPI, performanceUtils } from '@/lib/api-client';
+import { calculateMatchStatus, getMatchStatusLabel, getMatchStatusColor } from '@/lib/match-utils';
 
 export default function Home() {
     const { user } = useAuth();
@@ -108,40 +109,6 @@ export default function Home() {
         }
     };
 
-    const getStatusColor = (status: MatchStatus | string) => {
-        switch (status) {
-            case 'registration':
-                return 'bg-primary-50 text-primary-700 border border-primary-200';
-            case 'in_progress':
-                return 'bg-success-50 text-success-700 border border-success-200';
-            case 'completed':
-                return 'bg-gray-50 text-gray-700 border border-gray-200';
-            case 'draft':
-                return 'bg-gray-50 text-gray-600 border border-gray-200';
-            case 'cancelled':
-                return 'bg-error-50 text-error-700 border border-error-200';
-            default:
-                return 'bg-gray-50 text-gray-600 border border-gray-200';
-        }
-    };
-
-    const getStatusLabel = (status: MatchStatus | string) => {
-        switch (status) {
-            case 'registration':
-                return '모집중';
-            case 'in_progress':
-                return '진행중';
-            case 'completed':
-                return '완료';
-            case 'cancelled':
-                return '취소됨';
-            case 'draft':
-                return '준비중';
-            default:
-                return status;
-        }
-    };
-
 
     return (
         <div className="flex min-h-screen flex-col bg-gray-50">
@@ -172,49 +139,59 @@ export default function Home() {
                         </div>
                     ) : activeMatches.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {activeMatches.map(match => (
-                                <Link key={match.id} href={`/matches/${match.id}`}>
-                                    <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <h3 className="font-medium text-base text-gray-900 flex-1">
-                                                {match.title}
-                                            </h3>
-                                            {match.status === 'in_progress' && (
-                                                <span className="px-2 py-0.5 text-xs rounded-md font-medium bg-success-50 text-success-700 border border-success-200">
-                                                    진행중
+                            {activeMatches.map(match => {
+                                const calculatedStatus = calculateMatchStatus(
+                                    match.registration_start_date,
+                                    match.registration_deadline,
+                                    match.start_date,
+                                    match.end_date,
+                                    match.status
+                                );
+                                const statusLabel = getMatchStatusLabel(calculatedStatus);
+                                const statusColor = getMatchStatusColor(calculatedStatus);
+
+                                return (
+                                    <Link key={match.id} href={`/matches/${match.id}`}>
+                                        <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="font-medium text-base text-gray-900 flex-1">
+                                                    {match.title}
+                                                </h3>
+                                                <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${statusColor}`}>
+                                                    {statusLabel}
                                                 </span>
-                                            )}
-                                        </div>
-                                        <div className="space-y-1 text-sm text-gray-500">
-                                            <div className="flex items-center gap-2">
-                                                <Trophy className="w-3.5 h-3.5 text-gray-400" />
-                                                <span>{getTypeLabel(match.type)}</span>
-                                                {match.max_participants && (
-                                                    <span className="text-xs">• {match.max_participants}팀</span>
+                                            </div>
+                                            <div className="space-y-1 text-sm text-gray-500">
+                                                <div className="flex items-center gap-2">
+                                                    <Trophy className="w-3.5 h-3.5 text-gray-400" />
+                                                    <span>{getTypeLabel(match.type)}</span>
+                                                    {match.max_participants && (
+                                                        <span className="text-xs">• {match.max_participants}팀</span>
+                                                    )}
+                                                </div>
+                                                {(match.start_date || match.end_date) && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                                                        <span className="whitespace-nowrap text-xs">
+                                                            {match.start_date && formatDate(match.start_date)}
+                                                            {match.end_date && match.start_date !== match.end_date && ` ~ ${formatDate(match.end_date)}`}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {match.venue && (
+                                                    <div className="flex items-center gap-2">
+                                                        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        </svg>
+                                                        <span className="text-xs truncate">{match.venue}</span>
+                                                    </div>
                                                 )}
                                             </div>
-                                            {(match.start_date || match.end_date) && (
-                                                <div className="flex items-center gap-2">
-                                                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                                                    <span className="whitespace-nowrap text-xs">
-                                                        {match.start_date && formatDate(match.start_date)}
-                                                        {match.end_date && match.start_date !== match.end_date && ` ~ ${formatDate(match.end_date)}`}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {match.venue && (
-                                                <div className="flex items-center gap-2">
-                                                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    </svg>
-                                                    <span className="text-xs truncate">{match.venue}</span>
-                                                </div>
-                                            )}
                                         </div>
-                                    </div>
-                                </Link>
-                            ))}
+                                    </Link>
+                                );
+                            })}
                         </div>
                     ) : (
                         <div className="text-center py-12 bg-white rounded-lg">
@@ -257,41 +234,53 @@ export default function Home() {
                         </div>
                     ) : upcomingMatches.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {upcomingMatches.map(match => (
-                                <Link key={match.id} href={`/matches/${match.id}`}>
-                                    <div className="bg-white rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer border border-gray-200">
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold text-gray-900">
-                                                    {match.title}
-                                                </h3>
-                                                <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
-                                                    <div className="flex items-center gap-1">
-                                                        <Clock className="w-4 h-4" />
-                                                        <span className="whitespace-nowrap">{formatDate(match.start_date || '')}</span>
-                                                    </div>
-                                                    {match.registration_deadline && (
-                                                        <div className="flex items-center gap-1 text-orange-600">
-                                                            <Calendar className="w-4 h-4" />
-                                                            <span className="whitespace-nowrap">마감 {formatDate(match.registration_deadline)}</span>
+                            {upcomingMatches.map(match => {
+                                const calculatedStatus = calculateMatchStatus(
+                                    match.registration_start_date,
+                                    match.registration_deadline,
+                                    match.start_date,
+                                    match.end_date,
+                                    match.status
+                                );
+                                const statusLabel = getMatchStatusLabel(calculatedStatus);
+                                const statusColor = getMatchStatusColor(calculatedStatus);
+
+                                return (
+                                    <Link key={match.id} href={`/matches/${match.id}`}>
+                                        <div className="bg-white rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer border border-gray-200">
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex-1">
+                                                    <h3 className="font-semibold text-gray-900">
+                                                        {match.title}
+                                                    </h3>
+                                                    <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
+                                                        <div className="flex items-center gap-1">
+                                                            <Clock className="w-4 h-4" />
+                                                            <span className="whitespace-nowrap">{formatDate(match.start_date || '')}</span>
                                                         </div>
+                                                        {match.registration_deadline && (
+                                                            <div className="flex items-center gap-1 text-orange-600">
+                                                                <Calendar className="w-4 h-4" />
+                                                                <span className="whitespace-nowrap">마감 {formatDate(match.registration_deadline)}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-col items-end">
+                                                    <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${statusColor}`}>
+                                                        {statusLabel}
+                                                    </span>
+                                                    {match.max_participants && (
+                                                        <span className="text-xs text-gray-500 mt-1">
+                                                            ({(match as any).current_participants || 0}/{match.max_participants})
+                                                        </span>
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="flex flex-col items-end">
-                                                <span className="px-2 py-0.5 text-xs rounded-md font-medium bg-primary-50 text-primary-700 border border-primary-200">
-                                                    모집중
-                                                </span>
-                                                {match.max_participants && (
-                                                    <span className="text-xs text-gray-500 mt-1">
-                                                        ({(match as any).current_participants || 0}/{match.max_participants})
-                                                    </span>
-                                                )}
-                                            </div>
                                         </div>
-                                    </div>
-                                </Link>
-                            ))}
+                                    </Link>
+                                );
+                            })}
                         </div>
                     ) : (
                         <div className="text-center py-8 bg-white rounded-lg border border-gray-200">
