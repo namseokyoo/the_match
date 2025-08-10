@@ -138,12 +138,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // 회원가입
     const signUp = async (userEmail: string, userPassword: string, userMetadata?: Record<string, any>) => {
         try {
-            // 먼저 이메일 중복 체크를 위해 사용자 존재 여부 확인
-            const { data: existingUser } = await supabase.auth.admin?.listUsers?.({
-                filter: `email eq ${userEmail}`
-            }).catch(() => ({ data: null }));
-
-            // Admin API가 없으면 직접 signUp 시도
+            // 직접 signUp 시도
             const { data, error } = await supabase.auth.signUp({
                 email: userEmail,
                 password: userPassword,

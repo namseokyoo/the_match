@@ -11,7 +11,7 @@ import { Trophy, Eye, EyeOff, Check } from 'lucide-react';
 
 export default function SignupPage() {
     const router = useRouter();
-    const { signUp, signInWithGoogle, user, loading } = useAuth();
+    const { signInWithGoogle, user, loading } = useAuth();
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -56,7 +56,7 @@ export default function SignupPage() {
         setError('');
 
         // safeSignUp 함수를 사용하여 안전한 회원가입 처리
-        const { data, error: signUpError } = await safeSignUp(email, password, {
+        const { error: signUpError } = await safeSignUp(email, password, {
             full_name: name,
         });
 
