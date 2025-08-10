@@ -179,26 +179,34 @@ export default function Home() {
                                             <h3 className="font-medium text-base text-gray-900 flex-1">
                                                 {match.title}
                                             </h3>
-                                            <div className="flex flex-col items-end">
-                                                <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${getStatusColor(match.status)}`}>
-                                                    {getStatusLabel(match.status)}
-                                                </span>
-                                                {match.max_participants && (
-                                                    <span className="text-xs text-gray-500 mt-1">
-                                                        ({(match as any).current_participants || 0}/{match.max_participants})
-                                                    </span>
-                                                )}
-                                            </div>
+                                            <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${getStatusColor(match.status)}`}>
+                                                {getStatusLabel(match.status)}
+                                            </span>
                                         </div>
                                         <div className="space-y-1 text-sm text-gray-500">
                                             <div className="flex items-center gap-2">
                                                 <Trophy className="w-3.5 h-3.5 text-gray-400" />
                                                 <span>{getTypeLabel(match.type)}</span>
+                                                {match.max_participants && (
+                                                    <span className="text-xs">• {match.max_participants}팀</span>
+                                                )}
                                             </div>
-                                            {match.start_date && (
+                                            {(match.start_date || match.end_date) && (
                                                 <div className="flex items-center gap-2">
                                                     <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                                                    <span className="whitespace-nowrap">{formatDate(match.start_date)}</span>
+                                                    <span className="whitespace-nowrap text-xs">
+                                                        {match.start_date && formatDate(match.start_date)}
+                                                        {match.end_date && match.start_date !== match.end_date && ` ~ ${formatDate(match.end_date)}`}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {match.venue && (
+                                                <div className="flex items-center gap-2">
+                                                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    <span className="text-xs truncate">{match.venue}</span>
                                                 </div>
                                             )}
                                         </div>
