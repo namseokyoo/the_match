@@ -88,20 +88,23 @@ export default function RootLayout({
                 <ErrorBoundary>
                     <ClientProviders>
                         <PWAProvider>
-                            <div className="min-h-screen bg-background font-sans antialiased">
-                                <div className="relative flex min-h-screen flex-col">
-                                    {/* 네비게이션 바 */}
-                                    <MobileNavbar />
+                            {/* 모바일 사이즈 고정 래퍼 */}
+                            <div className="min-h-screen bg-gray-100 flex justify-center">
+                                <div className="w-full max-w-[430px] min-h-screen bg-background font-sans antialiased shadow-2xl">
+                                    <div className="relative flex min-h-screen flex-col">
+                                        {/* 네비게이션 바 */}
+                                        <MobileNavbar />
 
-                                    {/* 메인 콘텐츠 */}
-                                    <main className="flex-1 pb-16 md:pb-0">
-                                        <ErrorBoundary>
-                                            {children}
-                                        </ErrorBoundary>
-                                    </main>
-                                    
-                                    {/* 모바일 하단 네비게이션 */}
-                                    <MobileNav />
+                                        {/* 메인 콘텐츠 */}
+                                        <main className="flex-1 pb-16">
+                                            <ErrorBoundary>
+                                                {children}
+                                            </ErrorBoundary>
+                                        </main>
+                                        
+                                        {/* 모바일 하단 네비게이션 */}
+                                        <MobileNav />
+                                    </div>
                                 </div>
                             </div>
 
