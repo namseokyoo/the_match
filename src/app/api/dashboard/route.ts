@@ -71,7 +71,7 @@ export async function GET() {
         const upcomingMatches = (matches || [])
             .filter(match => {
                 // draft, registration 상태의 경기들 포함
-                if (!['registration', 'draft'].includes(match.status)) {
+                if (!['registration', 'draft'].includes(match.status as string)) {
                     return false;
                 }
                 
