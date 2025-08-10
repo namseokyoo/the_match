@@ -43,15 +43,24 @@ export const MatchForm: React.FC<MatchFormProps> = ({
     isLoading = false,
     mode = 'create',
 }) => {
+    // 기본값들 설정
+    const getDefaultRegistrationStartDate = () => {
+        const now = new Date();
+        return now.toISOString().slice(0, 16);
+    };
+
     const [formData, setFormData] = useState<CreateMatchForm>({
         title: initialData?.title || match?.title || '',
         description: initialData?.description || match?.description || '',
         type: initialData?.type || (match?.type as MatchType) || MatchType.SINGLE_ELIMINATION,
         max_participants: initialData?.max_participants || match?.max_participants || undefined,
+        registration_start_date: initialData?.registration_start_date || match?.registration_start_date || getDefaultRegistrationStartDate(),
         registration_deadline: initialData?.registration_deadline || match?.registration_deadline || '',
         start_date: initialData?.start_date || match?.start_date || '',
         end_date: initialData?.end_date || match?.end_date || '',
+        venue: initialData?.venue || match?.venue || '',
         rules: initialData?.rules || match?.rules || {},
+        prizes: initialData?.prizes || match?.prizes || '',
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -83,9 +92,15 @@ export const MatchForm: React.FC<MatchFormProps> = ({
 
         // 날짜 검증
         const now = new Date();
+        const registrationStartDate = formData.registration_start_date ? new Date(formData.registration_start_date) : null;
         const registrationDeadline = formData.registration_deadline ? new Date(formData.registration_deadline) : null;
         const startDate = formData.start_date ? new Date(formData.start_date) : null;
         const endDate = formData.end_date ? new Date(formData.end_date) : null;
+
+        // 등록 시작일은 현재 시간 이후 (생성 모드에서는 현재 시간 허용)
+        if (mode === 'edit' && registrationStartDate && registrationStartDate < now) {
+            newErrors.registration_start_date = '등록 시작일은 현재 시간 이후여야 합니다.';
+        }
 
         if (registrationDeadline && registrationDeadline < now) {
             newErrors.registration_deadline = '등록 마감일은 현재 시간 이후여야 합니다.';
@@ -93,6 +108,11 @@ export const MatchForm: React.FC<MatchFormProps> = ({
 
         if (startDate && startDate < now) {
             newErrors.start_date = '시작일은 현재 시간 이후여야 합니다.';
+        }
+
+        // 등록 시작일 < 등록 마감일 < 시작일 < 종료일 순서 검증
+        if (registrationStartDate && registrationDeadline && registrationStartDate > registrationDeadline) {
+            newErrors.registration_deadline = '등록 마감일은 등록 시작일 이후여야 합니다.';
         }
 
         if (registrationDeadline && startDate && registrationDeadline > startDate) {
@@ -107,7 +127,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleInputChange = (field: keyof CreateMatchForm, value: string | number) => {
+    const handleInputChange = (field: keyof CreateMatchForm, value: string | number | Record<string, any>) => {
         setFormData(prev => ({ ...prev, [field]: value }));
 
         // 해당 필드 에러 제거
@@ -234,7 +254,24 @@ export const MatchForm: React.FC<MatchFormProps> = ({
                     </div>
 
                     {/* 날짜 설정 */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="registration_start_date" className="block text-sm font-medium text-gray-700 mb-1">
+                                등록 시작일
+                            </label>
+                            <input
+                                id="registration_start_date"
+                                type="datetime-local"
+                                value={formatDateForInput(formData.registration_start_date || '')}
+                                onChange={(e) => handleInputChange('registration_start_date', e.target.value)}
+                                disabled={isLoading}
+                                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent ${errors.registration_start_date ? 'border-red-500' : ''
+                                    }`}
+                            />
+                            {errors.registration_start_date && <p className="text-red-500 text-sm mt-1">{errors.registration_start_date}</p>}
+                            <p className="text-xs text-gray-500 mt-1">팀들이 참가 신청할 수 있는 시작 시점</p>
+                        </div>
+
                         <div>
                             <label htmlFor="registration_deadline" className="block text-sm font-medium text-gray-700 mb-1">
                                 등록 마감일
@@ -253,7 +290,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({
 
                         <div>
                             <label htmlFor="start_date" className="block text-sm font-medium text-gray-700 mb-1">
-                                시작일
+                                경기 시작일
                             </label>
                             <input
                                 id="start_date"
@@ -269,7 +306,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({
 
                         <div>
                             <label htmlFor="end_date" className="block text-sm font-medium text-gray-700 mb-1">
-                                종료일
+                                경기 종료일
                             </label>
                             <input
                                 id="end_date"
@@ -282,6 +319,65 @@ export const MatchForm: React.FC<MatchFormProps> = ({
                             />
                             {errors.end_date && <p className="text-red-500 text-sm mt-1">{errors.end_date}</p>}
                         </div>
+                    </div>
+
+                    {/* 장소 */}
+                    <div>
+                        <label htmlFor="venue" className="block text-sm font-medium text-gray-700 mb-1">
+                            경기 장소
+                        </label>
+                        <Input
+                            id="venue"
+                            type="text"
+                            value={formData.venue || ''}
+                            onChange={(value) => handleInputChange('venue', value)}
+                            placeholder="예: 서울 월드컵 경기장"
+                            disabled={isLoading}
+                        />
+                    </div>
+
+                    {/* 규칙 */}
+                    <div>
+                        <label htmlFor="rules" className="block text-sm font-medium text-gray-700 mb-1">
+                            경기 규칙
+                        </label>
+                        <textarea
+                            id="rules"
+                            value={typeof formData.rules === 'string' ? formData.rules : JSON.stringify(formData.rules, null, 2)}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                try {
+                                    // JSON 형태로 파싱 시도
+                                    const parsed = JSON.parse(value);
+                                    handleInputChange('rules', parsed);
+                                } catch {
+                                    // 일반 텍스트로 처리
+                                    handleInputChange('rules', { text: value });
+                                }
+                            }}
+                            placeholder="경기 규칙을 입력하세요 (JSON 형식 또는 일반 텍스트)"
+                            disabled={isLoading}
+                            rows={4}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent resize-vertical"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">예: {`{"승부 방식": "3세트 2승제", "시간 제한": "각 세트 25분"}`}</p>
+                    </div>
+
+                    {/* 상품 */}
+                    <div>
+                        <label htmlFor="prizes" className="block text-sm font-medium text-gray-700 mb-1">
+                            시상 내역
+                        </label>
+                        <textarea
+                            id="prizes"
+                            value={formData.prizes || ''}
+                            onChange={(e) => handleInputChange('prizes', e.target.value)}
+                            placeholder="우승 상품, 부상 등을 입력하세요"
+                            disabled={isLoading}
+                            rows={2}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent resize-vertical"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">예: 우승 상금 100만원, 준우승 상금 50만원</p>
                     </div>
 
                     {/* 버튼 */}

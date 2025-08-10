@@ -151,10 +151,13 @@ export async function POST(request: NextRequest) {
             status: body.status || MatchStatus.DRAFT, // status를 body에서 받거나 기본값 사용
             creator_id: userId, // 인증된 사용자 ID 사용
             max_participants: body.max_participants || null,
+            registration_start_date: body.registration_start_date || null,
             registration_deadline: body.registration_deadline || null,
             start_date: body.start_date || null,
             end_date: body.end_date || null,
-            rules: {},
+            venue: body.venue?.trim() || null,
+            rules: body.rules || {},
+            prizes: body.prizes?.trim() || null,
             settings: {},
         };
 
@@ -222,6 +225,14 @@ function validateMatchData(data: any): string[] {
 
     // 날짜 검증
     const now = new Date();
+    
+    // 등록 시작일 검증
+    if (data.registration_start_date) {
+        const regStartDate = new Date(data.registration_start_date);
+        if (isNaN(regStartDate.getTime())) {
+            errors.push('올바른 등록 시작일을 입력해주세요.');
+        }
+    }
 
     if (data.registration_deadline) {
         const regDeadline = new Date(data.registration_deadline);
@@ -229,6 +240,14 @@ function validateMatchData(data: any): string[] {
             errors.push('올바른 등록 마감일을 입력해주세요.');
         } else if (regDeadline < now) {
             errors.push('등록 마감일은 현재 시간 이후여야 합니다.');
+        }
+        
+        // 등록 시작일과 마감일 비교
+        if (data.registration_start_date) {
+            const regStartDate = new Date(data.registration_start_date);
+            if (regStartDate > regDeadline) {
+                errors.push('등록 마감일은 등록 시작일 이후여야 합니다.');
+            }
         }
     }
 
@@ -260,6 +279,16 @@ function validateMatchData(data: any): string[] {
                 errors.push('종료일은 시작일 이후여야 합니다.');
             }
         }
+    }
+    
+    // 장소 검증
+    if (data.venue && data.venue.length > 200) {
+        errors.push('장소는 200글자를 초과할 수 없습니다.');
+    }
+    
+    // 상품 검증
+    if (data.prizes && data.prizes.length > 1000) {
+        errors.push('시상 내역은 1000글자를 초과할 수 없습니다.');
     }
 
     return errors;

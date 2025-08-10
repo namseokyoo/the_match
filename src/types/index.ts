@@ -62,6 +62,7 @@ export interface Match {
     status: MatchStatus | string;
     creator_id: string;
     max_participants?: number;
+    registration_start_date?: string;
     registration_deadline?: string;
     start_date?: string;
     end_date?: string;
@@ -74,6 +75,7 @@ export interface Match {
     venue_phone?: string;
     venue_hours?: string;
     venue_info?: string;
+    prizes?: string;
     created_at: string;
     updated_at: string;
 }
@@ -298,10 +300,13 @@ export interface CreateMatchForm {
     description?: string;
     type: MatchType;
     max_participants?: number;
+    registration_start_date?: string;
     registration_deadline?: string;
     start_date?: string;
     end_date?: string;
+    venue?: string;
     rules?: Record<string, any>;
+    prizes?: string;
 }
 
 export interface CreateTeamForm {
