@@ -96,7 +96,7 @@ export async function GET() {
 
         // 팀원 모집 중인 팀들 (생성된 모든 팀 표시)
         const recruitingTeams = (teams || [])
-            .filter(team => team.name && team.name.trim()) // 이름이 있는 팀만
+            .filter(team => team.name && (team.name as string).trim()) // 이름이 있는 팀만
             .slice(0, 4);
 
         // 통계 데이터 정리

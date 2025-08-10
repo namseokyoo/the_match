@@ -96,7 +96,7 @@ async function signupUser(page: Page, account: TestAccount): Promise<boolean> {
         }
         
     } catch (error) {
-        console.error(`   ❌ ${account.name} - Error:`, error.message);
+        console.error(`   ❌ ${account.name} - Error:`, error instanceof Error ? error.message : String(error));
         return false;
     }
 }
