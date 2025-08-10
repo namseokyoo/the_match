@@ -59,10 +59,21 @@ export default function SignupPage() {
         });
 
         if (signUpError) {
-            if (signUpError.message.includes('already registered')) {
-                setError('이미 등록된 이메일 주소입니다.');
+            // Supabase 에러 메시지 처리
+            console.error('Signup error:', signUpError);
+            
+            // 이메일 중복 체크 - Supabase의 다양한 에러 메시지 패턴 처리
+            if (signUpError.message.includes('already registered') || 
+                signUpError.message.includes('User already registered') ||
+                signUpError.message.includes('duplicate key') ||
+                signUpError.message.includes('already exists')) {
+                setError('이미 등록된 이메일 주소입니다. 다른 이메일을 사용해주세요.');
+            } else if (signUpError.message.includes('Invalid email')) {
+                setError('올바른 이메일 주소를 입력해주세요.');
+            } else if (signUpError.message.includes('Password')) {
+                setError('비밀번호는 최소 6자 이상이어야 합니다.');
             } else {
-                setError('회원가입에 실패했습니다. 다시 시도해주세요.');
+                setError(`회원가입에 실패했습니다: ${signUpError.message}`);
             }
             setIsLoading(false);
         } else {

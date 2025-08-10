@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Match, CreateTeamForm } from '@/types';
 import { TeamForm } from '@/components/team';
-import { useAuth } from '@/hooks/useAuth';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { supabase } from '@/lib/supabase';
 
 export default function CreateTeamPage() {
@@ -12,7 +12,7 @@ export default function CreateTeamPage() {
     const [loading, setLoading] = useState(false);
     const [tournamentsLoading, setTournamentsLoading] = useState(true);
 
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading } = useRequireAuth();
     const router = useRouter();
 
     // 매치 목록 조회 (팀이 참가할 수 있는 매치들)
@@ -63,12 +63,6 @@ export default function CreateTeamPage() {
         fetchTournaments();
     }, []);
 
-    // 로그인 상태 확인
-    useEffect(() => {
-        if (!authLoading && !user) {
-            router.push('/login');
-        }
-    }, [user, authLoading, router]);
 
     // 팀 생성 핸들러
     const handleCreateTeam = async (formData: CreateTeamForm & { match_id?: string }) => {

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { MatchForm } from '@/components/match';
 import { CreateMatchForm, MatchTemplate } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useNotification } from '@/contexts/NotificationContext';
 import { postWithAuth } from '@/lib/api-client';
 import Link from 'next/link';
@@ -13,7 +14,8 @@ export default function CreateMatchClient() {
     const [isLoading, setIsLoading] = useState(false);
     const [template, setTemplate] = useState<MatchTemplate | null>(null);
     const [loadingTemplate, setLoadingTemplate] = useState(false);
-    const { user, loading: authLoading, getAccessToken } = useAuth();
+    const { user, loading: authLoading } = useRequireAuth();
+    const { getAccessToken } = useAuth();
     const { showNotification } = useNotification();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -93,8 +95,13 @@ export default function CreateMatchClient() {
 
     // 로그인되지 않은 경우
     if (!user) {
-        router.push('/login');
-        return null;
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-gray-600">로그인이 필요합니다. 로그인 페이지로 이동 중...</p>
+                </div>
+            </div>
+        );
     }
 
     return (
