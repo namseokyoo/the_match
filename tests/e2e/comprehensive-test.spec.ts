@@ -60,24 +60,23 @@ test.describe('The Match 플랫폼 종합 테스트', () => {
       // 회원가입 버튼 클릭
       await page.click('button:has-text("회원가입")');
       
-      // 성공 메시지 확인 (최대 10초 대기)
-      const successMessage = await page.waitForSelector('text=회원가입 완료', { 
-        timeout: 10000,
-        state: 'visible' 
-      }).catch(() => null);
+      // 회원가입 후 자동 로그인 되므로 리다이렉트 대기
+      await page.waitForTimeout(5000);
       
-      if (successMessage) {
-        console.log('✅ 회원가입 성공');
+      // URL 확인으로 성공 여부 판단
+      const currentUrl = page.url();
+      if (currentUrl.includes('/dashboard') || currentUrl.includes('/matches')) {
+        console.log('✅ 회원가입 성공 (자동 로그인됨)');
       } else {
         // 에러 메시지 확인
-        const errorText = await page.locator('.text-red-800').textContent();
+        const errorText = await page.locator('.text-red-800').textContent().catch(() => null);
         issues.push({
           scenario: '회원가입',
           issue: '회원가입 실패',
           severity: 'major',
-          details: errorText || '알 수 없는 오류'
+          details: errorText || '회원가입 후 리다이렉트 실패'
         });
-        console.log('❌ 회원가입 실패:', errorText);
+        console.log('❌ 회원가입 실패:', errorText || currentUrl);
       }
     } catch (error) {
       issues.push({
@@ -283,7 +282,7 @@ test.describe('The Match 플랫폼 종합 테스트', () => {
       await page.fill('textarea[placeholder*="경기에 대한 설명을 입력하세요"]', '테스트 리그전입니다.');
       
       // 경기 타입 선택
-      const matchTypeSelect = page.locator('select[name="match_type"]');
+      const matchTypeSelect = page.locator('select#type');
       if (await matchTypeSelect.isVisible()) {
         await matchTypeSelect.selectOption('league');
       }
@@ -361,7 +360,7 @@ test.describe('The Match 플랫폼 종합 테스트', () => {
       await page.fill('textarea[placeholder*="경기에 대한 설명을 입력하세요"]', '테스트 토너먼트입니다.');
       
       // 경기 타입 선택
-      const matchTypeSelect = page.locator('select[name="match_type"]');
+      const matchTypeSelect = page.locator('select#type');
       if (await matchTypeSelect.isVisible()) {
         await matchTypeSelect.selectOption('single_elimination');
       }
@@ -590,10 +589,16 @@ test.describe('The Match 플랫폼 종합 테스트', () => {
       await page.goto('/profile');
       await page.waitForLoadState('networkidle');
       
-      // 프로필 정보 확인
-      const nameField = page.locator('input[value*="' + testUser.name + '"]');
-      if (await nameField.isVisible()) {
+      // 프로필 정보 확인 - 프로필은 처음에는 수정 모드가 아님
+      const profileName = page.locator('h1').first();
+      const editButton = page.locator('button:has-text("프로필 수정")');
+      
+      if (await editButton.isVisible()) {
         console.log('✅ 프로필 정보 표시 성공');
+        
+        // 프로필 수정 모드로 전환
+        await editButton.click();
+        await page.waitForTimeout(1000);
         
         // 프로필 수정 테스트
         const bioTextarea = page.locator('textarea[placeholder*="자기소개"]');
@@ -643,18 +648,22 @@ test.describe('The Match 플랫폼 종합 테스트', () => {
       await page.waitForLoadState('networkidle');
       
       // 대시보드 섹션 확인
-      const sections = ['내 경기', '내 팀', '참가 중인 경기'];
+      const sections = [
+        { text: '내 경기', selector: 'h2:has-text("내 경기"), h3:has-text("내 경기")' },
+        { text: '내 팀', selector: 'h2:has-text("내 팀"), h3:has-text("내 팀")' },
+        { text: '참가 중인 경기', selector: 'h2:has-text("참가 중인 경기"), h3:has-text("참가 중인 경기")' }
+      ];
       
       for (const section of sections) {
-        const sectionElement = page.locator(`text=${section}`);
+        const sectionElement = page.locator(section.selector).first();
         if (await sectionElement.isVisible()) {
-          console.log(`✅ ${section} 섹션 표시됨`);
+          console.log(`✅ ${section.text} 섹션 표시됨`);
         } else {
           issues.push({
             scenario: '대시보드',
-            issue: `${section} 섹션 없음`,
+            issue: `${section.text} 섹션 없음`,
             severity: 'minor',
-            details: `대시보드에 ${section} 섹션이 표시되지 않음`
+            details: `대시보드에 ${section.text} 섹션이 표시되지 않음`
           });
         }
       }
@@ -692,7 +701,7 @@ test.describe('The Match 플랫폼 종합 테스트', () => {
         let menuWorking = true;
         
         for (const item of menuItems) {
-          const menuItem = page.locator(`text=${item}`);
+          const menuItem = page.locator(`a:has-text("${item}")`).first();
           if (!(await menuItem.isVisible())) {
             menuWorking = false;
             break;
