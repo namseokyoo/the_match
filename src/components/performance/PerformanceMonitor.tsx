@@ -275,7 +275,7 @@ export const performanceUtils = {
         containerHeight: number,
         itemHeight: number,
         buffer: number = 5
-    ) => {
+    ) {
         const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - buffer);
         const endIndex = Math.min(
             items.length,
