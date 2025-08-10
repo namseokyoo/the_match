@@ -8,7 +8,8 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     try {
-        const supabase = createRouteHandlerClient({ cookies });
+        const cookieStore = cookies();
+        const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
@@ -74,7 +75,8 @@ export async function POST(
     { params }: { params: { id: string } }
 ) {
     try {
-        const supabase = createRouteHandlerClient({ cookies });
+        const cookieStore = cookies();
+        const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
@@ -162,7 +164,8 @@ export async function PATCH(
     { params }: { params: { id: string } }
 ) {
     try {
-        const supabase = createRouteHandlerClient({ cookies });
+        const cookieStore = cookies();
+        const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
