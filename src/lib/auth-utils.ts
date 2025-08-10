@@ -35,7 +35,10 @@ export async function safeSignUp(
             password,
             options: {
                 data: metadata,
-                emailRedirectTo: `${window.location.origin}/auth/callback`,
+                // 프로덕션 URL을 명시적으로 설정
+                emailRedirectTo: process.env.NODE_ENV === 'production' 
+                    ? 'https://the-match-five.vercel.app/auth/callback'
+                    : `${window.location.origin}/auth/callback`,
             },
         });
 
