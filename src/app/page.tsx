@@ -185,7 +185,7 @@ export default function Home() {
                                                 </span>
                                                 {match.max_participants && (
                                                     <span className="text-xs text-gray-500 mt-1">
-                                                        ({match.current_participants || 0}/{match.max_participants})
+                                                        ({(match as any).current_participants || 0}/{match.max_participants})
                                                     </span>
                                                 )}
                                             </div>
@@ -331,7 +331,7 @@ export default function Home() {
                                                 </span>
                                                 {match.max_participants && (
                                                     <span className="text-xs text-gray-500 mt-1">
-                                                        ({match.current_participants || 0}/{match.max_participants})
+                                                        ({(match as any).current_participants || 0}/{match.max_participants})
                                                     </span>
                                                 )}
                                             </div>
