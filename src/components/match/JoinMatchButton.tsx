@@ -23,6 +23,8 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
     const [checkingParticipation, setCheckingParticipation] = useState(true);
     const [userTeams, setUserTeams] = useState<any[]>([]);
     const [checkingTeams, setCheckingTeams] = useState(true);
+    const [showTeamSelector, setShowTeamSelector] = useState(false);
+    const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
 
     // 사용자가 주장인 팀 조회
     const fetchUserTeams = useCallback(async () => {
@@ -72,7 +74,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
     }, [user, match.id]);
 
     // 참가 신청
-    const handleJoin = async () => {
+    const handleJoin = async (teamId?: string) => {
         if (!user) {
             alert('로그인이 필요합니다.');
             return;
@@ -81,6 +83,12 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
         // 팀 주장 확인
         if (userTeams.length === 0) {
             alert('참가 신청하려면 먼저 팀을 생성해야 합니다.\n팀 페이지에서 팀을 생성하신 후 다시 시도해주세요.');
+            return;
+        }
+
+        // 여러 팀이 있고 선택하지 않은 경우
+        if (userTeams.length > 1 && !teamId) {
+            setShowTeamSelector(true);
             return;
         }
 
@@ -102,7 +110,9 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
             return;
         }
 
-        const notes = prompt('참가 신청 메모를 입력하세요 (선택사항):') || '';
+        const finalTeamId = teamId || userTeams[0].id;
+        const selectedTeam = userTeams.find(t => t.id === finalTeamId);
+        const notes = prompt(`'${selectedTeam?.name}' 팀으로 참가 신청합니다.\n참가 신청 메모를 입력하세요 (선택사항):`) || '';
 
         try {
             setLoading(true);
@@ -122,6 +132,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
                     'Authorization': `Bearer ${session.access_token}`
                 },
                 body: JSON.stringify({
+                    teamId: finalTeamId,
                     notes: notes.trim() || undefined,
                 }),
             });
@@ -139,6 +150,10 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
 
             // 콜백 호출
             onJoined?.();
+            
+            // 팀 선택 모달 닫기
+            setShowTeamSelector(false);
+            setSelectedTeamId(null);
 
         } catch (error) {
             console.error('참가 신청 오류:', error);
@@ -315,13 +330,67 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
 
     // 참가 신청 가능한 경우
     return (
-        <Button
-            onClick={handleJoin}
-            loading={loading}
-            className={`bg-blue-600 hover:bg-blue-700 ${className}`}
-        >
-            🏆 경기 참가 신청
-        </Button>
+        <>
+            <Button
+                onClick={() => handleJoin()}
+                loading={loading}
+                className={`bg-blue-600 hover:bg-blue-700 ${className}`}
+            >
+                🏆 경기 참가 신청
+            </Button>
+
+            {/* 팀 선택 모달 */}
+            {showTeamSelector && userTeams.length > 1 && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                        <h3 className="text-lg font-semibold mb-4">참가할 팀을 선택하세요</h3>
+                        <div className="space-y-2 mb-4">
+                            {userTeams.map((team) => (
+                                <button
+                                    key={team.id}
+                                    onClick={() => setSelectedTeamId(team.id)}
+                                    className={`w-full p-3 border rounded-lg text-left hover:bg-gray-50 transition-colors ${
+                                        selectedTeamId === team.id 
+                                            ? 'border-blue-500 bg-blue-50' 
+                                            : 'border-gray-300'
+                                    }`}
+                                >
+                                    <div className="font-medium">{team.name}</div>
+                                    {team.description && (
+                                        <div className="text-sm text-gray-600 mt-1">{team.description}</div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex gap-2">
+                            <Button
+                                onClick={() => {
+                                    if (selectedTeamId) {
+                                        handleJoin(selectedTeamId);
+                                    } else {
+                                        alert('팀을 선택해주세요.');
+                                    }
+                                }}
+                                disabled={!selectedTeamId || loading}
+                                className="flex-1"
+                            >
+                                선택한 팀으로 신청
+                            </Button>
+                            <Button
+                                onClick={() => {
+                                    setShowTeamSelector(false);
+                                    setSelectedTeamId(null);
+                                }}
+                                variant="ghost"
+                                className="flex-1"
+                            >
+                                취소
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 

@@ -415,6 +415,7 @@ export interface MatchParticipant {
 }
 
 export interface ApplyToMatchForm {
+    teamId?: string;
     notes?: string;
 }
 

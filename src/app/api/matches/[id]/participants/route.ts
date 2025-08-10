@@ -145,29 +145,51 @@ export async function POST(
             );
         }
 
-        // 사용자가 주장인 팀 조회
-        const { data: teams, error: teamsError } = await supabaseAdmin
-            .from('teams')
-            .select('id, name, captain_id')
-            .eq('captain_id', user.id);
+        // teamId가 body에 있으면 해당 팀 확인, 없으면 사용자의 팀 조회
+        let team;
+        
+        if (body.teamId) {
+            // 특정 팀 ID가 제공된 경우, 해당 팀의 주장인지 확인
+            const { data: selectedTeam, error: teamError } = await supabaseAdmin
+                .from('teams')
+                .select('id, name, captain_id')
+                .eq('id', body.teamId)
+                .eq('captain_id', user.id)
+                .single();
 
-        if (teamsError) {
-            console.error('팀 조회 오류:', teamsError);
-            return NextResponse.json(
-                { error: '팀 정보를 조회하는 중 오류가 발생했습니다.' },
-                { status: 500 }
-            );
+            if (teamError || !selectedTeam) {
+                return NextResponse.json(
+                    { error: '선택한 팀을 찾을 수 없거나 주장 권한이 없습니다.' },
+                    { status: 403 }
+                );
+            }
+            
+            team = selectedTeam;
+        } else {
+            // 사용자가 주장인 팀 조회
+            const { data: teams, error: teamsError } = await supabaseAdmin
+                .from('teams')
+                .select('id, name, captain_id')
+                .eq('captain_id', user.id);
+
+            if (teamsError) {
+                console.error('팀 조회 오류:', teamsError);
+                return NextResponse.json(
+                    { error: '팀 정보를 조회하는 중 오류가 발생했습니다.' },
+                    { status: 500 }
+                );
+            }
+
+            if (!teams || teams.length === 0) {
+                return NextResponse.json(
+                    { error: '참가 신청하려면 먼저 팀을 생성해야 합니다.' },
+                    { status: 400 }
+                );
+            }
+
+            // 첫 번째 팀 사용
+            team = teams[0];
         }
-
-        if (!teams || teams.length === 0) {
-            return NextResponse.json(
-                { error: '참가 신청하려면 먼저 팀을 생성해야 합니다.' },
-                { status: 400 }
-            );
-        }
-
-        // 여러 팀이 있는 경우 첫 번째 팀 사용 (추후 팀 선택 UI 추가 가능)
-        const team = teams[0];
 
         // 이미 참가 신청했는지 확인
         const { data: existingApplication, error: checkError } = await supabaseAdmin
