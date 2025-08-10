@@ -138,11 +138,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // 회원가입
     const signUp = async (userEmail: string, userPassword: string, userMetadata?: Record<string, any>) => {
         try {
-            const { error } = await supabase.auth.signUp({
+            // 먼저 이메일 중복 체크를 위해 사용자 존재 여부 확인
+            const { data: existingUser } = await supabase.auth.admin?.listUsers?.({
+                filter: `email eq ${userEmail}`
+            }).catch(() => ({ data: null }));
+
+            // Admin API가 없으면 직접 signUp 시도
+            const { data, error } = await supabase.auth.signUp({
                 email: userEmail,
                 password: userPassword,
                 options: {
                     data: userMetadata,
+                    emailRedirectTo: `${window.location.origin}/auth/callback`,
                 },
             });
 
@@ -151,7 +158,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 return { error };
             }
 
-            // onAuthStateChange가 상태를 업데이트함
+            // Supabase는 이미 존재하는 이메일에 대해 에러 없이 응답할 수 있음
+            // data.user가 null이거나 identities가 비어있으면 이미 존재하는 사용자
+            if (!data.user || (data.user.identities && data.user.identities.length === 0)) {
+                console.error('User already exists or signup failed');
+                return { 
+                    error: {
+                        message: 'User already registered',
+                        status: 400,
+                        name: 'AuthError'
+                    } as AuthError 
+                };
+            }
+
+            // 실제 회원가입 성공
+            console.log('Sign up successful:', data.user.email);
             return { error: null };
         } catch (error) {
             console.error('Sign up exception:', error);

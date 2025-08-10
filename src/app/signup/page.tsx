@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { signIn } from '@/lib/supabase';
+import { safeSignUp } from '@/lib/auth-utils';
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { Trophy, Eye, EyeOff, Check } from 'lucide-react';
 
@@ -54,41 +55,53 @@ export default function SignupPage() {
         setIsLoading(true);
         setError('');
 
-        const { error: signUpError } = await signUp(email, password, {
+        // safeSignUp 함수를 사용하여 안전한 회원가입 처리
+        const { data, error: signUpError } = await safeSignUp(email, password, {
             full_name: name,
         });
 
         if (signUpError) {
-            // Supabase 에러 메시지 처리
+            // 에러 메시지 처리
             console.error('Signup error:', signUpError);
             
-            // 이메일 중복 체크 - Supabase의 다양한 에러 메시지 패턴 처리
-            if (signUpError.message.includes('already registered') || 
-                signUpError.message.includes('User already registered') ||
-                signUpError.message.includes('duplicate key') ||
-                signUpError.message.includes('already exists')) {
-                setError('이미 등록된 이메일 주소입니다. 다른 이메일을 사용해주세요.');
-            } else if (signUpError.message.includes('Invalid email')) {
+            // 이메일 중복 체크
+            if (signUpError.message === 'Email already registered') {
+                setError('이미 등록된 이메일 주소입니다. 다른 이메일을 사용하거나 로그인해주세요.');
+            } else if (signUpError.message.includes('Invalid email') || 
+                       signUpError.message.includes('valid email')) {
                 setError('올바른 이메일 주소를 입력해주세요.');
-            } else if (signUpError.message.includes('Password')) {
+            } else if (signUpError.message.includes('Password') || 
+                       signUpError.message.includes('password')) {
                 setError('비밀번호는 최소 6자 이상이어야 합니다.');
+            } else if (signUpError.message.includes('rate limit')) {
+                setError('너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요.');
+            } else if (signUpError.message === 'Signup failed - no user created') {
+                setError('회원가입에 실패했습니다. 이미 가입된 이메일일 수 있습니다.');
             } else {
-                setError(`회원가입에 실패했습니다: ${signUpError.message}`);
+                setError('회원가입에 실패했습니다. 다시 시도해주세요.');
             }
             setIsLoading(false);
-        } else {
-            // 회원가입 성공 후 자동 로그인 시도
-            const { error: signInError } = await signIn(email, password);
-            
-            if (signInError) {
-                // 로그인 실패시에도 회원가입은 성공했으므로 성공 메시지 표시
-                setSuccess(true);
-            } else {
-                // 로그인 성공시 바로 대시보드로 이동
-                router.push('/dashboard');
-            }
-            setIsLoading(false);
+            return; // 에러 발생 시 여기서 종료
         }
+
+        // 회원가입이 성공한 경우에만 자동 로그인 시도
+        console.log('회원가입 성공, 자동 로그인 시도...');
+        
+        // 잠시 대기 후 로그인 (Supabase가 사용자를 생성하는 시간 필요)
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const { error: signInError } = await signIn(email, password);
+        
+        if (signInError) {
+            console.error('자동 로그인 실패:', signInError);
+            // 로그인 실패시 성공 메시지 표시하고 로그인 페이지로 안내
+            setSuccess(true);
+        } else {
+            console.log('자동 로그인 성공');
+            // 로그인 성공시 바로 대시보드로 이동
+            router.push('/dashboard');
+        }
+        setIsLoading(false);
     };
 
     const handleGoogleSignup = async () => {
