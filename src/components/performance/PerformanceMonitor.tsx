@@ -259,12 +259,12 @@ export const performanceUtils = {
 
     // 지연 로딩
     lazyLoad: function (importFunc: () => Promise<any>) {
-        let module: any = null;
+        let cachedModule: any = null;
         return async () => {
-            if (!module) {
-                module = await importFunc();
+            if (!cachedModule) {
+                cachedModule = await importFunc();
             }
-            return module;
+            return cachedModule;
         };
     },
 
