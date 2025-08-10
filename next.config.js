@@ -20,7 +20,10 @@ const nextConfig = {
         dirs: ['src'],
     },
     typescript: {
+        // Vercel 빌드 시 타입 에러를 무시하지 않고 엄격하게 체크
         ignoreBuildErrors: false,
+        // 타입 체크를 빌드 전에 수행
+        tsconfigPath: './tsconfig.json',
     },
     swcMinify: true,
     poweredByHeader: false,

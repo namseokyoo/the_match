@@ -6,6 +6,7 @@
     "scripts": {
         "dev": "next dev",
         "build": "next build",
+        "build:production": "npm run type-check && next build",
         "start": "next start",
         "lint": "next lint",
         "type-check": "tsc --noEmit",
@@ -22,7 +23,9 @@
         "test:e2e:webkit": "playwright test --project=webkit",
         "test:e2e:mobile": "playwright test --project='Mobile Chrome' --project='Mobile Safari'",
         "test:e2e:headed": "playwright test --headed",
-        "test:e2e:debug": "playwright test --debug"
+        "test:e2e:debug": "playwright test --debug",
+        "pre-deploy": "./scripts/pre-deploy-check.sh",
+        "vercel-build": "npm run type-check && next build"
     },
     "dependencies": {
         "@hookform/resolvers": "^3.3.2",
@@ -71,7 +74,8 @@
         "typescript": "5.3.3"
     },
     "engines": {
-        "node": ">=18.0.0"
+        "node": "18.x || 20.x",
+        "npm": ">=9.0.0"
     },
     "packageManager": "pnpm@8.15.0"
 }
