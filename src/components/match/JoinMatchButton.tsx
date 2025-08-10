@@ -5,6 +5,7 @@ import { Match, MatchParticipant } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
+import { showToast } from '@/components/ui/Toast';
 
 interface JoinMatchButtonProps {
     match: Match;
@@ -76,13 +77,13 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
     // 참가 신청
     const handleJoin = async (teamId?: string) => {
         if (!user) {
-            alert('로그인이 필요합니다.');
+            showToast('로그인이 필요합니다.', 'error');
             return;
         }
 
         // 팀 주장 확인
         if (userTeams.length === 0) {
-            alert('참가 신청하려면 먼저 팀을 생성해야 합니다.\n팀 페이지에서 팀을 생성하신 후 다시 시도해주세요.');
+            showToast('참가 신청하려면 먼저 팀을 생성해야 합니다. 팀 페이지에서 팀을 생성하신 후 다시 시도해주세요.', 'warning');
             return;
         }
 
@@ -94,7 +95,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
 
         // 경기 상태 확인
         if (match.status !== 'registration') {
-            alert('현재 참가 신청을 받지 않는 경기입니다.');
+            showToast('현재 참가 신청을 받지 않는 경기입니다.', 'warning');
             return;
         }
 
@@ -106,7 +107,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
                 rejected: '거부됨',
             }[myParticipation.status] || myParticipation.status;
 
-            alert(`이미 참가 신청한 경기입니다. (현재 상태: ${statusText})`);
+            showToast(`이미 참가 신청한 경기입니다. (현재 상태: ${statusText})`, 'info');
             return;
         }
 
@@ -121,7 +122,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
             const { data: { session } } = await supabase.auth.getSession();
             
             if (!session) {
-                alert('인증 세션을 가져올 수 없습니다. 다시 로그인해주세요.');
+                showToast('인증 세션을 가져올 수 없습니다. 다시 로그인해주세요.', 'error');
                 return;
             }
 
@@ -143,7 +144,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
                 throw new Error(result.error || '참가 신청 중 오류가 발생했습니다.');
             }
 
-            alert(result.message || '참가 신청이 완료되었습니다.');
+            showToast(result.message || '참가 신청이 완료되었습니다.', 'success');
 
             // 참가 상태 다시 확인
             await checkMyParticipation();
@@ -157,7 +158,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
 
         } catch (error) {
             console.error('참가 신청 오류:', error);
-            alert(error instanceof Error ? error.message : '참가 신청 중 오류가 발생했습니다.');
+            showToast(error instanceof Error ? error.message : '참가 신청 중 오류가 발생했습니다.', 'error');
         } finally {
             setLoading(false);
         }
@@ -178,7 +179,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
             const { data: { session } } = await supabase.auth.getSession();
             
             if (!session) {
-                alert('인증 세션을 가져올 수 없습니다. 다시 로그인해주세요.');
+                showToast('인증 세션을 가져올 수 없습니다. 다시 로그인해주세요.', 'error');
                 return;
             }
 
@@ -195,7 +196,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
                 throw new Error(result.error || '취소 처리 중 오류가 발생했습니다.');
             }
 
-            alert(result.message || '참가 신청을 취소했습니다.');
+            showToast(result.message || '참가 신청을 취소했습니다.', 'info');
 
             // 참가 상태 다시 확인
             await checkMyParticipation();
@@ -205,7 +206,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
 
         } catch (error) {
             console.error('취소 처리 오류:', error);
-            alert(error instanceof Error ? error.message : '취소 처리 중 오류가 발생했습니다.');
+            showToast(error instanceof Error ? error.message : '취소 처리 중 오류가 발생했습니다.', 'error');
         } finally {
             setLoading(false);
         }
@@ -368,7 +369,7 @@ const JoinMatchButton: React.FC<JoinMatchButtonProps> = ({
                                     if (selectedTeamId) {
                                         handleJoin(selectedTeamId);
                                     } else {
-                                        alert('팀을 선택해주세요.');
+                                        showToast('팀을 선택해주세요.', 'warning');
                                     }
                                 }}
                                 disabled={!selectedTeamId || loading}

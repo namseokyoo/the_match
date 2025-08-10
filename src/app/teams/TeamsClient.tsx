@@ -5,6 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Team, Player, PaginatedResponse } from '@/types';
 import { TeamList } from '@/components/team';
 import { Button } from '@/components/ui';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { showToast } from '@/components/ui/Toast';
+import { Users, Search, AlertCircle } from 'lucide-react';
 import { SearchBar } from '@/components/search';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -135,7 +138,7 @@ export default function TeamsClient() {
     // 팀 삭제 핸들러
     const handleDeleteTeam = async (team: Team) => {
         if (!user) {
-            alert('로그인이 필요합니다.');
+            showToast('로그인이 필요합니다.', 'error');
             return;
         }
         const confirmDelete = window.confirm(`정말로 "${team.name}" 팀을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`);
@@ -146,11 +149,11 @@ export default function TeamsClient() {
             if (!response.ok) {
                 throw new Error(data.error || '팀 삭제에 실패했습니다.');
             }
-            alert(`${team.name} 팀이 성공적으로 삭제되었습니다.`);
+            showToast(`${team.name} 팀이 성공적으로 삭제되었습니다.`, 'success');
             await fetchTeams(1, searchQuery, true);
         } catch (error) {
             console.error('팀 삭제 오류:', error);
-            alert(error instanceof Error ? error.message : '팀 삭제 중 오류가 발생했습니다.');
+            showToast(error instanceof Error ? error.message : '팀 삭제 중 오류가 발생했습니다.', 'error');
         }
     };
 
@@ -172,26 +175,15 @@ export default function TeamsClient() {
     if (error && teams.length === 0) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="mx-auto max-w-md">
-                        <svg className="w-20 h-20 mx-auto text-red-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                            오류가 발생했습니다
-                        </h3>
-                        <p className="text-gray-600 mb-6">{error}</p>
-                        <div className="space-x-4">
-                            <Button
-                                onClick={() => fetchTeams(1, '', true)}
-                                variant="primary"
-                                size="md"
-                            >
-                                다시 시도
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+                <EmptyState
+                    icon={AlertCircle}
+                    title="오류가 발생했습니다"
+                    description={error}
+                    action={{
+                        label: '다시 시도',
+                        onClick: () => fetchTeams(1, '', true)
+                    }}
+                />
             </div>
         );
     }

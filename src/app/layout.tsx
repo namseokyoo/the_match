@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import dynamic from 'next/dynamic';
 import MobileNavbar from '@/components/ui/MobileNavbar';
+import MobileNav from '@/components/layout/MobileNav';
 import { ErrorBoundary } from '@/components/ui';
 import { ToastContainer } from '@/components/ui/Toast';
 import ClientProviders from '@/components/providers/ClientProviders';
@@ -93,11 +94,14 @@ export default function RootLayout({
                                     <MobileNavbar />
 
                                     {/* 메인 콘텐츠 */}
-                                    <main className="flex-1">
+                                    <main className="flex-1 pb-16 md:pb-0">
                                         <ErrorBoundary>
                                             {children}
                                         </ErrorBoundary>
                                     </main>
+                                    
+                                    {/* 모바일 하단 네비게이션 */}
+                                    <MobileNav />
                                 </div>
                             </div>
 

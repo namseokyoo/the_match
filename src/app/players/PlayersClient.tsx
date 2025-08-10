@@ -5,6 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Player, Team } from '@/types';
 import { Button } from '@/components/ui';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { User, Search, AlertCircle } from 'lucide-react';
 import { SearchBar } from '@/components/search';
 import { supabase } from '@/lib/supabase';
 
@@ -83,35 +86,22 @@ export default function PlayersClient() {
 
     // 로딩 상태
     if (loading) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-            </div>
-        );
+        return <LoadingSpinner fullScreen text="선수 목록을 불러오고 있습니다..." />;
     }
 
     // 오류 발생 시
     if (error) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="mx-auto max-w-md">
-                        <svg className="w-20 h-20 mx-auto text-red-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                            오류가 발생했습니다
-                        </h3>
-                        <p className="text-gray-600 mb-6">{error}</p>
-                        <Button
-                            onClick={fetchPlayers}
-                            variant="primary"
-                            size="md"
-                        >
-                            다시 시도
-                        </Button>
-                    </div>
-                </div>
+                <EmptyState
+                    icon={AlertCircle}
+                    title="오류가 발생했습니다"
+                    description={error}
+                    action={{
+                        label: '다시 시도',
+                        onClick: fetchPlayers
+                    }}
+                />
             </div>
         );
     }
@@ -145,17 +135,23 @@ export default function PlayersClient() {
 
                 {/* 선수 목록 */}
                 {filteredPlayers.length === 0 ? (
-                    <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
-                        <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                            {searchQuery ? '검색 결과가 없습니다' : '등록된 선수가 없습니다'}
-                        </h3>
-                        <p className="text-gray-600">
-                            {searchQuery ? '다른 검색어로 시도해보세요.' : '팀에서 선수를 등록해주세요.'}
-                        </p>
-                    </div>
+                    searchQuery ? (
+                        <EmptyState
+                            icon={Search}
+                            title="검색 결과가 없습니다"
+                            description="다른 검색어로 시도해보세요."
+                        />
+                    ) : (
+                        <EmptyState
+                            icon={User}
+                            title="등록된 선수가 없습니다"
+                            description="팀에서 선수를 등록해주세요."
+                            action={{
+                                label: '팀 목록 보기',
+                                href: '/teams'
+                            }}
+                        />
+                    )
                 ) : (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         {filteredPlayers.map((player) => (

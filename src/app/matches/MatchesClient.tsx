@@ -4,6 +4,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MatchList } from '@/components/match';
 import { Button } from '@/components/ui';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { showToast } from '@/components/ui/Toast';
+import { Trophy, Search, Calendar, Plus } from 'lucide-react';
 import { SearchBar, FilterPanel } from '@/components/search';
 import { Match, MatchType, MatchStatus } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
@@ -125,7 +128,7 @@ export default function MatchesClient() {
     // 경기 삭제
     const handleDelete = async (id: string) => {
         if (!user) {
-            alert('로그인이 필요합니다.');
+            showToast('로그인이 필요합니다.', 'error');
             return;
         }
 
@@ -148,17 +151,17 @@ export default function MatchesClient() {
 
             // 성공 시 목록 새로고침
             await fetchMatches();
-            alert('경기가 성공적으로 삭제되었습니다.');
+            showToast('경기가 성공적으로 삭제되었습니다.', 'success');
         } catch (err) {
             console.error('경기 삭제 오류:', err);
-            alert(err instanceof Error ? err.message : '경기 삭제 중 오류가 발생했습니다.');
+            showToast(err instanceof Error ? err.message : '경기 삭제 중 오류가 발생했습니다.', 'error');
         }
     };
 
     // 경기 생성 페이지로 이동
     const handleCreateMatch = () => {
         if (!user) {
-            alert('경기를 생성하려면 로그인이 필요합니다.');
+            showToast('경기를 생성하려면 로그인이 필요합니다.', 'error');
             router.push('/login');
             return;
         }
@@ -274,42 +277,23 @@ export default function MatchesClient() {
 
                         {/* 빈 상태 (경기가 없을 때) */}
                         {!loading && !error && filteredMatches.length === 0 && (
-                            <div className="text-center py-12">
-                                <div className="mx-auto max-w-md">
-                                    {searchQuery || filters.type.length > 0 || filters.status.length > 0 ? (
-                                        <>
-                                            <svg className="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                            </svg>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                                검색 결과가 없습니다
-                                            </h3>
-                                            <p className="text-gray-600 mb-6">
-                                                다른 검색어나 필터를 시도해보세요.
-                                            </p>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <svg className="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                            </svg>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                                아직 경기가 없습니다
-                                            </h3>
-                                            <p className="text-gray-600 mb-6">
-                                                첫 번째 경기를 생성하여 경쟁을 시작해보세요!
-                                            </p>
-                                            <Button
-                                                onClick={handleCreateMatch}
-                                                variant="primary"
-                                                size="md"
-                                            >
-                                                첫 경기 만들기
-                                            </Button>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
+                            searchQuery || filters.type.length > 0 || filters.status.length > 0 ? (
+                                <EmptyState
+                                    icon={Search}
+                                    title="검색 결과가 없습니다"
+                                    description="다른 검색어나 필터를 시도해보세요."
+                                />
+                            ) : (
+                                <EmptyState
+                                    icon={Trophy}
+                                    title="아직 경기가 없습니다"
+                                    description="첫 번째 경기를 생성하여 경쟁을 시작해보세요!"
+                                    action={{
+                                        label: '첫 경기 만들기',
+                                        onClick: handleCreateMatch
+                                    }}
+                                />
+                            )
                         )}
                     </div>
                 </div>
