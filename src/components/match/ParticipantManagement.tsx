@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { ParticipantStatus } from '@/types';
 import { Button } from '@/components/ui';
+import { supabase } from '@/lib/supabase';
+import { showToast } from '@/components/ui/Toast';
 
 interface Participant {
     id: string;
@@ -42,10 +44,15 @@ export default function ParticipantManagement({
     const [error, setError] = useState<string | null>(null);
     const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
     const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
+    const [applying, setApplying] = useState(false);
+    const [userTeams, setUserTeams] = useState<any[]>([]);
 
     useEffect(() => {
         fetchParticipants();
-    }, [matchId]);
+        if (user) {
+            fetchUserTeams();
+        }
+    }, [matchId, user]);
 
     const fetchParticipants = async () => {
         setLoading(true);
@@ -65,6 +72,64 @@ export default function ParticipantManagement({
             setError(err instanceof Error ? err.message : '참가자 목록을 불러올 수 없습니다.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchUserTeams = async () => {
+        if (!user) return;
+        
+        try {
+            const { data: teams } = await supabase
+                .from('teams')
+                .select('*')
+                .eq('captain_id', user.id);
+            
+            setUserTeams(teams || []);
+        } catch (err) {
+            console.error('사용자 팀 조회 오류:', err);
+        }
+    };
+
+    const handleApplyToMatch = async () => {
+        if (!user) {
+            showToast('로그인이 필요합니다', 'error');
+            return;
+        }
+
+        if (userTeams.length === 0) {
+            showToast('먼저 팀을 생성해야 합니다', 'error');
+            return;
+        }
+
+        setApplying(true);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            const response = await fetch(`/api/matches/${matchId}/participants`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session?.access_token}`
+                },
+                body: JSON.stringify({
+                    notes: '열심히 참가하겠습니다!'
+                })
+            });
+
+            const data = await response.json();
+            
+            if (response.ok) {
+                showToast('경기 참가 신청이 완료되었습니다', 'success');
+                fetchParticipants();
+                onUpdate?.();
+            } else {
+                showToast(data.error || '참가 신청에 실패했습니다', 'error');
+            }
+        } catch (error) {
+            console.error('Error applying to match:', error);
+            showToast('참가 신청 중 오류가 발생했습니다', 'error');
+        } finally {
+            setApplying(false);
         }
     };
 
@@ -105,6 +170,63 @@ export default function ParticipantManagement({
         } catch (err) {
             console.error('참가자 상태 업데이트 오류:', err);
             setError(err instanceof Error ? err.message : '상태 업데이트에 실패했습니다.');
+        } finally {
+            setProcessingIds(prev => {
+                const next = new Set(prev);
+                next.delete(participantId);
+                return next;
+            });
+        }
+    };
+
+    const handleRemoveTeam = async (participantId: string, teamName: string) => {
+        if (!user || !isCreator) {
+            setError('권한이 없습니다.');
+            return;
+        }
+
+        if (!confirm(`정말로 "${teamName}" 팀을 경기에서 제거하시겠습니까?`)) {
+            return;
+        }
+
+        setProcessingIds(prev => new Set(prev).add(participantId));
+        setError(null);
+
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            const response = await fetch(
+                `/api/matches/${matchId}/participants/${participantId}/remove`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session?.access_token}`
+                    },
+                    body: JSON.stringify({
+                        reason: '경기 운영상 제거'
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || '팀 제거에 실패했습니다.');
+            }
+
+            showToast(`${teamName} 팀이 경기에서 제거되었습니다`, 'success');
+            
+            // 목록 새로고침
+            await fetchParticipants();
+            
+            // 부모 컴포넌트에 업데이트 알림
+            if (onUpdate) {
+                onUpdate();
+            }
+        } catch (err) {
+            console.error('팀 제거 오류:', err);
+            setError(err instanceof Error ? err.message : '팀 제거에 실패했습니다.');
         } finally {
             setProcessingIds(prev => {
                 const next = new Set(prev);
@@ -176,6 +298,11 @@ export default function ParticipantManagement({
         rejected: participants.filter(p => p.status === 'rejected').length,
     };
 
+    // 현재 사용자의 팀이 이미 신청했는지 확인
+    const hasApplied = participants.some(p => 
+        userTeams.some(team => team.id === p.team_id)
+    );
+
     if (loading) {
         return (
             <div className="flex justify-center items-center py-12">
@@ -186,6 +313,23 @@ export default function ParticipantManagement({
 
     return (
         <div className="space-y-4">
+            {/* 참가 신청 버튼 */}
+            {user && !isCreator && !hasApplied && userTeams.length > 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-gray-700 mb-3">
+                        이 경기에 팀으로 참가하시겠습니까?
+                    </p>
+                    <Button
+                        onClick={handleApplyToMatch}
+                        disabled={applying}
+                        variant="primary"
+                        size="sm"
+                    >
+                        {applying ? '신청 중...' : '경기 참가 신청'}
+                    </Button>
+                </div>
+            )}
+
             {error && (
                 <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
                     {error}
@@ -332,15 +476,28 @@ export default function ParticipantManagement({
                                                 </Button>
                                             </>
                                         )}
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            className="text-red-600 hover:text-red-700"
-                                            onClick={() => handleDelete(participant.id)}
-                                            disabled={processingIds.has(participant.id)}
-                                        >
-                                            삭제
-                                        </Button>
+                                        {participant.status === 'approved' && (
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="text-red-600 hover:text-red-700"
+                                                onClick={() => handleRemoveTeam(participant.id, participant.team.name)}
+                                                disabled={processingIds.has(participant.id)}
+                                            >
+                                                팀 제거
+                                            </Button>
+                                        )}
+                                        {participant.status !== 'approved' && (
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="text-red-600 hover:text-red-700"
+                                                onClick={() => handleDelete(participant.id)}
+                                                disabled={processingIds.has(participant.id)}
+                                            >
+                                                삭제
+                                            </Button>
+                                        )}
                                     </div>
                                 )}
                             </div>

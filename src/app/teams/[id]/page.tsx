@@ -254,10 +254,14 @@ export default function TeamDetailPage() {
         if (!team) return;
 
         try {
+            // Supabase 세션에서 액세스 토큰 가져오기
+            const { data: { session } } = await supabase.auth.getSession();
+            
             const response = await fetch(`/api/teams/${team.id}/join-requests`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session?.access_token}`,
                 },
                 body: JSON.stringify({
                     player_name: user.user_metadata?.name || user.email?.split('@')[0] || '익명',

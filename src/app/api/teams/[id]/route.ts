@@ -20,8 +20,7 @@ export async function GET(
             .from('teams')
             .select(`
                 *,
-                players:players(*),
-                match_participants!inner(match_id, matches(id, title))
+                players:players(*)
             `)
             .eq('id', id)
             .single();

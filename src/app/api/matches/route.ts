@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
             title: body.title.trim(),
             description: body.description?.trim() || null,
             type: body.type,
-            status: MatchStatus.DRAFT,
+            status: body.status || MatchStatus.DRAFT, // status를 body에서 받거나 기본값 사용
             creator_id: userId, // 인증된 사용자 ID 사용
             max_participants: body.max_participants || null,
             registration_deadline: body.registration_deadline || null,

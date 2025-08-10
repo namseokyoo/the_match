@@ -1,15 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
+
+// Supabase 클라이언트 생성 함수
+function createSupabaseClient(request: NextRequest) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    
+    // Authorization 헤더에서 토큰 가져오기
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '') || '';
+    
+    // Supabase 클라이언트 생성
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+        global: {
+            headers: token ? {
+                Authorization: `Bearer ${token}`
+            } : {}
+        },
+        auth: {
+            persistSession: false
+        }
+    });
+    
+    return supabase;
+}
 
 // GET: 팀의 가입 신청 목록 조회 (팀 주장용) 또는 내 신청 조회
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
-        const cookieStore = cookies();
-        const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+        const params = await context.params;
+        const teamId = params.id;
+        
+        const supabase = createSupabaseClient(request);
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
@@ -18,8 +43,6 @@ export async function GET(
                 { status: 401 }
             );
         }
-
-        const teamId = params.id;
 
         // 팀 정보 확인
         const { data: team, error: teamError } = await supabase
@@ -72,11 +95,13 @@ export async function GET(
 // POST: 팀 가입 신청
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
-        const cookieStore = cookies();
-        const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+        const params = await context.params;
+        const teamId = params.id;
+        
+        const supabase = createSupabaseClient(request);
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
@@ -86,7 +111,6 @@ export async function POST(
             );
         }
 
-        const teamId = params.id;
         const body = await request.json();
         const { player_name, player_email, position, jersey_number, message } = body;
 
@@ -161,11 +185,13 @@ export async function POST(
 // PATCH: 가입 신청 승인/거절 (팀 주장용)
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
-        const cookieStore = cookies();
-        const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+        const params = await context.params;
+        const teamId = params.id;
+        
+        const supabase = createSupabaseClient(request);
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
@@ -175,7 +201,6 @@ export async function PATCH(
             );
         }
 
-        const teamId = params.id;
         const body = await request.json();
         const { requestId, status, response_message } = body;
 
@@ -221,6 +246,42 @@ export async function PATCH(
                 { error: 'Failed to update join request' },
                 { status: 500 }
             );
+        }
+
+        // 승인된 경우 players 테이블에 추가
+        if (status === 'approved') {
+            const { data: newPlayer, error: playerError } = await supabase
+                .from('players')
+                .insert([{
+                    team_id: teamId,
+                    name: updatedRequest.player_name,
+                    email: updatedRequest.player_email,
+                    position: updatedRequest.position,
+                    jersey_number: updatedRequest.jersey_number,
+                    user_id: updatedRequest.user_id
+                }])
+                .select()
+                .single();
+
+            if (playerError) {
+                console.error('Error adding player to team:', playerError);
+                // 실패시 요청 상태를 다시 pending으로 롤백
+                await supabase
+                    .from('team_join_requests')
+                    .update({ status: 'pending', responded_by: null, responded_at: null })
+                    .eq('id', requestId);
+                
+                return NextResponse.json(
+                    { error: 'Failed to add player to team' },
+                    { status: 500 }
+                );
+            }
+
+            return NextResponse.json({ 
+                request: updatedRequest,
+                player: newPlayer,
+                message: 'Request approved and player added to team successfully' 
+            });
         }
 
         return NextResponse.json({ 
