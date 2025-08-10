@@ -259,7 +259,6 @@ export default function TeamDetailPage() {
                     name: user.user_metadata?.name || user.email?.split('@')[0] || '익명',
                     email: user.email,
                     team_id: team.id,
-                    user_id: user.id,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 }]);
@@ -281,7 +280,7 @@ export default function TeamDetailPage() {
 
     // 권한 및 멤버십 확인
     const isOwner = user && team && team.captain_id === user.id;
-    const isMember = user && players.some(player => player.id === user.id);
+    const isMember = user && players.some(player => player.email === user.email);
 
     // 로딩 상태 (인증 확인 중 또는 데이터 로딩 중)
     if (loading || authLoading) {
