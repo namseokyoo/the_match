@@ -315,6 +315,36 @@ export interface CreatePlayerForm {
     jersey_number?: number;
 }
 
+// Team Join Request types
+// eslint-disable-next-line no-unused-vars
+export enum JoinRequestStatus {
+    PENDING = 'pending',
+    APPROVED = 'approved',
+    REJECTED = 'rejected',
+}
+
+export interface TeamJoinRequest {
+    id: string;
+    team_id: string;
+    user_id: string;
+    player_name: string;
+    player_email?: string;
+    position?: string;
+    jersey_number?: number;
+    message?: string;
+    status: JoinRequestStatus | string;
+    responded_by?: string;
+    responded_at?: string;
+    response_message?: string;
+    created_at: string;
+    updated_at: string;
+    
+    // 조인된 데이터
+    team?: Team;
+    user?: User;
+    responder?: User;
+}
+
 // Component prop types
 export interface BaseComponentProps {
     className?: string;

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Team, Player } from '@/types';
 import { TeamDetail } from '@/components/team';
+import TeamJoinRequests from '@/components/team/TeamJoinRequests';
 import { Button } from '@/components/ui';
 import { AddPlayerModal, EditPlayerModal } from '@/components/player';
 import { useAuth } from '@/hooks/useAuth';
@@ -253,28 +254,30 @@ export default function TeamDetailPage() {
         if (!team) return;
 
         try {
-            const { error } = await supabase
-                .from('players')
-                .insert([{
-                    name: user.user_metadata?.name || user.email?.split('@')[0] || '익명',
-                    email: user.email,
-                    team_id: team.id,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                }]);
+            const response = await fetch(`/api/teams/${team.id}/join-requests`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    player_name: user.user_metadata?.name || user.email?.split('@')[0] || '익명',
+                    player_email: user.email,
+                    message: '팀에 가입하고 싶습니다!'
+                })
+            });
 
-            if (error) {
-                console.error('Team join error:', error);
-                alert('팀 가입 신청에 실패했습니다: ' + error.message);
-                return;
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || '팀 가입 신청에 실패했습니다.');
             }
 
-            alert(`${team.name} 팀에 성공적으로 가입했습니다!`);
+            alert(`${team.name} 팀에 가입 신청을 완료했습니다! 팀 주장의 승인을 기다려주세요.`);
             // 데이터 새로고침
             fetchTeam();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Team join error:', error);
-            alert('팀 가입 중 오류가 발생했습니다.');
+            alert(error.message || '팀 가입 신청에 실패했습니다.');
         }
     };
 
@@ -388,6 +391,20 @@ export default function TeamDetailPage() {
                     isOwner={isOwner || false}
                     isMember={isMember || false}
                 />
+                
+                {/* 팀 가입 신청 관리 */}
+                {(isOwner || !isMember) && (
+                    <div className="mt-8">
+                        <h2 className="text-xl font-bold mb-4">
+                            {isOwner ? '팀 가입 신청 관리' : '가입 신청 현황'}
+                        </h2>
+                        <TeamJoinRequests 
+                            teamId={teamId}
+                            isCaptain={isOwner || false}
+                            onRequestUpdate={fetchTeam}
+                        />
+                    </div>
+                )}
             </div>
 
             {/* 선수 추가 모달 */}

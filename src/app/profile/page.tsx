@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Team, Match, Player } from '@/types';
-import { Button, Input } from '@/components/ui';
+import { Team, Match, Player, TeamJoinRequest } from '@/types';
+import { Button, Input, Card } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
+import { formatDate } from '@/lib/utils';
+import { Clock, Check, X } from 'lucide-react';
 
 interface UserProfile {
     id: string;
@@ -23,6 +25,7 @@ export default function ProfilePage() {
     const [myTeams, setMyTeams] = useState<Team[]>([]);
     const [myMatches, setMyMatches] = useState<Match[]>([]);
     const [myPlayerProfiles, setMyPlayerProfiles] = useState<Player[]>([]);
+    const [myJoinRequests, setMyJoinRequests] = useState<TeamJoinRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
@@ -120,6 +123,19 @@ export default function ProfilePage() {
                 } else {
                     setMyPlayerProfiles(playersData || []);
                 }
+            }
+
+            // 내 팀 가입 신청 조회
+            const { data: joinRequestsData, error: joinRequestsError } = await supabase
+                .from('team_join_requests')
+                .select('*, team:teams(*)')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (joinRequestsError) {
+                console.error('Join requests fetch error:', joinRequestsError);
+            } else {
+                setMyJoinRequests(joinRequestsData || []);
             }
 
         } catch (err) {
@@ -371,6 +387,65 @@ export default function ProfilePage() {
                                     모두 보기 ({myMatches.length}개)
                                 </button>
                             )}
+                        </div>
+                    )}
+                </div>
+
+                {/* 팀 가입 신청 현황 */}
+                <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">팀 가입 신청 현황</h2>
+                    {myJoinRequests.length === 0 ? (
+                        <p className="text-gray-500 text-sm">팀 가입 신청 내역이 없습니다.</p>
+                    ) : (
+                        <div className="space-y-3">
+                            {myJoinRequests.map((request) => (
+                                <Card key={request.id} className="p-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h3 className="font-medium">
+                                                    {request.team?.name || '알 수 없는 팀'}
+                                                </h3>
+                                                <div className="flex items-center gap-1">
+                                                    {request.status === 'pending' && (
+                                                        <>
+                                                            <Clock className="w-4 h-4 text-yellow-500" />
+                                                            <span className="text-sm text-yellow-600">승인 대기중</span>
+                                                        </>
+                                                    )}
+                                                    {request.status === 'approved' && (
+                                                        <>
+                                                            <Check className="w-4 h-4 text-green-500" />
+                                                            <span className="text-sm text-green-600">승인됨</span>
+                                                        </>
+                                                    )}
+                                                    {request.status === 'rejected' && (
+                                                        <>
+                                                            <X className="w-4 h-4 text-red-500" />
+                                                            <span className="text-sm text-red-600">거절됨</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <p className="text-sm text-gray-500">
+                                                신청일: {formatDate(request.created_at)}
+                                            </p>
+                                            {request.responded_at && (
+                                                <p className="text-sm text-gray-500">
+                                                    처리일: {formatDate(request.responded_at)}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => router.push(`/teams/${request.team_id}`)}
+                                        >
+                                            팀 보기
+                                        </Button>
+                                    </div>
+                                </Card>
+                            ))}
                         </div>
                     )}
                 </div>
