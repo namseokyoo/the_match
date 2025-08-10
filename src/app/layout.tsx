@@ -8,6 +8,7 @@ import { ToastContainer } from '@/components/ui/Toast';
 import ClientProviders from '@/components/providers/ClientProviders';
 import PWAProvider from '@/components/pwa/PWAProvider';
 import './globals.css';
+import './mobile-fixed.css';
 
 // ConfigStatus는 클라이언트 사이드에서만 렌더링
 const ConfigStatus = dynamic(
@@ -28,6 +29,13 @@ export const metadata: Metadata = {
         email: false,
         address: false,
         telephone: false,
+    },
+    viewport: {
+        width: 430,
+        initialScale: 1,
+        maximumScale: 1,
+        minimumScale: 1,
+        userScalable: false,
     },
     metadataBase: new URL('http://localhost:3000'),
     alternates: {
@@ -89,9 +97,9 @@ export default function RootLayout({
                     <ClientProviders>
                         <PWAProvider>
                             {/* 모바일 사이즈 고정 래퍼 */}
-                            <div className="min-h-screen bg-gray-100 flex justify-center">
-                                <div className="w-full max-w-[430px] min-h-screen bg-background font-sans antialiased shadow-2xl">
-                                    <div className="relative flex min-h-screen flex-col">
+                            <div className="min-h-screen bg-gray-100 flex justify-center overflow-x-hidden">
+                                <div className="w-[430px] min-w-[430px] max-w-[430px] min-h-screen bg-background font-sans antialiased shadow-2xl relative">
+                                    <div className="relative flex min-h-screen flex-col w-full">
                                         {/* 네비게이션 바 */}
                                         <MobileNavbar />
 
