@@ -43,10 +43,35 @@ export const MatchForm: React.FC<MatchFormProps> = ({
     isLoading = false,
     mode = 'create',
 }) => {
+    // 날짜 포맷팅 함수
+    const formatDateForInput = (dateString: string): string => {
+        if (!dateString) return '';
+        // 이미 datetime-local 형식인 경우 그대로 반환
+        if (dateString.includes('T') && dateString.length === 16) {
+            return dateString;
+        }
+        // Date 객체로 변환 후 포맷팅
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '';
+        // 로컬 시간대로 변환
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
     // 기본값들 설정
     const getDefaultRegistrationStartDate = () => {
         const now = new Date();
-        return now.toISOString().slice(0, 16);
+        // 로컬 시간대로 변환
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
 
     const [formData, setFormData] = useState<CreateMatchForm>({
@@ -54,10 +79,10 @@ export const MatchForm: React.FC<MatchFormProps> = ({
         description: initialData?.description || match?.description || '',
         type: initialData?.type || (match?.type as MatchType) || MatchType.SINGLE_ELIMINATION,
         max_participants: initialData?.max_participants || match?.max_participants || undefined,
-        registration_start_date: initialData?.registration_start_date || match?.registration_start_date || getDefaultRegistrationStartDate(),
-        registration_deadline: initialData?.registration_deadline || match?.registration_deadline || '',
-        start_date: initialData?.start_date || match?.start_date || '',
-        end_date: initialData?.end_date || match?.end_date || '',
+        registration_start_date: formatDateForInput(initialData?.registration_start_date || match?.registration_start_date || '') || getDefaultRegistrationStartDate(),
+        registration_deadline: formatDateForInput(initialData?.registration_deadline || match?.registration_deadline || ''),
+        start_date: formatDateForInput(initialData?.start_date || match?.start_date || ''),
+        end_date: formatDateForInput(initialData?.end_date || match?.end_date || ''),
         venue: initialData?.venue || match?.venue || '',
         rules: initialData?.rules || match?.rules || {},
         prizes: initialData?.prizes || match?.prizes || '',
@@ -152,12 +177,6 @@ export const MatchForm: React.FC<MatchFormProps> = ({
         } catch (error) {
             console.error('폼 제출 오류:', error);
         }
-    };
-
-    const formatDateForInput = (dateString: string): string => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toISOString().slice(0, 16);
     };
 
     return (
@@ -262,7 +281,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({
                             <input
                                 id="registration_start_date"
                                 type="datetime-local"
-                                value={formatDateForInput(formData.registration_start_date || '')}
+                                value={formData.registration_start_date || ''}
                                 onChange={(e) => handleInputChange('registration_start_date', e.target.value)}
                                 disabled={isLoading}
                                 className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent ${errors.registration_start_date ? 'border-red-500' : ''
@@ -279,7 +298,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({
                             <input
                                 id="registration_deadline"
                                 type="datetime-local"
-                                value={formatDateForInput(formData.registration_deadline || '')}
+                                value={formData.registration_deadline || ''}
                                 onChange={(e) => handleInputChange('registration_deadline', e.target.value)}
                                 disabled={isLoading}
                                 className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent ${errors.registration_deadline ? 'border-red-500' : ''
@@ -295,7 +314,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({
                             <input
                                 id="start_date"
                                 type="datetime-local"
-                                value={formatDateForInput(formData.start_date || '')}
+                                value={formData.start_date || ''}
                                 onChange={(e) => handleInputChange('start_date', e.target.value)}
                                 disabled={isLoading}
                                 className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent ${errors.start_date ? 'border-red-500' : ''
@@ -311,7 +330,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({
                             <input
                                 id="end_date"
                                 type="datetime-local"
-                                value={formatDateForInput(formData.end_date || '')}
+                                value={formData.end_date || ''}
                                 onChange={(e) => handleInputChange('end_date', e.target.value)}
                                 disabled={isLoading}
                                 className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent ${errors.end_date ? 'border-red-500' : ''
