@@ -153,6 +153,7 @@ const MobileNavbar = () => {
                                 <UserCheck className="w-5 h-5" />
                                 <span>선수</span>
                             </Link>
+                            {/* 템플릿 메뉴 - 임시 숨김
                             <Link 
                                 href="/matches/templates"
                                 className={isActive('/matches/templates') ? activeMenuItemClass : menuItemClass}
@@ -160,6 +161,7 @@ const MobileNavbar = () => {
                                 <LayoutTemplate className="w-5 h-5" />
                                 <span>템플릿</span>
                             </Link>
+                            */}
                             <Link 
                                 href="/stats"
                                 className={isActive('/stats') ? activeMenuItemClass : menuItemClass}
@@ -293,12 +295,14 @@ const MobileNavbar = () => {
                             >
                                 경기
                             </Link>
+                            {/* 템플릿 메뉴 - 임시 숨김
                             <Link
                                 href="/matches/templates"
                                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                             >
                                 템플릿
                             </Link>
+                            */}
                             <Link
                                 href="/teams"
                                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"

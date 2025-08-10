@@ -138,6 +138,7 @@ export default function CreateMatchClient() {
                                 새로운 경기를 생성하여 팀들의 경쟁을 시작하세요.
                             </p>
                         </div>
+                        {/* 템플릿 사용 버튼 - 임시 숨김
                         <Link
                             href="/matches/templates"
                             className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -147,6 +148,7 @@ export default function CreateMatchClient() {
                             </svg>
                             템플릿 사용
                         </Link>
+                        */}
                     </div>
                 </div>
 
