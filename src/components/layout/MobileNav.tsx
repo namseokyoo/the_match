@@ -74,7 +74,7 @@ const MobileNav: React.FC = () => {
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 w-full" style={{ maxWidth: '430px' }}>
+        <div className="fixed bottom-0 bg-white border-t border-gray-200 z-40" style={{ width: '430px', left: '50%', transform: 'translateX(-50%)' }}>
             <nav className="flex items-center justify-around h-16">
                 {navItems.map((item) => {
                     const Icon = item.icon;
