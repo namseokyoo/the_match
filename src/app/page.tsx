@@ -148,33 +148,35 @@ export default function Home() {
             {/* Onboarding Tour for new users */}
             <OnboardingTour autoStart={!!user} />
             
-            {/* Hero Section - Compact Design with Centered Title */}
-            <section className="bg-gradient-to-br from-primary-500 to-primary-700 px-4 py-6 sm:py-8">
-                <div className="mx-auto max-w-7xl">
-                    {/* 제목 - 중앙 정렬 */}
-                    <div className="text-center text-white mb-4">
-                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                            The Match
-                        </h1>
-                        <p className="text-sm sm:text-base text-primary-100 mt-1">
-                            스포츠 경기 관리 플랫폼
-                        </p>
-                    </div>
-
-                    {/* 통계 - 가로로 배치, 중앙 정렬 */}
-                    <div className="flex justify-center gap-3 sm:gap-4">
-                        <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 sm:px-6 sm:py-3 text-center shadow min-w-[80px] sm:min-w-[100px]">
-                            <div className="text-xl sm:text-2xl font-bold text-primary-600">{stats.totalMatches}</div>
-                            <div className="text-xs text-gray-600">경기</div>
-                        </div>
-                        <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 sm:px-6 sm:py-3 text-center shadow min-w-[80px] sm:min-w-[100px]">
-                            <div className="text-xl sm:text-2xl font-bold text-primary-600">{stats.totalTeams}</div>
-                            <div className="text-xs text-gray-600">팀</div>
-                        </div>
-                        <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 sm:px-6 sm:py-3 text-center shadow min-w-[80px] sm:min-w-[100px]">
-                            <div className="text-xl sm:text-2xl font-bold text-primary-600">{stats.totalPlayers}</div>
-                            <div className="text-xs text-gray-600">선수</div>
-                        </div>
+            {/* Hero CTA Section - 상단으로 이동 */}
+            <section className="bg-gradient-to-br from-primary-500 to-primary-700 px-4 py-12 sm:py-16">
+                <div className="mx-auto max-w-4xl text-center">
+                    <h1 className="mb-4 text-3xl sm:text-4xl font-bold text-white">
+                        The Match와 함께 시작하세요
+                    </h1>
+                    <p className="mb-8 text-lg sm:text-xl text-primary-100">
+                        무료로 경기를 만들고 팀을 관리하는 새로운 경험
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        {user ? (
+                            <>
+                                <Link href="/matches/create" className="px-8 py-3 bg-white text-primary-600 rounded-lg hover:bg-gray-100 font-semibold transition-colors shadow-lg">
+                                    경기 만들기
+                                </Link>
+                                <Link href="/teams/create" className="px-8 py-3 bg-primary-800 text-white rounded-lg hover:bg-primary-900 font-semibold transition-colors shadow-lg">
+                                    팀 만들기
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <Link href="/signup" className="px-8 py-3 bg-white text-primary-600 rounded-lg hover:bg-gray-100 font-semibold transition-colors shadow-lg">
+                                    무료 회원가입
+                                </Link>
+                                <Link href="/login" className="px-8 py-3 bg-primary-800 text-white rounded-lg hover:bg-primary-900 font-semibold transition-colors shadow-lg">
+                                    로그인
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             </section>
@@ -353,35 +355,33 @@ export default function Home() {
                 </section>
             )}
 
-            {/* CTA Section */}
-            <section className="py-12 px-4">
-                <div className="mx-auto max-w-4xl text-center">
-                    <h2 className="mb-4 text-3xl font-bold text-gray-900">
-                        지금 시작하세요
-                    </h2>
-                    <p className="mb-8 text-xl text-gray-600">
-                        무료로 The Match를 체험해보고 경기 관리의 새로운 경험을 만나보세요
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        {user ? (
-                            <>
-                                <Link href="/matches/create" className="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-semibold transition-colors shadow-sm">
-                                    경기 만들기
-                                </Link>
-                                <Link href="/teams/create" className="px-8 py-3 bg-success-600 text-white rounded-lg hover:bg-success-700 font-semibold transition-colors shadow-sm">
-                                    팀 만들기
-                                </Link>
-                            </>
-                        ) : (
-                            <>
-                                <Link href="/signup" className="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-semibold transition-colors shadow-sm">
-                                    무료 회원가입
-                                </Link>
-                                <Link href="/login" className="px-8 py-3 bg-white text-primary-600 border-2 border-primary-600 rounded-lg hover:bg-primary-50 font-semibold transition-colors">
-                                    로그인
-                                </Link>
-                            </>
-                        )}
+            {/* 통계 섹션 - 맨 아래로 이동 */}
+            <section className="bg-gradient-to-br from-primary-500 to-primary-700 px-4 py-8 sm:py-12">
+                <div className="mx-auto max-w-7xl">
+                    {/* 제목 - 중앙 정렬 */}
+                    <div className="text-center text-white mb-6">
+                        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                            The Match 플랫폼 현황
+                        </h2>
+                        <p className="text-sm sm:text-base text-primary-100 mt-2">
+                            함께 성장하는 스포츠 커뮤니티
+                        </p>
+                    </div>
+
+                    {/* 통계 - 가로로 배치, 중앙 정렬 */}
+                    <div className="flex justify-center gap-4 sm:gap-6">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-lg px-6 py-4 sm:px-8 sm:py-6 text-center shadow-lg min-w-[100px] sm:min-w-[140px]">
+                            <div className="text-3xl sm:text-4xl font-bold text-primary-600">{stats.totalMatches}</div>
+                            <div className="text-sm sm:text-base text-gray-600 mt-1">진행된 경기</div>
+                        </div>
+                        <div className="bg-white/95 backdrop-blur-sm rounded-lg px-6 py-4 sm:px-8 sm:py-6 text-center shadow-lg min-w-[100px] sm:min-w-[140px]">
+                            <div className="text-3xl sm:text-4xl font-bold text-primary-600">{stats.totalTeams}</div>
+                            <div className="text-sm sm:text-base text-gray-600 mt-1">활동 중인 팀</div>
+                        </div>
+                        <div className="bg-white/95 backdrop-blur-sm rounded-lg px-6 py-4 sm:px-8 sm:py-6 text-center shadow-lg min-w-[100px] sm:min-w-[140px]">
+                            <div className="text-3xl sm:text-4xl font-bold text-primary-600">{stats.totalPlayers}</div>
+                            <div className="text-sm sm:text-base text-gray-600 mt-1">등록된 선수</div>
+                        </div>
                     </div>
                 </div>
             </section>

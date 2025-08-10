@@ -39,7 +39,7 @@ export function useRealtimeUpdates(config: RealtimeConfig) {
 
         // Database changes subscription
         if (config.table) {
-            let subscription = channel.on(
+            channel.on(
                 'postgres_changes',
                 {
                     event: '*',

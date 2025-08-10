@@ -217,10 +217,10 @@ export const PerformanceMonitor: React.FC<{ show?: boolean }> = ({ show = false 
 // 성능 최적화 유틸리티 함수들
 export const performanceUtils = {
     // 디바운스
-    debounce: <T extends (...args: any[]) => any>(
+    debounce: function <T extends (...args: any[]) => any>(
         func: T,
         wait: number
-    ): ((...args: Parameters<T>) => void) => {
+    ): ((...args: Parameters<T>) => void) {
         let timeout: NodeJS.Timeout;
         return (...args: Parameters<T>) => {
             clearTimeout(timeout);
@@ -229,10 +229,10 @@ export const performanceUtils = {
     },
 
     // 쓰로틀
-    throttle: <T extends (...args: any[]) => any>(
+    throttle: function <T extends (...args: any[]) => any>(
         func: T,
         limit: number
-    ): ((...args: Parameters<T>) => void) => {
+    ): ((...args: Parameters<T>) => void) {
         let inThrottle: boolean;
         return (...args: Parameters<T>) => {
             if (!inThrottle) {
@@ -244,7 +244,7 @@ export const performanceUtils = {
     },
 
     // 메모이제이션
-    memoize: <T extends (...args: any[]) => any>(func: T) => {
+    memoize: function <T extends (...args: any[]) => any>(func: T) {
         const cache = new Map();
         return ((...args: Parameters<T>): ReturnType<T> => {
             const key = JSON.stringify(args);
@@ -258,7 +258,7 @@ export const performanceUtils = {
     },
 
     // 지연 로딩
-    lazyLoad: (importFunc: () => Promise<any>) => {
+    lazyLoad: function (importFunc: () => Promise<any>) {
         let module: any = null;
         return async () => {
             if (!module) {
@@ -269,7 +269,7 @@ export const performanceUtils = {
     },
 
     // 가상 스크롤링을 위한 아이템 계산
-    calculateVisibleItems: <T>(
+    calculateVisibleItems: function <T>(
         items: T[],
         scrollTop: number,
         containerHeight: number,
