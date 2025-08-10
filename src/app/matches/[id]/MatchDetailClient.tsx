@@ -20,7 +20,7 @@ interface MatchDetailClientProps {
 
 export default function MatchDetailClient({ match: initialMatch }: MatchDetailClientProps) {
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, getAccessToken } = useAuth();
     const [refreshKey, setRefreshKey] = useState(0);
     const [match, setMatch] = useState(initialMatch);
     const [activeTab, setActiveTab] = useState<'overview' | 'bracket' | 'participants' | 'settings'>('overview');
@@ -65,12 +65,20 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
     
         const confirmDelete = window.confirm('정말로 이 경기를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.');
         if (!confirmDelete) return;
+
+        const token = getAccessToken();
+        if (!token) {
+            alert('인증 토큰을 가져올 수 없습니다. 다시 로그인해주세요.');
+            router.push('/login');
+            return;
+        }
     
         try {
             const response = await fetch(`/api/matches/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
             });
     
