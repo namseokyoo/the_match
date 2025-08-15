@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Clock, Users, Search } from 'lucide-react';
 import { showToast } from '@/components/ui/Toast';
 import { format } from 'date-fns';
@@ -49,11 +49,7 @@ export default function CheckInList({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'checked_in' | 'absent'>('all');
 
-  useEffect(() => {
-    fetchCheckIns();
-  }, [matchId, type, teamId]);
-
-  const fetchCheckIns = async () => {
+  const fetchCheckIns = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -153,7 +149,11 @@ export default function CheckInList({
     } finally {
       setLoading(false);
     }
-  };
+  }, [matchId, type, teamId]);
+
+  useEffect(() => {
+    fetchCheckIns();
+  }, [matchId, type, teamId, fetchCheckIns]);
 
   const handleStatusChange = async (checkInId: string, newStatus: 'checked_in' | 'absent') => {
     if (!isOwner) {

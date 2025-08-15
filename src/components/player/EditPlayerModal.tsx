@@ -9,7 +9,7 @@ interface EditPlayerModalProps {
     player: Player | null;
     isOpen: boolean;
     onClose: () => void;
-    onPlayerUpdated: (player: Player) => void;
+    onPlayerUpdated: (_player: Player) => void;
 }
 
 export const EditPlayerModal: React.FC<EditPlayerModalProps> = ({

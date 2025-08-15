@@ -12,7 +12,6 @@ import {
     Trophy, 
     Users, 
     UserCheck,
-    LayoutTemplate,
     PlusCircle,
     LogOut,
     LogIn,

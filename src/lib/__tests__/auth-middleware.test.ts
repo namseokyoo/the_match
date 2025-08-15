@@ -15,7 +15,7 @@ describe('JWT 보안 검증', () => {
      */
     test('서명되지 않은 JWT를 거부해야 함', async () => {
         // 가짜 JWT: header.payload (서명 없음)
-        const unsignedToken = 'eyJhbGciOiJub25lIn0.eyJzdWIiOiIxMjM0NTY3ODkwIn0';
+        const _unsignedToken = 'eyJhbGciOiJub25lIn0.eyJzdWIiOiIxMjM0NTY3ODkwIn0'; // Test unsigned token
         // verifyAuth는 이를 거부해야 함
     });
 
@@ -25,7 +25,7 @@ describe('JWT 보안 검증', () => {
      */
     test('만료된 JWT를 거부해야 함', async () => {
         // exp: 2020년 1월 1일로 설정된 JWT
-        const expiredToken = 'expired.jwt.token';
+        const _expiredToken = 'expired.jwt.token'; // Test expired token
         // verifyAuth는 만료 에러를 반환해야 함
     });
 
@@ -35,7 +35,7 @@ describe('JWT 보안 검증', () => {
      */
     test('잘못된 발급자의 JWT를 거부해야 함', async () => {
         // iss claim이 다른 서비스인 JWT
-        const wrongIssuerToken = 'wrong.issuer.token';
+        const _wrongIssuerToken = 'wrong.issuer.token'; // Test wrong issuer token
         // verifyAuth는 이를 거부해야 함
     });
 
@@ -45,7 +45,7 @@ describe('JWT 보안 검증', () => {
      */
     test('알고리즘 혼동 공격을 방어해야 함', async () => {
         // alg를 HS256으로 변경하고 공개키로 서명한 악의적인 JWT
-        const algorithmConfusionToken = 'malicious.jwt.token';
+        const _algorithmConfusionToken = 'malicious.jwt.token'; // Test algorithm confusion attack
         // verifyAuth는 이를 거부해야 함
     });
 
@@ -53,7 +53,7 @@ describe('JWT 보안 검증', () => {
      * 5. 빈 토큰 거부 테스트
      */
     test('빈 토큰을 거부해야 함', async () => {
-        const emptyToken = '';
+        const _emptyToken = ''; // Test empty token
         // verifyAuth는 빈 토큰 에러를 반환해야 함
     });
 
@@ -63,12 +63,12 @@ describe('JWT 보안 검증', () => {
      * - Base64가 아닌 문자열
      */
     test('형식이 잘못된 JWT를 거부해야 함', async () => {
-        const malformedTokens = [
+        const _malformedTokens = [
             'not.a.jwt',
             'only.two',
             'not-base64-@#$%',
             '.....',
-        ];
+        ]; // Test malformed token cases
         // 모든 토큰이 거부되어야 함
     });
 
@@ -78,7 +78,7 @@ describe('JWT 보안 검증', () => {
      */
     test('SQL Injection을 방어해야 함', async () => {
         // sub에 SQL injection 페이로드가 포함된 JWT
-        const sqlInjectionToken = 'token.with.sql.injection';
+        const _sqlInjectionToken = 'token.with.sql.injection'; // Test SQL injection token
         // 시스템이 안전하게 처리해야 함
     });
 
@@ -87,7 +87,7 @@ describe('JWT 보안 검증', () => {
      */
     test('유효한 Supabase JWT를 승인해야 함', async () => {
         // 실제 Supabase에서 발급한 유효한 JWT
-        const validToken = 'valid.supabase.token';
+        const _validToken = 'valid.supabase.token'; // Test valid token
         // verifyAuth는 사용자 정보를 반환해야 함
     });
 });

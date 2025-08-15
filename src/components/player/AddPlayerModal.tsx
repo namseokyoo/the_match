@@ -9,7 +9,7 @@ interface AddPlayerModalProps {
     teamId: string;
     isOpen: boolean;
     onClose: () => void;
-    onPlayerAdded: (player: Player) => void;
+    onPlayerAdded: (_player: Player) => void;
 }
 
 export const AddPlayerModal: React.FC<AddPlayerModalProps> = ({

@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Trophy, Users, Calendar, Clock, ArrowRight, UserPlus } from 'lucide-react';
+import { Trophy, Calendar, Clock, ArrowRight, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { OnboardingTour } from '@/components/onboarding';
-import { Match, Team, MatchStatus, MatchType } from '@/types';
+import { Match, Team, MatchType } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { dashboardAPI, performanceUtils } from '@/lib/api-client';
 import { calculateMatchStatus, getMatchStatusLabel, getMatchStatusColor } from '@/lib/match-utils';

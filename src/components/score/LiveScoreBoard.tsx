@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Match, Team } from '@/types';
 import { ChevronUp, ChevronDown, Play, Pause, Flag, RefreshCw } from 'lucide-react';
@@ -40,6 +40,34 @@ export const LiveScoreBoard: React.FC<LiveScoreBoardProps> = ({
     const [timer, setTimer] = useState<number>(0);
     const [isTimerRunning, setIsTimerRunning] = useState(false);
 
+    const fetchLiveScore = useCallback(async () => {
+        try {
+            const { data, error } = await supabase
+                .from('live_scores')
+                .select('*')
+                .eq('match_id', match.id)
+                .single();
+
+            if (error && error.code !== 'PGRST116') {
+                console.error('Error fetching live score:', error);
+            }
+
+            if (data) {
+                setLiveScore(data);
+                // 타이머 복원
+                if (data.period_time) {
+                    const [minutes, seconds] = data.period_time.split(':').map(Number);
+                    setTimer(minutes * 60 + seconds);
+                }
+                if (data.status === 'in_progress') {
+                    setIsTimerRunning(true);
+                }
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, [match.id]);
+
     // 실시간 스코어 가져오기
     useEffect(() => {
         fetchLiveScore();
@@ -67,7 +95,7 @@ export const LiveScoreBoard: React.FC<LiveScoreBoardProps> = ({
         return () => {
             subscription.unsubscribe();
         };
-    }, [match.id]);
+    }, [match.id, fetchLiveScore]);
 
     // 타이머 관리
     useEffect(() => {
@@ -83,34 +111,6 @@ export const LiveScoreBoard: React.FC<LiveScoreBoardProps> = ({
             if (interval) clearInterval(interval);
         };
     }, [isTimerRunning, liveScore?.status]);
-
-    const fetchLiveScore = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('live_scores')
-                .select('*')
-                .eq('match_id', match.id)
-                .single();
-
-            if (error && error.code !== 'PGRST116') {
-                console.error('Error fetching live score:', error);
-            }
-
-            if (data) {
-                setLiveScore(data);
-                // 타이머 복원
-                if (data.period_time) {
-                    const [minutes, seconds] = data.period_time.split(':').map(Number);
-                    setTimer(minutes * 60 + seconds);
-                }
-                if (data.status === 'in_progress') {
-                    setIsTimerRunning(true);
-                }
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const initializeLiveScore = async () => {
         setUpdating(true);

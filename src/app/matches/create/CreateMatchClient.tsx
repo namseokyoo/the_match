@@ -8,7 +8,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useNotification } from '@/contexts/NotificationContext';
 import { postWithAuth } from '@/lib/api-client';
-import Link from 'next/link';
 
 export default function CreateMatchClient() {
     const [isLoading, setIsLoading] = useState(false);

@@ -7,7 +7,7 @@ import { TeamList } from '@/components/team';
 import { Button } from '@/components/ui';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { showToast } from '@/components/ui/Toast';
-import { Users, Search, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { SearchBar } from '@/components/search';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -101,7 +101,7 @@ export default function TeamsClient() {
     // URL 파라미터 변경 감지
     useEffect(() => {
         fetchTeams(1, searchQuery, true);
-    }, [searchQuery]); // fetchTeams를 의존성에서 제거
+    }, [searchQuery, fetchTeams]);
 
     // 필터링된 팀 목록 (클라이언트 사이드 필터링)
     const filteredTeams = useMemo(() => {

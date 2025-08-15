@@ -8,11 +8,11 @@ interface AuthContextType {
     user: User | null;
     session: Session | null;
     loading: boolean;
-    signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-    signUp: (email: string, password: string, metadata?: Record<string, any>) => Promise<{ error: AuthError | null }>;
+    signIn: (_email: string, _password: string) => Promise<{ error: AuthError | null }>;
+    signUp: (_email: string, _password: string, _metadata?: Record<string, any>) => Promise<{ error: AuthError | null }>;
     signOut: () => Promise<void>;
     signInWithGoogle: () => Promise<{ error: AuthError | null }>;
-    resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+    resetPassword: (_email: string) => Promise<{ error: AuthError | null }>;
     isAuthenticated: boolean;
     getAccessToken: () => string | null;
 }

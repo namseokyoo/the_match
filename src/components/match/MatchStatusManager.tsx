@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Match, MatchStatus } from '@/types';
 import { Button } from '@/components/ui';
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui';
 interface MatchStatusManagerProps {
     match: Match;
     isCreator: boolean;
-    onStatusChange?: (newStatus: MatchStatus) => void;
+    onStatusChange?: (_newStatus: MatchStatus) => void;
 }
 
 // 상태별 한글 표시 텍스트
@@ -50,11 +50,7 @@ export default function MatchStatusManager({
     const [targetStatus, setTargetStatus] = useState<MatchStatus | null>(null);
     const [cancellationReason, setCancellationReason] = useState('');
 
-    useEffect(() => {
-        fetchStatusInfo();
-    }, [match.id]);
-
-    const fetchStatusInfo = async () => {
+    const fetchStatusInfo = useCallback(async () => {
         try {
             const response = await fetch(`/api/matches/${match.id}/status`);
             const data = await response.json();
@@ -67,7 +63,11 @@ export default function MatchStatusManager({
         } catch (err) {
             console.error('상태 정보 조회 오류:', err);
         }
-    };
+    }, [match.id]);
+
+    useEffect(() => {
+        fetchStatusInfo();
+    }, [fetchStatusInfo]);
 
     const handleStatusChange = async (newStatus: MatchStatus) => {
         // 취소 상태로 변경 시 사유 입력 받기

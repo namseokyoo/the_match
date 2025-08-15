@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '@/lib/supabase-server';
 import { supabase } from '@/lib/supabase';
 
 // 경기 결과 조회
@@ -10,7 +9,7 @@ export async function GET(
     try {
         
         // 현재 사용자 확인
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user: _user } } = await supabase.auth.getUser(); // User validation for future use
         
         // 경기 정보 조회
         const { data: match, error: matchError } = await supabase
@@ -198,7 +197,7 @@ async function processNextRound(
         // 다음 라운드 정보 계산
         const nextRound = currentRound + 1;
         const nextMatchIndex = Math.floor(matchIndex / 2);
-        const isFirstTeam = matchIndex % 2 === 0;
+        const _isFirstTeam = matchIndex % 2 === 0; // Team position for bracket advancement
         
         // 브래킷 정보 업데이트 (추후 구현)
         // 여기서는 승자를 다음 라운드에 배치하는 로직을 구현

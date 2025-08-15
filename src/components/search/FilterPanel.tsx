@@ -20,12 +20,12 @@ interface FilterPanelProps {
 }
 
 export const FilterPanel: React.FC<FilterPanelProps> = ({
-    filters,
+    filters: _filters,
     onFilterChange,
     filterType,
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [localFilters, setLocalFilters] = useState<FilterOptions>(filters);
+    const [localFilters, setLocalFilters] = useState<FilterOptions>(_filters);
 
     const handleTypeToggle = (type: MatchType) => {
         const currentTypes = localFilters.type || [];

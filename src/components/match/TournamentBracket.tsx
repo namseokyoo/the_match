@@ -6,7 +6,7 @@ import { useIsMobile, useIsTablet, useIsDesktop } from '@/hooks/useMediaQuery';
 
 interface TournamentBracketProps {
     bracket: BracketType;
-    onMatchClick?: (match: BracketMatch) => void;
+    onMatchClick?: (_match: BracketMatch) => void;
     isEditable?: boolean;
 }
 
@@ -31,7 +31,7 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
 }) => {
     const isMobile = useIsMobile();
     const isTablet = useIsTablet();
-    const isDesktop = useIsDesktop();
+    const _isDesktop = useIsDesktop();
     const [activeRound, setActiveRound] = useState(0);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     

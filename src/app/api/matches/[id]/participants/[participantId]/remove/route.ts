@@ -97,7 +97,7 @@ export async function POST(
         }
 
         const body = await request.json();
-        const { reason } = body;
+        const { reason: _reason } = body; // Reason for removal (future audit logging)
 
         // 참가 기록 삭제
         const { error: deleteError } = await supabase

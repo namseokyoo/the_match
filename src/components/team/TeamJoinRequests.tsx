@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { TeamJoinRequest, JoinRequestStatus } from '@/types';
+import React, { useState, useEffect, useCallback } from 'react';
+import { TeamJoinRequest } from '@/types';
 import { Button, Card } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
 import { Check, X, Clock } from 'lucide-react';
@@ -21,11 +21,7 @@ export const TeamJoinRequests: React.FC<TeamJoinRequestsProps> = ({
     const [loading, setLoading] = useState(true);
     const [processingId, setProcessingId] = useState<string | null>(null);
 
-    useEffect(() => {
-        fetchRequests();
-    }, [teamId]);
-
-    const fetchRequests = async () => {
+    const fetchRequests = useCallback(async () => {
         try {
             const response = await fetch(`/api/teams/${teamId}/join-requests`);
             const data = await response.json();
@@ -38,7 +34,11 @@ export const TeamJoinRequests: React.FC<TeamJoinRequestsProps> = ({
         } finally {
             setLoading(false);
         }
-    };
+    }, [teamId]);
+
+    useEffect(() => {
+        fetchRequests();
+    }, [teamId, fetchRequests]);
 
     const handleRequestAction = async (requestId: string, status: 'approved' | 'rejected') => {
         setProcessingId(requestId);

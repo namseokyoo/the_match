@@ -217,26 +217,26 @@ export const PerformanceMonitor: React.FC<{ show?: boolean }> = ({ show = false 
 // 성능 최적화 유틸리티 함수들
 export const performanceUtils = {
     // 디바운스
-    debounce: function <T extends (...args: any[]) => any>(
+    debounce: function <T extends (..._args: any[]) => any>(
         func: T,
         wait: number
-    ): ((...args: Parameters<T>) => void) {
+    ): ((..._args: Parameters<T>) => void) {
         let timeout: NodeJS.Timeout;
-        return (...args: Parameters<T>) => {
+        return (..._args: Parameters<T>) => {
             clearTimeout(timeout);
-            timeout = setTimeout(() => func(...args), wait);
+            timeout = setTimeout(() => func(..._args), wait);
         };
     },
 
     // 쓰로틀
-    throttle: function <T extends (...args: any[]) => any>(
+    throttle: function <T extends (..._args: any[]) => any>(
         func: T,
         limit: number
-    ): ((...args: Parameters<T>) => void) {
+    ): ((..._args: Parameters<T>) => void) {
         let inThrottle: boolean;
-        return (...args: Parameters<T>) => {
+        return (..._args: Parameters<T>) => {
             if (!inThrottle) {
-                func(...args);
+                func(..._args);
                 inThrottle = true;
                 setTimeout(() => (inThrottle = false), limit);
             }
@@ -244,14 +244,14 @@ export const performanceUtils = {
     },
 
     // 메모이제이션
-    memoize: function <T extends (...args: any[]) => any>(func: T) {
+    memoize: function <T extends (..._args: any[]) => any>(func: T) {
         const cache = new Map();
-        return ((...args: Parameters<T>): ReturnType<T> => {
-            const key = JSON.stringify(args);
+        return ((..._args: Parameters<T>): ReturnType<T> => {
+            const key = JSON.stringify(_args);
             if (cache.has(key)) {
                 return cache.get(key);
             }
-            const result = func(...args);
+            const result = func(..._args);
             cache.set(key, result);
             return result;
         }) as T;

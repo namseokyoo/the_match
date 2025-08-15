@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Activity, Wifi, WifiOff, Users, Clock, Trophy } from 'lucide-react';
+import { Activity, Wifi, WifiOff } from 'lucide-react';
 import { useMatchRealtime } from '@/hooks/useRealtimeUpdates';
-import { formatDistanceToNow } from 'date-fns';
-import { ko } from 'date-fns/locale';
 
 interface Score {
     team1: string;
@@ -31,7 +29,7 @@ export const LiveScoreboard: React.FC<LiveScoreboardProps> = ({
         score1: 0,
         score2: 0,
     });
-    const [events, setEvents] = useState<any[]>([]);
+    const [events] = useState<any[]>([]);
     const [isLive, setIsLive] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 

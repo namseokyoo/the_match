@@ -19,10 +19,9 @@ export const MatchResultManager: React.FC<MatchResultManagerProps> = ({
     matchId,
     teams,
     isCreator,
-    matchType,
-    currentRound = 1,
+    currentRound: _currentRound = 1,
 }) => {
-    const { results, loading, error, submitResult, deleteResult, refreshResults } = useMatchResults(matchId);
+    const { results, loading, error, submitResult, deleteResult } = useMatchResults(matchId);
     const [showForm, setShowForm] = useState(false);
     const [editingResult, setEditingResult] = useState<any>(null);
     const [selectedMatch, setSelectedMatch] = useState<{
@@ -33,7 +32,7 @@ export const MatchResultManager: React.FC<MatchResultManagerProps> = ({
     } | null>(null);
 
     // 토너먼트 브래킷에서 매치 선택 시 호출
-    const handleMatchSelect = (round: number, matchIndex: number, team1: Team, team2: Team) => {
+    const _handleMatchSelect = (round: number, matchIndex: number, team1: Team, team2: Team) => {
         setSelectedMatch({ round, matchIndex, team1, team2 });
         setShowForm(true);
         setEditingResult(null);

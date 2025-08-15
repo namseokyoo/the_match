@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { format, addDays, addWeeks, addMonths } from 'date-fns';
@@ -46,7 +46,7 @@ export default function CreateRecurringMatchPage() {
   });
 
   // 날짜 미리보기 생성
-  const generatePreviewDates = () => {
+  const generatePreviewDates = useCallback(() => {
     const dates: Date[] = [];
     const startDate = new Date(`${formData.start_date}T${formData.start_time}`);
     
@@ -71,14 +71,14 @@ export default function CreateRecurringMatchPage() {
     }
     
     setPreviewDates(dates);
-  };
+  }, [formData.start_date, formData.start_time, formData.recurrence_count, formData.recurrence_type]);
 
   // 폼 데이터 변경 시 미리보기 업데이트
   React.useEffect(() => {
     if (formData.start_date && formData.start_time && formData.recurrence_count > 0) {
       generatePreviewDates();
     }
-  }, [formData.start_date, formData.start_time, formData.recurrence_type, formData.recurrence_count]);
+  }, [formData.start_date, formData.start_time, formData.recurrence_type, formData.recurrence_count, generatePreviewDates]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
     ChevronLeft, 
     ChevronRight, 
@@ -53,12 +53,7 @@ export const MatchCalendar: React.FC = () => {
     const [selectedStatus, setSelectedStatus] = useState<MatchStatus | 'all'>('all');
     const [selectedType, setSelectedType] = useState<MatchType | 'all'>('all');
 
-    // 경기 데이터 가져오기
-    useEffect(() => {
-        fetchMatches();
-    }, [currentDate, viewMode]);
-
-    const fetchMatches = async () => {
+    const fetchMatches = useCallback(async () => {
         try {
             setLoading(true);
             
@@ -102,7 +97,12 @@ export const MatchCalendar: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [currentDate, viewMode]);
+
+    // 경기 데이터 가져오기
+    useEffect(() => {
+        fetchMatches();
+    }, [currentDate, viewMode, fetchMatches]);
 
     // 필터링된 이벤트
     const filteredEvents = events.filter(event => {

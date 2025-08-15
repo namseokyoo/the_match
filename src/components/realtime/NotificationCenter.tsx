@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Bell, X, Check, Trophy, Users, Calendar, AlertCircle } from 'lucide-react';
+import { Bell, X, Check, Trophy, Users, AlertCircle } from 'lucide-react';
 import { useNotifications } from '@/hooks/useRealtimeUpdates';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';

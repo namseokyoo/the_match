@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { showToast } from '@/components/ui/Toast';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -119,7 +119,7 @@ export default function PWAProvider({ children }: { children: React.ReactNode })
   };
 
   // 푸시 알림 구독
-  const subscribeToPushNotifications = async () => {
+  const subscribeToPushNotifications = useCallback(async () => {
     if (!registration) return;
 
     try {
@@ -143,10 +143,10 @@ export default function PWAProvider({ children }: { children: React.ReactNode })
       console.error('Push subscription failed:', error);
       showToast('푸시 알림 활성화에 실패했습니다', 'error');
     }
-  };
+  }, [registration]);
 
   // PWA 설치 프롬프트 표시
-  const installPWA = async () => {
+  const installPWA = useCallback(async () => {
     if (!deferredPrompt) return;
 
     deferredPrompt.prompt();
@@ -160,7 +160,7 @@ export default function PWAProvider({ children }: { children: React.ReactNode })
 
     setDeferredPrompt(null);
     setIsInstallable(false);
-  };
+  }, [deferredPrompt]);
 
   // Context value로 제공할 수도 있음
   useEffect(() => {
@@ -169,7 +169,7 @@ export default function PWAProvider({ children }: { children: React.ReactNode })
     (window as any).subscribeToPushNotifications = subscribeToPushNotifications;
     (window as any).isOnline = isOnline;
     (window as any).isInstallable = isInstallable;
-  }, [deferredPrompt, isOnline, isInstallable]);
+  }, [deferredPrompt, isOnline, isInstallable, installPWA, subscribeToPushNotifications]);
 
   return <>{children}</>;
 }

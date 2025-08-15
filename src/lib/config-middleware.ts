@@ -8,7 +8,7 @@ import { configValidator } from './config-validator';
  * 적절한 에러 응답을 반환합니다.
  */
 export async function withConfigValidation(
-    handler: (req: NextRequest) => Promise<NextResponse>
+    handler: (_req: NextRequest) => Promise<NextResponse>
 ) {
     return async (req: NextRequest) => {
         // 환경 설정 검증

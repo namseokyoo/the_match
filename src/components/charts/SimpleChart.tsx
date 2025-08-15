@@ -220,7 +220,7 @@ export const PieChart: React.FC<PieChartProps> = ({
     
     let currentAngle = -90; // Start at top
     
-    const createPath = (value: number, index: number) => {
+    const createPath = (value: number, _index: number) => {
         const percentage = value / total;
         const angle = percentage * 360;
         const startAngle = currentAngle;
@@ -331,9 +331,11 @@ export const StatCard: React.FC<StatCardProps> = ({
     );
 };
 
-export default {
+const SimpleChart = {
     BarChart,
     LineChart,
     PieChart,
     StatCard,
 };
+
+export default SimpleChart;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import QRCode from 'qrcode';
 import { Download, RefreshCw, Check } from 'lucide-react';
@@ -26,11 +26,7 @@ export default function QRCodeGenerator({
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    generateQRCode();
-  }, [matchId, teamId, playerId, type]);
-
-  const generateQRCode = async () => {
+  const generateQRCode = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -62,7 +58,11 @@ export default function QRCodeGenerator({
     } finally {
       setLoading(false);
     }
-  };
+  }, [matchId, teamId, playerId, type]);
+
+  useEffect(() => {
+    generateQRCode();
+  }, [generateQRCode]);
 
   const handleDownload = () => {
     if (!qrCodeUrl) return;

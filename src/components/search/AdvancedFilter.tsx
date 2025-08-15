@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Filter, X, ChevronDown, Check, Calendar } from 'lucide-react';
-import { MatchType, MatchStatus } from '@/types';
+import { Filter, X, ChevronDown } from 'lucide-react';
 
 interface FilterOption {
     value: string;
@@ -35,6 +34,7 @@ export const AdvancedFilter: React.FC<AdvancedFilterProps> = ({
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [filters, setFilters] = useState<Record<string, any>>({});
+    // Note: filters variable used in handleApply function
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
     const handleFilterChange = (groupId: string, value: any) => {

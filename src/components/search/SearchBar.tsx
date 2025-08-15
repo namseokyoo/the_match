@@ -22,12 +22,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     const router = useRouter();
     const searchParams = useSearchParams();
     const [query, setQuery] = useState(defaultValue || searchParams.get('q') || '');
+    // Note: query variable used throughout component
     const [isSearching, setIsSearching] = useState(false);
 
     // URL 파라미터 변경 감지
     useEffect(() => {
         const urlQuery = searchParams.get('q');
-        if (urlQuery && urlQuery !== query) {
+        if (urlQuery) {
             setQuery(urlQuery);
         }
     }, [searchParams]);

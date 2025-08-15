@@ -19,7 +19,7 @@ interface ToastItem extends ToastProps {
 
 // 전역 토스트 리스트
 let toastList: ToastItem[] = [];
-let updateToasts: ((toasts: ToastItem[]) => void) | null = null;
+let updateToasts: ((_toasts: ToastItem[]) => void) | null = null;
 
 export const showToast = (
     message: string, 

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { X, Download, Copy, Check, MessageCircle, Link } from 'lucide-react';
+import { X, Download, Check, MessageCircle, Link } from 'lucide-react';
 import { showToast } from '@/components/ui/Toast';
 import { Match, Team } from '@/types';
 
@@ -40,13 +40,7 @@ export default function ShareModal({
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && !imageUrl) {
-      generateImage();
-    }
-  }, [isOpen]);
-
-  const generateImage = async () => {
+  const generateImage = useCallback(async () => {
     if (generatedImage) {
       setImageUrl(generatedImage);
       return;
@@ -56,7 +50,13 @@ export default function ShareModal({
     const image = await onGenerateImage();
     setImageUrl(image);
     setIsGenerating(false);
-  };
+  }, [generatedImage, onGenerateImage]);
+
+  useEffect(() => {
+    if (isOpen && !imageUrl) {
+      generateImage();
+    }
+  }, [isOpen, imageUrl, generateImage]);
 
   const handleDownload = () => {
     if (!imageUrl) return;

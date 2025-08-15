@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
@@ -37,7 +37,7 @@ export default function MatchParticipants({
     const [applying, setApplying] = useState(false);
     const { user } = useAuth();
 
-    const fetchParticipants = async () => {
+    const fetchParticipants = useCallback(async () => {
         try {
             const response = await fetch(`/api/matches/${matchId}/participants`);
             const data = await response.json();
@@ -51,13 +51,13 @@ export default function MatchParticipants({
         } finally {
             setLoading(false);
         }
-    };
+    }, [matchId]);
 
     useEffect(() => {
         if (matchId) {
             fetchParticipants();
         }
-    }, [matchId]);
+    }, [matchId, fetchParticipants]);
 
     const handleApplyToMatch = async () => {
         if (!user) {

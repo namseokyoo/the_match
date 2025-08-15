@@ -5,7 +5,7 @@ import { supabase } from './supabase';
  * @param email 체크할 이메일 주소
  * @returns 이미 존재하면 true, 사용 가능하면 false
  */
-export async function checkEmailExists(email: string): Promise<boolean> {
+export async function checkEmailExists(_email: string): Promise<boolean> {
     try {
         // Supabase Auth API는 이메일 중복 체크를 직접 제공하지 않음
         // signUp을 시도하고 응답을 확인하는 방법이 더 정확함

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MatchType, MatchStatus } from '@/types';
+import { MatchType } from '@/types';
 import { verifyAuth, requireEmailVerified } from '@/lib/auth-middleware';
 import { getSupabaseAdmin } from '@/lib/supabase-server';
 import { calculateMatchStatus } from '@/lib/match-utils';

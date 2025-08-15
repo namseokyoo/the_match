@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { ParticipantStatus } from '@/types';
@@ -47,14 +47,7 @@ export default function ParticipantManagement({
     const [applying, setApplying] = useState(false);
     const [userTeams, setUserTeams] = useState<any[]>([]);
 
-    useEffect(() => {
-        fetchParticipants();
-        if (user) {
-            fetchUserTeams();
-        }
-    }, [matchId, user]);
-
-    const fetchParticipants = async () => {
+    const fetchParticipants = useCallback(async () => {
         setLoading(true);
         setError(null);
         
@@ -73,9 +66,9 @@ export default function ParticipantManagement({
         } finally {
             setLoading(false);
         }
-    };
+    }, [matchId]);
 
-    const fetchUserTeams = async () => {
+    const fetchUserTeams = useCallback(async () => {
         if (!user) return;
         
         try {
@@ -88,7 +81,14 @@ export default function ParticipantManagement({
         } catch (err) {
             console.error('사용자 팀 조회 오류:', err);
         }
-    };
+    }, [user]);
+
+    useEffect(() => {
+        fetchParticipants();
+        if (user) {
+            fetchUserTeams();
+        }
+    }, [matchId, user, fetchParticipants, fetchUserTeams]);
 
     const handleApplyToMatch = async () => {
         if (!user) {

@@ -4,7 +4,7 @@ import React from 'react';
 
 interface TextareaProps extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'onChange'> {
     value?: string;
-    onChange?: (value: string) => void;
+    onChange?: (_value: string) => void;
     error?: boolean;
     helperText?: string;
 }

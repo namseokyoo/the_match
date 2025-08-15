@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import QrScanner from 'qr-scanner';
 import { Camera, X, CheckCircle, AlertCircle } from 'lucide-react';
 import { showToast } from '@/components/ui/Toast';
-import { Button } from '@/components/ui';
 
 interface QRCodeScannerProps {
-  onScan: (data: any) => void;
+  onScan: (_data: any) => void;
   onClose?: () => void;
   isOpen: boolean;
 }
@@ -19,52 +18,19 @@ export default function QRCodeScanner({ onScan, onClose, isOpen }: QRCodeScanner
   const [hasCamera, setHasCamera] = useState(true);
   const [scanResult, setScanResult] = useState<any>(null);
 
-  useEffect(() => {
-    if (isOpen && videoRef.current) {
-      initializeScanner();
+  const handleClose = useCallback(() => {
+    if (scanner) {
+      scanner.destroy();
+      setScanner(null);
     }
-
-    return () => {
-      if (scanner) {
-        scanner.destroy();
-      }
-    };
-  }, [isOpen]);
-
-  const initializeScanner = async () => {
-    if (!videoRef.current) return;
-
-    try {
-      // 카메라 권한 확인
-      const hasCamera = await QrScanner.hasCamera();
-      setHasCamera(hasCamera);
-
-      if (!hasCamera) {
-        showToast('카메라를 사용할 수 없습니다', 'error');
-        return;
-      }
-
-      const qrScanner = new QrScanner(
-        videoRef.current,
-        (result) => handleScanSuccess(result),
-        {
-          returnDetailedScanResult: true,
-          highlightScanRegion: true,
-          highlightCodeOutline: true,
-        }
-      );
-
-      setScanner(qrScanner);
-      await qrScanner.start();
-      setScanning(true);
-    } catch (error) {
-      console.error('스캐너 초기화 실패:', error);
-      showToast('카메라 접근 권한이 필요합니다', 'error');
-      setHasCamera(false);
+    setScanning(false);
+    setScanResult(null);
+    if (onClose) {
+      onClose();
     }
-  };
+  }, [scanner, onClose]);
 
-  const handleScanSuccess = (result: QrScanner.ScanResult) => {
+  const handleScanSuccess = useCallback((result: QrScanner.ScanResult) => {
     try {
       // QR 코드 데이터 파싱
       const data = JSON.parse(result.data);
@@ -105,19 +71,52 @@ export default function QRCodeScanner({ onScan, onClose, isOpen }: QRCodeScanner
         }
       }, 2000);
     }
-  };
+  }, [onScan, scanner, handleClose]);
 
-  const handleClose = () => {
-    if (scanner) {
-      scanner.destroy();
-      setScanner(null);
+  const initializeScanner = useCallback(async () => {
+    if (!videoRef.current) return;
+
+    try {
+      // 카메라 권한 확인
+      const hasCamera = await QrScanner.hasCamera();
+      setHasCamera(hasCamera);
+
+      if (!hasCamera) {
+        showToast('카메라를 사용할 수 없습니다', 'error');
+        return;
+      }
+
+      const qrScanner = new QrScanner(
+        videoRef.current,
+        (result) => handleScanSuccess(result),
+        {
+          returnDetailedScanResult: true,
+          highlightScanRegion: true,
+          highlightCodeOutline: true,
+        }
+      );
+
+      setScanner(qrScanner);
+      await qrScanner.start();
+      setScanning(true);
+    } catch (error) {
+      console.error('스캐너 초기화 실패:', error);
+      showToast('카메라 접근 권한이 필요합니다', 'error');
+      setHasCamera(false);
     }
-    setScanning(false);
-    setScanResult(null);
-    if (onClose) {
-      onClose();
+  }, [handleScanSuccess]);
+
+  useEffect(() => {
+    if (isOpen && videoRef.current) {
+      initializeScanner();
     }
-  };
+
+    return () => {
+      if (scanner) {
+        scanner.destroy();
+      }
+    };
+  }, [isOpen, initializeScanner, scanner]);
 
   if (!isOpen) return null;
 

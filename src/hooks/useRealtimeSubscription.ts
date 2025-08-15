@@ -11,10 +11,10 @@ interface UseRealtimeSubscriptionOptions {
     schema?: string;
     table: string;
     filter?: string;
-    onInsert?: (data: RealtimePostgresChangesPayload<any>) => void;
-    onUpdate?: (data: RealtimePostgresChangesPayload<any>) => void;
-    onDelete?: (data: RealtimePostgresChangesPayload<any>) => void;
-    onChange?: (data: RealtimePostgresChangesPayload<any>) => void;
+    onInsert?: (_data: RealtimePostgresChangesPayload<any>) => void;
+    onUpdate?: (_data: RealtimePostgresChangesPayload<any>) => void;
+    onDelete?: (_data: RealtimePostgresChangesPayload<any>) => void;
+    onChange?: (_data: RealtimePostgresChangesPayload<any>) => void;
 }
 
 export function useRealtimeSubscription({
@@ -91,7 +91,7 @@ export function useRealtimeSubscription({
 export function useMatchRealtime(
     matchId: string,
     handlers: {
-        onUpdate?: (data: RealtimePostgresChangesPayload<any>) => void;
+        onUpdate?: (_data: RealtimePostgresChangesPayload<any>) => void;
     }
 ) {
     return useRealtimeSubscription({
@@ -104,8 +104,8 @@ export function useMatchRealtime(
 export function useTeamRealtime(
     teamId: string,
     handlers: {
-        onUpdate?: (data: RealtimePostgresChangesPayload<any>) => void;
-        onDelete?: (data: RealtimePostgresChangesPayload<any>) => void;
+        onUpdate?: (_data: RealtimePostgresChangesPayload<any>) => void;
+        onDelete?: (_data: RealtimePostgresChangesPayload<any>) => void;
     }
 ) {
     return useRealtimeSubscription({
@@ -118,9 +118,9 @@ export function useTeamRealtime(
 export function usePlayersRealtime(
     teamId: string,
     handlers: {
-        onInsert?: (data: RealtimePostgresChangesPayload<any>) => void;
-        onUpdate?: (data: RealtimePostgresChangesPayload<any>) => void;
-        onDelete?: (data: RealtimePostgresChangesPayload<any>) => void;
+        onInsert?: (_data: RealtimePostgresChangesPayload<any>) => void;
+        onUpdate?: (_data: RealtimePostgresChangesPayload<any>) => void;
+        onDelete?: (_data: RealtimePostgresChangesPayload<any>) => void;
     }
 ) {
     return useRealtimeSubscription({

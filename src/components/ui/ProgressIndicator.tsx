@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Check, Circle } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 interface Step {
     id: string;
@@ -17,7 +17,7 @@ interface ProgressIndicatorProps {
     size?: 'sm' | 'md' | 'lg';
     showLabels?: boolean;
     clickable?: boolean;
-    onStepClick?: (index: number) => void;
+    onStepClick?: (_index: number) => void;
 }
 
 export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({

@@ -34,7 +34,7 @@ export const TournamentManager: React.FC<TournamentManagerProps> = ({
         // 팀 수에 따른 라운드 수 계산
         const numTeams = teams.length;
         const numRounds = Math.ceil(Math.log2(numTeams));
-        const totalMatches = Math.pow(2, numRounds) - 1;
+        const _totalMatches = Math.pow(2, numRounds) - 1; // Total matches in tournament
 
         // 브래킷 라운드 생성
         const rounds = [];

@@ -9,7 +9,7 @@ interface MatchResultFormProps {
     gameId: string;
     team1: Team;
     team2: Team;
-    onSubmit: (result: Partial<GameDetail>) => void;
+    onSubmit: (_result: Partial<GameDetail>) => void;
     onCancel: () => void;
     initialData?: GameDetail;
 }

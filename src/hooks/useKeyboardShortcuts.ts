@@ -8,7 +8,7 @@ interface Shortcut {
     alt?: boolean;
     shift?: boolean;
     meta?: boolean;
-    handler: (e: KeyboardEvent) => void;
+    handler: (_e: KeyboardEvent) => void;
     description?: string;
     preventDefault?: boolean;
 }

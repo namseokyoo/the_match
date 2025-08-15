@@ -9,13 +9,13 @@ interface RealtimeConfig {
     event?: string;
     table?: string;
     filter?: string;
-    onMessage?: (payload: any) => void;
-    onInsert?: (payload: any) => void;
-    onUpdate?: (payload: any) => void;
-    onDelete?: (payload: any) => void;
+    onMessage?: (_payload: any) => void;
+    onInsert?: (_payload: any) => void;
+    onUpdate?: (_payload: any) => void;
+    onDelete?: (_payload: any) => void;
     onConnect?: () => void;
     onDisconnect?: () => void;
-    onError?: (error: any) => void;
+    onError?: (_error: any) => void;
 }
 
 export function useRealtimeUpdates(config: RealtimeConfig) {
@@ -26,7 +26,36 @@ export function useRealtimeUpdates(config: RealtimeConfig) {
     const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
     const reconnectAttemptsRef = useRef(0);
 
-    const connect = useCallback(() => {
+    const disconnect = useCallback(() => {
+        if (channelRef.current) {
+            supabase.removeChannel(channelRef.current);
+            channelRef.current = null;
+            setIsConnected(false);
+            config.onDisconnect?.();
+        }
+        
+        if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current);
+        }
+    }, [supabase, config]);
+
+    const handleReconnect = useCallback(() => {
+        if (reconnectAttemptsRef.current >= 5) {
+            showToast('실시간 연결이 끊어졌습니다. 페이지를 새로고침해주세요.', 'error');
+            return;
+        }
+
+        const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
+        reconnectAttemptsRef.current++;
+
+        reconnectTimeoutRef.current = setTimeout(() => {
+            disconnect();
+            // Call connect directly without dependency
+            connectChannel();
+        }, delay);
+    }, [disconnect]);
+
+    const connectChannel = useCallback(() => {
         if (channelRef.current) return;
 
         const channel = supabase
@@ -94,35 +123,9 @@ export function useRealtimeUpdates(config: RealtimeConfig) {
         });
 
         channelRef.current = channel;
-    }, [config, supabase]);
+    }, [config, supabase, handleReconnect]);
 
-    const disconnect = useCallback(() => {
-        if (channelRef.current) {
-            supabase.removeChannel(channelRef.current);
-            channelRef.current = null;
-            setIsConnected(false);
-            config.onDisconnect?.();
-        }
-        
-        if (reconnectTimeoutRef.current) {
-            clearTimeout(reconnectTimeoutRef.current);
-        }
-    }, [supabase, config]);
-
-    const handleReconnect = useCallback(() => {
-        if (reconnectAttemptsRef.current >= 5) {
-            showToast('실시간 연결이 끊어졌습니다. 페이지를 새로고침해주세요.', 'error');
-            return;
-        }
-
-        const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
-        reconnectAttemptsRef.current++;
-
-        reconnectTimeoutRef.current = setTimeout(() => {
-            disconnect();
-            connect();
-        }, delay);
-    }, [connect, disconnect]);
+    const connect = connectChannel;
 
     const sendMessage = useCallback(async (event: string, payload: any) => {
         if (!channelRef.current) {

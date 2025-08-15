@@ -1,7 +1,7 @@
 'use client';
 
 import React, { forwardRef } from 'react';
-import { Trophy, ChevronRight } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 
 interface BracketTeam {
   id: string;

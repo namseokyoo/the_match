@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Team, Match, Player, TeamJoinRequest } from '@/types';
@@ -37,7 +37,7 @@ export default function ProfilePage() {
     const router = useRouter();
 
     // 프로필 정보 조회
-    const fetchProfile = async () => {
+    const fetchProfile = useCallback(async () => {
         if (!user) return;
 
         try {
@@ -143,7 +143,7 @@ export default function ProfilePage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user]);
 
     // 컴포넌트 마운트 시 데이터 로드
     useEffect(() => {
@@ -154,7 +154,7 @@ export default function ProfilePage() {
             // 로딩이 완료되었는데 사용자가 없으면 로그인 페이지로
             router.push('/login');
         }
-    }, [authLoading, user?.id]); // router와 fetchProfile을 의존성에서 제거
+    }, [authLoading, user, fetchProfile, router]);
 
     // 프로필 수정
     const handleSaveProfile = async () => {

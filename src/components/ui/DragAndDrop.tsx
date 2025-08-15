@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, DragEvent, ReactNode } from 'react';
-import { GripVertical, Move } from 'lucide-react';
+import { GripVertical } from 'lucide-react';
 
 interface DraggableItem {
     id: string;
@@ -11,7 +11,7 @@ interface DraggableItem {
 interface DragAndDropProps<T extends DraggableItem> {
     items: T[];
     onReorder: (items: T[]) => void;
-    renderItem: (item: T, index: number, isDragging: boolean) => ReactNode;
+    renderItem: (_item: T, _index: number, _isDragging: boolean) => ReactNode;
     className?: string;
     direction?: 'vertical' | 'horizontal';
     handle?: boolean;
@@ -30,7 +30,7 @@ export function DragAndDrop<T extends DraggableItem>({
     const dragNodeRef = useRef<HTMLDivElement | null>(null);
     const dragOverNodeRef = useRef<HTMLDivElement | null>(null);
 
-    const handleDragStart = (e: DragEvent<HTMLDivElement>, item: T, index: number) => {
+    const handleDragStart = (e: DragEvent<HTMLDivElement>, item: T, _index: number) => {
         setDraggedItem(item);
         dragNodeRef.current = e.currentTarget;
         e.dataTransfer.effectAllowed = 'move';
@@ -43,10 +43,10 @@ export function DragAndDrop<T extends DraggableItem>({
         }, 0);
     };
 
-    const handleDragEnter = (e: DragEvent<HTMLDivElement>, index: number) => {
+    const handleDragEnter = (e: DragEvent<HTMLDivElement>, _index: number) => {
         e.preventDefault();
-        if (draggedItem && items[index].id !== draggedItem.id) {
-            setDraggedOverIndex(index);
+        if (draggedItem && items[_index].id !== draggedItem.id) {
+            setDraggedOverIndex(_index);
             dragOverNodeRef.current = e.currentTarget;
         }
     };
@@ -137,7 +137,7 @@ export function DragAndDrop<T extends DraggableItem>({
 interface SortableListProps<T extends DraggableItem> {
     items: T[];
     onReorder: (items: T[]) => void;
-    renderItem: (item: T) => ReactNode;
+    renderItem: (_item: T) => ReactNode;
     className?: string;
 }
 
@@ -171,8 +171,8 @@ interface KanbanColumn<T extends DraggableItem> {
 
 interface KanbanBoardProps<T extends DraggableItem> {
     columns: KanbanColumn<T>[];
-    onItemMove: (itemId: string, fromColumn: string, toColumn: string, newIndex: number) => void;
-    renderItem: (item: T) => ReactNode;
+    onItemMove: (_itemId: string, _fromColumn: string, _toColumn: string, _newIndex: number) => void;
+    renderItem: (_item: T) => ReactNode;
     className?: string;
 }
 

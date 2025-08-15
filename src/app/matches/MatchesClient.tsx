@@ -6,7 +6,7 @@ import { MatchList } from '@/components/match';
 import { Button } from '@/components/ui';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { showToast } from '@/components/ui/Toast';
-import { Trophy, Search, Calendar, Plus } from 'lucide-react';
+import { Trophy, Search } from 'lucide-react';
 import { SearchBar, FilterPanel } from '@/components/search';
 import { Match, MatchType, MatchStatus } from '@/types';
 import { useAuth } from '@/hooks/useAuth';

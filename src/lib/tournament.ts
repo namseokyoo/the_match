@@ -152,11 +152,11 @@ export async function createSingleEliminationBracket(
  * 더블 엘리미네이션 토너먼트 대진표 생성
  */
 export async function createDoubleEliminationBracket(
-    matchId: string,
-    teamIds: string[]
+    _matchId: string,
+    _teamIds: string[]
 ): Promise<TournamentBracket> {
     // 위너스 브라켓과 루저스 브라켓 생성
-    const doubleElimGames: Game[] = [];
+    const _doubleElimGames: Game[] = []; // Future use for double elimination logic
     const doubleElimRounds: Game[][] = [];
     
     // TODO: 더블 엘리미네이션 로직 구현
@@ -235,9 +235,9 @@ export async function createRoundRobinSchedule(
  * 스위스 시스템 대진표 생성
  */
 export async function createSwissSystemSchedule(
-    matchId: string,
-    teamIds: string[],
-    rounds: number = 5
+    _matchId: string,
+    _teamIds: string[],
+    _rounds: number = 5
 ): Promise<Game[]> {
     const games: Game[] = [];
     

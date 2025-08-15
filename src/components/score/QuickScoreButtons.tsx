@@ -3,7 +3,7 @@
 import React from 'react';
 
 interface QuickScoreButtonsProps {
-    onScoreChange: (team: 'team1' | 'team2', delta: number) => void;
+    onScoreChange: (_team: 'team1' | 'team2', _delta: number) => void;
     team: 'team1' | 'team2';
     disabled?: boolean;
     color?: 'blue' | 'red';

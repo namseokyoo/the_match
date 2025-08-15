@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Trophy, Target, TrendingUp, Award, Users, Activity } from 'lucide-react';
+import { Trophy, Award, Users, Activity } from 'lucide-react';
 import { showToast } from '@/components/ui/Toast';
 
 interface PlayerStat {
@@ -63,11 +63,7 @@ export default function PlayerStats({
   const [sortBy, setSortBy] = useState<'goals' | 'assists' | 'win_rate' | 'games'>('goals');
   const supabase = createClientComponentClient();
 
-  useEffect(() => {
-    fetchStats();
-  }, [playerId, teamId, matchId, season, sortBy]);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       let query = supabase
         .from('player_stats')
@@ -112,7 +108,11 @@ export default function PlayerStats({
     } finally {
       setLoading(false);
     }
-  };
+  }, [playerId, teamId, matchId, season, sortBy, limit, sportType, supabase]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [playerId, teamId, matchId, season, sortBy, fetchStats]);
 
   const getStatColor = (value: number, max: number) => {
     const percentage = (value / max) * 100;

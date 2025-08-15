@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, X, Filter, Clock, TrendingUp, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Search, X, Clock, TrendingUp, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { debounce } from '@/lib/utils';
 
@@ -37,6 +37,7 @@ export const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
     className = '',
 }) => {
     const [query, setQuery] = useState('');
+    // Note: query variable used for search functionality
     const [results, setResults] = useState<SearchResult[]>([]);
     const [history, setHistory] = useState<SearchHistory[]>([]);
     const [trending, setTrending] = useState<string[]>([]);
@@ -138,11 +139,11 @@ export const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
     }, []);
 
     // Debounced search
-    const debouncedSearch = useCallback(
-        debounce((searchQuery: string) => {
+    const debouncedSearch = useMemo(
+        () => debounce((searchQuery: string) => {
             performSearch(searchQuery);
         }, 300),
-        []
+        [performSearch]
     );
 
     // 검색어 변경 처리

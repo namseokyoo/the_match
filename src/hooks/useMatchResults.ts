@@ -18,9 +18,9 @@ interface UseMatchResultsReturn {
     results: MatchResult[];
     loading: boolean;
     error: string | null;
-    submitResult: (matchId: string, result: Partial<MatchResult>) => Promise<void>;
-    deleteResult: (matchId: string, gameId: string) => Promise<void>;
-    refreshResults: (matchId: string) => Promise<void>;
+    submitResult: (_matchId: string, _result: Partial<MatchResult>) => Promise<void>;
+    deleteResult: (_matchId: string, _gameId: string) => Promise<void>;
+    refreshResults: (_matchId: string) => Promise<void>;
 }
 
 export function useMatchResults(matchId?: string): UseMatchResultsReturn {

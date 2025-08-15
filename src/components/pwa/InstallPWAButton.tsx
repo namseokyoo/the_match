@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Download, X, Smartphone, Check } from 'lucide-react';
+import { Download, X, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui';
 
 export default function InstallPWAButton() {

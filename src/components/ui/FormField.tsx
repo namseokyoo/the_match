@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react';
 
 interface ValidationRule {
-    test: (value: any) => boolean;
+    test: (_value: any) => boolean;
     message: string;
 }
 
@@ -13,7 +13,7 @@ interface FormFieldProps {
     name: string;
     type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date' | 'datetime-local' | 'textarea' | 'select';
     value: any;
-    onChange: (value: any) => void;
+    onChange: (_value: any) => void;
     onBlur?: () => void;
     placeholder?: string;
     required?: boolean;

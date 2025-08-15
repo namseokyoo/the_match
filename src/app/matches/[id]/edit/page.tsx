@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Match, MatchType, MatchStatus } from '@/types';
+import { Match, MatchType } from '@/types';
 import { Button, Input, Textarea } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';

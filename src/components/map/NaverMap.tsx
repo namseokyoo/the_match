@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Script from 'next/script';
 import { MapPin, Navigation, Phone, Clock, Info } from 'lucide-react';
 
 interface NaverMapProps {
   address: string;
   title?: string;
-  onLocationSelect?: (lat: number, lng: number, address: string) => void;
+  onLocationSelect?: (_lat: number, _lng: number, _address: string) => void;
   editable?: boolean;
   height?: string;
   showInfo?: boolean;
@@ -41,7 +41,7 @@ export default function NaverMap({
   const [coordinates, setCoordinates] = useState({ lat: 37.5665, lng: 126.9780 });
 
   // 주소로 좌표 검색
-  const searchAddressToCoordinate = (searchAddress: string) => {
+  const searchAddressToCoordinate = useCallback((searchAddress: string) => {
     if (!window.naver) return;
 
     window.naver.maps.Service.geocode(
@@ -77,10 +77,10 @@ export default function NaverMap({
         }
       }
     );
-  };
+  }, [map, marker, onLocationSelect]);
 
   // 지도 초기화
-  const initializeMap = () => {
+  const initializeMap = useCallback(() => {
     if (!window.naver || !mapRef.current) return;
 
     const mapOptions = {
@@ -158,21 +158,21 @@ export default function NaverMap({
     }
 
     setLoading(false);
-  };
+  }, [coordinates.lat, coordinates.lng, title, address, showInfo, phoneNumber, openingHours, editable, onLocationSelect]);
 
   // 네이버 지도 스크립트 로드 후 초기화
   useEffect(() => {
     if (window.naver && window.naver.maps) {
       initializeMap();
     }
-  }, []);
+  }, [initializeMap]);
 
   // 주소 변경 시 재검색
   useEffect(() => {
     if (address && window.naver && window.naver.maps) {
       searchAddressToCoordinate(address);
     }
-  }, [address]);
+  }, [address, searchAddressToCoordinate]);
 
   return (
     <>

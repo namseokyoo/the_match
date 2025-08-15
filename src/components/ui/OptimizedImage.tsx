@@ -153,7 +153,7 @@ interface ResponsiveImageProps extends Omit<OptimizedImageProps, 'width' | 'heig
 
 export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
     aspectRatio = 16 / 9,
-    sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
+    sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw', // Responsive sizes
     ...props
 }) => {
     return (
