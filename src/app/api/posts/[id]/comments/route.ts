@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-server';
+import { getAuthUser } from '@/lib/supabase-auth';
 
 // GET /api/posts/[id]/comments - 댓글 목록 조회
 export async function GET(
@@ -82,18 +83,19 @@ export async function POST(
     { params }: { params: { id: string } }
 ) {
     try {
-        const supabase = getSupabaseAdmin();
-        const postId = params.id;
-        
         // 인증 확인
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const user = await getAuthUser(request);
         
-        if (authError || !user) {
+        if (!user || typeof user !== 'object' || !('id' in user)) {
             return NextResponse.json(
                 { error: '로그인이 필요합니다.' },
                 { status: 401 }
             );
         }
+        
+        const supabase = getSupabaseAdmin();
+        const postId = params.id;
+        const userId = (user as any).id;
 
         const body = await request.json();
         const { content, parent_id } = body;
@@ -111,7 +113,7 @@ export async function POST(
             .from('comments')
             .insert({
                 post_id: postId,
-                user_id: user.id,
+                user_id: userId,
                 content,
                 parent_id: parent_id || null
             })

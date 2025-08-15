@@ -8,6 +8,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Button from '@/components/ui/Button';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import supabase from '@/lib/supabase';
 import { 
     ArrowLeft, 
     Heart, 
@@ -81,8 +82,19 @@ export default function PostDetailPage() {
         }
 
         try {
-            const response = await fetch(`/api/posts/${postId}/like`, {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (session?.access_token) {
+                headers['Authorization'] = `Bearer ${session.access_token}`;
+            }
+            
+            const response = await fetch(`/api/posts/${postId}/likes`, {
                 method: 'POST',
+                headers,
             });
 
             const data = await response.json();
@@ -117,11 +129,19 @@ export default function PostDetailPage() {
 
         setSubmitting(true);
         try {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (session?.access_token) {
+                headers['Authorization'] = `Bearer ${session.access_token}`;
+            }
+            
             const response = await fetch(`/api/posts/${postId}/comments`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers,
                 body: JSON.stringify({
                     content: commentContent,
                     parent_id: replyTo
