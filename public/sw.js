@@ -66,6 +66,11 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // chrome-extension 등 지원하지 않는 스킴 필터링
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
+
   // 캐시 제외 경로 체크
   if (CACHE_EXCLUDE.some(path => url.pathname.includes(path))) {
     return;
