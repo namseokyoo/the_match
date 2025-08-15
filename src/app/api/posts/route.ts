@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
         }
         
         // 현재 사용자의 좋아요 여부 확인
-        const { user } = await getAuthUser(request);
+        const user = await getAuthUser(request);
         
         if (user && posts) {
             const postIds = posts.map((p: any) => p.id);
@@ -127,9 +127,9 @@ export async function POST(request: NextRequest) {
         const supabase = getSupabaseAdmin();
         
         // 인증 확인
-        const { user, error: authError } = await getAuthUser(request);
+        const user = await getAuthUser(request);
         
-        if (authError || !user) {
+        if (!user) {
             return NextResponse.json(
                 { error: '로그인이 필요합니다.' },
                 { status: 401 }

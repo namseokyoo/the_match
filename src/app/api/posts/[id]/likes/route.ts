@@ -27,7 +27,7 @@ export async function GET(
     
     // 사용자가 로그인한 경우 좋아요 여부 확인
     let isLiked = false;
-    if (user && typeof user === 'object' && 'id' in user) {
+    if (user) {
       const { data: userLike } = await supabase
         .from('likes')
         .select('id')
@@ -59,7 +59,7 @@ export async function POST(
   try {
     const user = await getAuthUser(request);
     
-    if (!user || typeof user !== 'object' || !('id' in user)) {
+    if (!user) {
       return NextResponse.json(
         { error: '로그인이 필요합니다.' },
         { status: 401 }

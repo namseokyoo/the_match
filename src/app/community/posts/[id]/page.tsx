@@ -8,7 +8,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Button from '@/components/ui/Button';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import supabase from '@/lib/supabase';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { 
     ArrowLeft, 
     Heart, 
@@ -82,6 +82,7 @@ export default function PostDetailPage() {
         }
 
         try {
+            const supabase = createSupabaseBrowser();
             const { data: { session } } = await supabase.auth.getSession();
             
             const headers: HeadersInit = {
@@ -95,6 +96,7 @@ export default function PostDetailPage() {
             const response = await fetch(`/api/posts/${postId}/likes`, {
                 method: 'POST',
                 headers,
+                credentials: 'include', // 쿠키를 포함하도록 설정
             });
 
             const data = await response.json();
@@ -108,9 +110,15 @@ export default function PostDetailPage() {
                         likes_count: (prev.likes_count || 0) + (data.liked ? 1 : -1)
                     };
                 });
+            } else {
+                console.error('Like error:', data);
+                if (data.error) {
+                    toast.error(data.error);
+                }
             }
         } catch (error) {
             console.error('Error toggling like:', error);
+            toast.error('좋아요 처리 중 오류가 발생했습니다.');
         }
     };
 
@@ -129,6 +137,7 @@ export default function PostDetailPage() {
 
         setSubmitting(true);
         try {
+            const supabase = createSupabaseBrowser();
             const { data: { session } } = await supabase.auth.getSession();
             
             const headers: HeadersInit = {
@@ -142,6 +151,7 @@ export default function PostDetailPage() {
             const response = await fetch(`/api/posts/${postId}/comments`, {
                 method: 'POST',
                 headers,
+                credentials: 'include', // 쿠키를 포함하도록 설정
                 body: JSON.stringify({
                     content: commentContent,
                     parent_id: replyTo
@@ -156,6 +166,7 @@ export default function PostDetailPage() {
                 await fetchComments();
                 toast.success('댓글이 작성되었습니다.');
             } else {
+                console.error('Comment error:', data);
                 toast.error(data.error || '댓글 작성에 실패했습니다.');
             }
         } catch (error) {

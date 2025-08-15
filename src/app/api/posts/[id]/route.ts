@@ -46,7 +46,7 @@ export async function GET(
             .single();
 
         // 현재 사용자의 좋아요 여부 확인
-        const { user } = await getAuthUser(request);
+        const user = await getAuthUser(request);
         
         if (user) {
             const { data: userLike } = await supabase
@@ -88,9 +88,9 @@ export async function PUT(
         const postId = params.id;
         
         // 인증 확인
-        const { user, error: authError } = await getAuthUser(request);
+        const user = await getAuthUser(request);
         
-        if (authError || !user) {
+        if (!user) {
             return NextResponse.json(
                 { error: '로그인이 필요합니다.' },
                 { status: 401 }
@@ -149,9 +149,9 @@ export async function DELETE(
         const postId = params.id;
         
         // 인증 확인
-        const { user, error: authError } = await getAuthUser(request);
+        const user = await getAuthUser(request);
         
-        if (authError || !user) {
+        if (!user) {
             return NextResponse.json(
                 { error: '로그인이 필요합니다.' },
                 { status: 401 }
