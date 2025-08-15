@@ -23,7 +23,7 @@ export async function GET(
                 )
             `)
             .eq('post_id', postId)
-            .eq('is_deleted', false)
+            .eq('is_hidden', false)
             .is('parent_id', null)
             .order('created_at', { ascending: true });
 
@@ -50,7 +50,7 @@ export async function GET(
                     )
                 `)
                 .in('parent_id', commentIds)
-                .eq('is_deleted', false)
+                .eq('is_hidden', false)
                 .order('created_at', { ascending: true });
 
             // 대댓글을 부모 댓글에 추가

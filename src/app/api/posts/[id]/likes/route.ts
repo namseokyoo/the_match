@@ -16,7 +16,7 @@ export async function GET(
     
     // 전체 좋아요 수 조회
     const { count, error: countError } = await supabase
-      .from('post_likes')
+      .from('likes')
       .select('*', { count: 'exact', head: true })
       .eq('post_id', postId);
     
@@ -29,7 +29,7 @@ export async function GET(
     let isLiked = false;
     if (user && typeof user === 'object' && 'id' in user) {
       const { data: userLike } = await supabase
-        .from('post_likes')
+        .from('likes')
         .select('id')
         .eq('post_id', postId)
         .eq('user_id', (user as any).id)
@@ -72,7 +72,7 @@ export async function POST(
     
     // 기존 좋아요 확인
     const { data: existingLike } = await supabase
-      .from('post_likes')
+      .from('likes')
       .select('id')
       .eq('post_id', postId)
       .eq('user_id', userId)
@@ -81,7 +81,7 @@ export async function POST(
     if (existingLike) {
       // 좋아요 취소
       const { error: deleteError } = await supabase
-        .from('post_likes')
+        .from('likes')
         .delete()
         .eq('id', (existingLike as any).id);
       
@@ -92,7 +92,7 @@ export async function POST(
       
       // 업데이트된 좋아요 수 조회
       const { count } = await supabase
-        .from('post_likes')
+        .from('likes')
         .select('*', { count: 'exact', head: true })
         .eq('post_id', postId);
       
@@ -103,7 +103,7 @@ export async function POST(
     } else {
       // 좋아요 추가
       const { error: insertError } = await supabase
-        .from('post_likes')
+        .from('likes')
         .insert({
           post_id: postId,
           user_id: userId
@@ -116,7 +116,7 @@ export async function POST(
       
       // 업데이트된 좋아요 수 조회
       const { count } = await supabase
-        .from('post_likes')
+        .from('likes')
         .select('*', { count: 'exact', head: true })
         .eq('post_id', postId);
       
