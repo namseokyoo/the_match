@@ -11,17 +11,10 @@ export async function GET(
         const supabase = getSupabaseAdmin();
         const postId = params.id;
 
+        // 댓글 조회
         const { data: comments, error } = await supabase
             .from('comments')
-            .select(`
-                *,
-                profiles:user_id (
-                    id,
-                    username,
-                    email,
-                    avatar_url
-                )
-            `)
+            .select('*')
             .eq('post_id', postId)
             .eq('is_hidden', false)
             .is('parent_id', null)
@@ -30,44 +23,81 @@ export async function GET(
         if (error) {
             console.error('Error fetching comments:', error);
             return NextResponse.json(
-                { error: '댓글을 불러오는데 실패했습니다.' },
+                { error: '댓글을 불러오는데 실패했습니다.', details: error.message },
                 { status: 500 }
             );
         }
 
+        // 댓글이 없으면 빈 배열 반환
+        if (!comments || comments.length === 0) {
+            return NextResponse.json({ comments: [] });
+        }
+
+        // 사용자 정보 조회
+        const userIds = Array.from(new Set(comments.map(c => (c as any).user_id)));
+        const { data: profiles } = await supabase
+            .from('profiles')
+            .select('user_id, id, username, email, avatar_url')
+            .in('user_id', userIds);
+
+        const profileMap = new Map();
+        profiles?.forEach(profile => {
+            profileMap.set(profile.user_id, profile);
+        });
+
+        // 댓글에 사용자 정보 추가
+        const commentsWithProfiles = comments.map(comment => ({
+            ...comment,
+            profiles: profileMap.get((comment as any).user_id) || null
+        }));
+
         // 대댓글 조회
-        if (comments && comments.length > 0) {
-            const commentIds = comments.map(c => c.id);
-            const { data: replies } = await supabase
-                .from('comments')
-                .select(`
-                    *,
-                    user:profiles!user_id (
-                        id,
-                        email,
-                        full_name,
-                        avatar_url
-                    )
-                `)
-                .in('parent_id', commentIds)
-                .eq('is_hidden', false)
-                .order('created_at', { ascending: true });
+        const commentIds = comments.map(c => (c as any).id);
+        const { data: replies } = await supabase
+            .from('comments')
+            .select('*')
+            .in('parent_id', commentIds)
+            .eq('is_hidden', false)
+            .order('created_at', { ascending: true });
+
+        if (replies && replies.length > 0) {
+            // 대댓글 사용자 정보 조회
+            const replyUserIds = Array.from(new Set(replies.map(r => (r as any).user_id)));
+            const { data: replyProfiles } = await supabase
+                .from('profiles')
+                .select('user_id, id, username, email, avatar_url')
+                .in('user_id', replyUserIds);
+
+            const replyProfileMap = new Map();
+            replyProfiles?.forEach(profile => {
+                replyProfileMap.set(profile.user_id, profile);
+            });
+
+            // 대댓글에 사용자 정보 추가
+            const repliesWithProfiles = replies.map(reply => ({
+                ...reply,
+                profiles: replyProfileMap.get((reply as any).user_id) || null
+            }));
 
             // 대댓글을 부모 댓글에 추가
             const repliesMap = new Map();
-            replies?.forEach(reply => {
-                if (!repliesMap.has(reply.parent_id)) {
-                    repliesMap.set(reply.parent_id, []);
+            repliesWithProfiles.forEach(reply => {
+                if (!repliesMap.has((reply as any).parent_id)) {
+                    repliesMap.set((reply as any).parent_id, []);
                 }
-                repliesMap.get(reply.parent_id).push(reply);
+                repliesMap.get((reply as any).parent_id).push(reply);
             });
 
-            comments.forEach(comment => {
+            commentsWithProfiles.forEach((comment: any) => {
                 comment.replies = repliesMap.get(comment.id) || [];
+            });
+        } else {
+            commentsWithProfiles.forEach((comment: any) => {
+                comment.replies = [];
             });
         }
 
-        return NextResponse.json({ comments: comments || [] });
+        return NextResponse.json({ comments: commentsWithProfiles });
     } catch (error) {
         console.error('Server error:', error);
         return NextResponse.json(
@@ -117,15 +147,7 @@ export async function POST(
                 content,
                 parent_id: parent_id || null
             })
-            .select(`
-                *,
-                profiles:user_id (
-                    id,
-                    username,
-                    email,
-                    avatar_url
-                )
-            `)
+            .select()
             .single();
 
         if (error) {
@@ -136,7 +158,19 @@ export async function POST(
             );
         }
 
-        return NextResponse.json({ comment }, { status: 201 });
+        // 사용자 정보 조회
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('user_id, id, username, email, avatar_url')
+            .eq('user_id', userId)
+            .single();
+
+        const commentWithProfile = {
+            ...comment,
+            profiles: profile || null
+        };
+
+        return NextResponse.json({ comment: commentWithProfile }, { status: 201 });
     } catch (error) {
         console.error('Server error:', error);
         return NextResponse.json(
