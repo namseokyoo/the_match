@@ -294,6 +294,14 @@ export function ProtectedRoute({
 
 ## Important Notes
 
+### TypeScript Type Safety (Critical for Vercel Deployment)
+- **ALWAYS resolve ALL TypeScript type errors before deployment**
+- TypeScript errors will cause Vercel deployment to fail
+- Run `npm run type-check` before any git push to production
+- Never ignore or suppress TypeScript errors with @ts-ignore
+- Properly type all API responses and database queries
+- When using Supabase joins, use profiles table instead of auth.users
+
 ### Terminology Consistency
 - Always use "Match" instead of "Tournament" in new code
 - Database tables may still use legacy names but application layer uses "match"
@@ -316,11 +324,12 @@ export function ProtectedRoute({
 
 ## Testing and Quality Assurance
 
-### Before Committing
-1. Run `pnpm lint` to check code style
-2. Run `pnpm type-check` to verify TypeScript types
-3. Run `pnpm build` to ensure production build works
+### Before Committing (MANDATORY CHECKS)
+1. Run `npm run lint` to check code style
+2. **Run `npm run type-check` to verify TypeScript types - MUST PASS with ZERO errors**
+3. Run `npm run build` to ensure production build works
 4. Test functionality in development environment
+5. **NEVER push code with TypeScript errors - Vercel deployment WILL fail**
 
 ### Development Process
 - Use feature branches for development

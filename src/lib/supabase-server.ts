@@ -96,3 +96,6 @@ export async function checkSupabaseHealth(): Promise<boolean> {
         return false;
     }
 }
+
+// API Routes에서 사용할 createClient export
+export { createClient } from '@supabase/supabase-js';

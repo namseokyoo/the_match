@@ -18,7 +18,8 @@ import {
     UserPlus,
     LayoutDashboard,
     User,
-    BarChart3
+    BarChart3,
+    MessageSquare
 } from 'lucide-react';
 
 const MobileNavbar = () => {
@@ -168,6 +169,13 @@ const MobileNavbar = () => {
                                 <BarChart3 className="w-5 h-5" />
                                 <span>통계</span>
                             </Link>
+                            <Link 
+                                href="/community"
+                                className={isActive('/community') ? activeMenuItemClass : menuItemClass}
+                            >
+                                <MessageSquare className="w-5 h-5" />
+                                <span>커뮤니티</span>
+                            </Link>
                         </div>
 
                         {showSkeleton ? (
@@ -312,6 +320,12 @@ const MobileNavbar = () => {
                                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                             >
                                 통계
+                            </Link>
+                            <Link
+                                href="/community"
+                                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                            >
+                                커뮤니티
                             </Link>
 
                             {showSkeleton ? (
