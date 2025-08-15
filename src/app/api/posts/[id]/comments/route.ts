@@ -14,10 +14,10 @@ export async function GET(
             .from('comments')
             .select(`
                 *,
-                user:profiles!user_id (
+                profiles:user_id (
                     id,
+                    username,
                     email,
-                    full_name,
                     avatar_url
                 )
             `)
@@ -117,10 +117,11 @@ export async function POST(
             })
             .select(`
                 *,
-                user:auth.users!user_id (
+                profiles:user_id (
                     id,
+                    username,
                     email,
-                    raw_user_meta_data
+                    avatar_url
                 )
             `)
             .single();

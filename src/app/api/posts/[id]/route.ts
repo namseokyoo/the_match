@@ -98,7 +98,7 @@ export async function PUT(
         }
 
         const body = await request.json();
-        const { title, content, tags } = body;
+        const { title, content, board_id, tags } = body;
 
         // 유효성 검사
         if (!title || !content) {
@@ -114,6 +114,7 @@ export async function PUT(
             .update({
                 title,
                 content,
+                board_id: board_id,
                 tags: tags || []
             })
             .eq('id', postId)
