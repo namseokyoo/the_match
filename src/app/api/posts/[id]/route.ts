@@ -42,7 +42,7 @@ export async function GET(
         const { data: profile } = await supabase
             .from('profiles')
             .select('id, email, full_name, avatar_url')
-            .eq('id', post.user_id)
+            .eq('id', (post as any).user_id)
             .single();
 
         // 현재 사용자의 좋아요 여부 확인

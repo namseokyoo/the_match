@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 
         // 작성자 정보 가져오기
         if (posts && posts.length > 0) {
-            const userIds = [...new Set(posts.map((p: any) => p.user_id))];
+            const userIds = Array.from(new Set(posts.map((p: any) => p.user_id)));
             const { data: profiles } = await supabase
                 .from('profiles')
                 .select('id, email, full_name, avatar_url')
