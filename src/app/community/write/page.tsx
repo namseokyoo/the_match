@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
 import Button from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { ArrowLeft } from 'lucide-react';
@@ -63,6 +64,15 @@ export default function WritePostPage() {
 
         setLoading(true);
         try {
+            // Supabase 세션 가져오기
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                toast.error('로그인이 필요합니다.');
+                router.push('/login?redirect=/community/write');
+                return;
+            }
+
             const tags = formData.tags
                 .split(',')
                 .map(tag => tag.trim())
@@ -72,6 +82,7 @@ export default function WritePostPage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
                 },
                 body: JSON.stringify({
                     board_id: formData.board_id,

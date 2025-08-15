@@ -10,13 +10,31 @@ export async function getAuthUser(request: NextRequest) {
         return { user: null, error: 'Supabase configuration missing' };
     }
 
-    // 쿠키에서 액세스 토큰 가져오기
+    // 1. Authorization 헤더 확인 (우선)
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+            global: {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        });
+
+        const { data: { user }, error } = await supabase.auth.getUser(token);
+        if (user) {
+            return { user, error: null };
+        }
+    }
+
+    // 2. 쿠키에서 액세스 토큰 가져오기
     const cookieHeader = request.headers.get('cookie');
     if (!cookieHeader) {
         return { user: null, error: 'No authentication cookie' };
     }
 
-    // Supabase 세션 쿠키 파싱
+    // Supabase 세션 쿠키 파싱 - 다양한 쿠키 이름 확인
     const cookies = Object.fromEntries(
         cookieHeader.split('; ').map(cookie => {
             const [key, ...values] = cookie.split('=');
@@ -24,22 +42,40 @@ export async function getAuthUser(request: NextRequest) {
         })
     );
 
-    // Supabase 액세스 토큰 찾기
+    // Supabase 액세스 토큰 찾기 - 다양한 패턴 확인
     let accessToken = null;
+    
+    // sb-[project-ref]-auth-token 패턴 확인 (Vercel 배포 환경)
     for (const [key, value] of Object.entries(cookies)) {
-        if (key.includes('supabase-auth-token') || key.includes('sb-access-token')) {
+        if (key.startsWith('sb-') && key.includes('-auth-token')) {
             try {
                 const parsed = JSON.parse(decodeURIComponent(value));
-                accessToken = parsed[0] || parsed.access_token;
-                break;
+                accessToken = parsed.access_token || parsed[0]?.access_token;
+                if (accessToken) break;
             } catch {
                 // 파싱 실패 시 계속
             }
         }
     }
 
+    // 다른 패턴들도 확인
     if (!accessToken) {
-        return { user: null, error: 'No valid authentication token' };
+        for (const [key, value] of Object.entries(cookies)) {
+            if (key.includes('supabase-auth-token') || key.includes('sb-access-token')) {
+                try {
+                    const parsed = JSON.parse(decodeURIComponent(value));
+                    accessToken = parsed[0] || parsed.access_token;
+                    if (accessToken) break;
+                } catch {
+                    // 파싱 실패 시 계속
+                }
+            }
+        }
+    }
+
+    if (!accessToken) {
+        console.error('Available cookies:', Object.keys(cookies));
+        return { user: null, error: 'No valid authentication token found in cookies' };
     }
 
     // 토큰으로 사용자 정보 가져오기
@@ -51,9 +87,10 @@ export async function getAuthUser(request: NextRequest) {
         }
     });
 
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
     
     if (error || !user) {
+        console.error('Auth error:', error);
         return { user: null, error: error?.message || 'Authentication failed' };
     }
 

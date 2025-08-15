@@ -2,6 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚠️ CRITICAL RULES - MUST FOLLOW
+
+### 🔴 TypeScript Zero-Error Policy
+**MANDATORY: ALL TypeScript errors MUST be fixed BEFORE ANY commit/push**
+- **Run `npm run type-check` before EVERY commit - MUST show 0 errors**
+- **TypeScript errors = Vercel deployment FAILURE**
+- **NEVER use @ts-ignore or any type suppression**
+- **Fix ALL type errors IMMEDIATELY when detected**
+
 ## Project Overview
 
 **The Match** is a tournament and league management platform built with Next.js 14 and TypeScript. The service enables users to create matches, manage teams, and organize sports competitions with a focus on mobile-first design and cost-effective architecture.
@@ -294,13 +303,33 @@ export function ProtectedRoute({
 
 ## Important Notes
 
-### TypeScript Type Safety (Critical for Vercel Deployment)
-- **ALWAYS resolve ALL TypeScript type errors before deployment**
-- TypeScript errors will cause Vercel deployment to fail
-- Run `npm run type-check` before any git push to production
-- Never ignore or suppress TypeScript errors with @ts-ignore
-- Properly type all API responses and database queries
+### 🚨 TypeScript Type Safety (CRITICAL - Vercel Deployment Will FAIL)
+#### **MANDATORY: ZERO TypeScript Errors Policy**
+- **TypeScript errors = Vercel deployment FAILURE = Production DOWN**
+- **ALWAYS run `npm run type-check` BEFORE EVERY commit**
+- **NEVER push code with ANY TypeScript errors**
+- **NEVER use @ts-ignore, @ts-nocheck, or any type suppression**
+- **ALWAYS fix type errors immediately when detected**
+
+#### Type Safety Requirements
+- Properly type ALL function parameters and return values
+- Type ALL API responses with explicit interfaces
+- Type ALL database queries and Supabase responses
+- Use `as any` ONLY as temporary solution with TODO comment
 - When using Supabase joins, use profiles table instead of auth.users
+- Handle nullable/undefined values explicitly
+
+#### Common Type Error Solutions
+- Set iteration: Use `Array.from(new Set())` instead of `[...new Set()]`
+- Supabase responses: Cast with `(data as any)` when type inference fails
+- Unknown types: Define proper interfaces instead of using `any`
+
+#### Pre-Commit Checklist
+```bash
+npm run type-check  # MUST show 0 errors
+npm run lint        # Fix all linting issues
+npm run build       # Ensure build succeeds
+```
 
 ### Terminology Consistency
 - Always use "Match" instead of "Tournament" in new code
@@ -324,12 +353,19 @@ export function ProtectedRoute({
 
 ## Testing and Quality Assurance
 
-### Before Committing (MANDATORY CHECKS)
-1. Run `npm run lint` to check code style
-2. **Run `npm run type-check` to verify TypeScript types - MUST PASS with ZERO errors**
-3. Run `npm run build` to ensure production build works
-4. Test functionality in development environment
-5. **NEVER push code with TypeScript errors - Vercel deployment WILL fail**
+### 🔴 Before Committing (MANDATORY CHECKS - NO EXCEPTIONS)
+#### **MUST PASS ALL CHECKS BEFORE EVERY COMMIT**
+1. **`npm run type-check`** → **MUST show 0 errors** ⚠️ CRITICAL
+2. **`npm run lint`** → Fix ALL linting issues
+3. **`npm run build`** → MUST succeed without errors
+4. Test ALL affected functionality in development
+5. **REMINDER: TypeScript errors = Deployment FAILURE = Production DOWN**
+
+#### **If ANY check fails:**
+- **DO NOT COMMIT**
+- **DO NOT PUSH**
+- **FIX IMMEDIATELY**
+- **RE-RUN ALL CHECKS**
 
 ### Development Process
 - Use feature branches for development
@@ -419,11 +455,17 @@ git push origin feature/descriptive-name
 ```
 
 #### 2. Before Committing
-**ALWAYS run these checks:**
+**🚨 MANDATORY CHECKS - RUN EVERY TIME, NO EXCEPTIONS:**
 ```bash
-npm run lint          # Check code style
-npm run type-check    # Verify TypeScript types
-npm run build         # Ensure build works
+npm run type-check    # MUST PASS with 0 errors - CRITICAL!
+npm run lint          # Fix all linting issues
+npm run build         # Must succeed without errors
+
+# If type-check shows ANY errors:
+# 1. STOP - Do NOT commit
+# 2. FIX all TypeScript errors
+# 3. Re-run ALL checks
+# 4. Only commit when ALL checks pass
 ```
 
 #### 3. Feature Completion and Merge to Develop
