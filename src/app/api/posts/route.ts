@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-server';
+import { getAuthUser } from '@/lib/supabase-auth';
 
 // GET /api/posts - 게시글 목록 조회
 export async function GET(request: NextRequest) {
@@ -19,21 +20,15 @@ export async function GET(request: NextRequest) {
             .from('posts')
             .select(`
                 *,
-                user:profiles!user_id (
-                    id,
-                    email,
-                    full_name,
-                    avatar_url
-                ),
                 board:boards!board_id (
                     id,
                     name,
                     slug
                 ),
                 comments:comments(count),
-                likes:post_likes(count)
+                likes:likes!likes_post_id_fkey(count)
             `, { count: 'exact' })
-            .eq('is_deleted', false);
+            .eq('is_hidden', false);
 
         if (board_id) {
             query = query.eq('board_id', board_id);
@@ -71,26 +66,40 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        // 작성자 정보 가져오기
+        if (posts && posts.length > 0) {
+            const userIds = [...new Set(posts.map((p: any) => p.user_id))];
+            const { data: profiles } = await supabase
+                .from('profiles')
+                .select('id, email, full_name, avatar_url')
+                .in('id', userIds);
+            
+            const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+            
+            posts.forEach((post: any) => {
+                post.user = profileMap.get(post.user_id) || null;
+                post.comments_count = post.comments?.[0]?.count || 0;
+                post.likes_count = post.likes?.[0]?.count || 0;
+                delete post.comments;
+                delete post.likes;
+            });
+        }
+        
         // 현재 사용자의 좋아요 여부 확인
-        const { data: { user } } = await supabase.auth.getUser();
+        const { user } = await getAuthUser(request);
         
         if (user && posts) {
-            const postIds = posts.map(p => p.id);
+            const postIds = posts.map((p: any) => p.id);
             const { data: userLikes } = await supabase
-                .from('post_likes')
+                .from('likes')
                 .select('post_id')
                 .eq('user_id', user.id)
                 .in('post_id', postIds);
             
             const likedPostIds = new Set(userLikes?.map(l => l.post_id) || []);
             
-            posts.forEach(post => {
-                const postAny = post as any;
-                postAny.is_liked = likedPostIds.has(postAny.id);
-                postAny.comments_count = postAny.comments?.[0]?.count || 0;
-                postAny.likes_count = postAny.likes?.[0]?.count || 0;
-                delete postAny.comments;
-                delete postAny.likes;
+            posts.forEach((post: any) => {
+                post.is_liked = likedPostIds.has(post.id);
             });
         }
 
@@ -118,7 +127,7 @@ export async function POST(request: NextRequest) {
         const supabase = getSupabaseAdmin();
         
         // 인증 확인
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const { user, error: authError } = await getAuthUser(request);
         
         if (authError || !user) {
             return NextResponse.json(

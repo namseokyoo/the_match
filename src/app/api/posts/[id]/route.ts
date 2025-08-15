@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-server';
+import { getAuthUser } from '@/lib/supabase-auth';
 
 // GET /api/posts/[id] - 게시글 상세 조회
 export async function GET(
@@ -15,22 +16,16 @@ export async function GET(
             .from('posts')
             .select(`
                 *,
-                user:profiles!user_id (
-                    id,
-                    email,
-                    full_name,
-                    avatar_url
-                ),
                 board:boards!board_id (
                     id,
                     name,
                     slug
                 ),
                 comments:comments(count),
-                likes:post_likes(count)
+                likes:likes!likes_post_id_fkey(count)
             `)
             .eq('id', postId)
-            .eq('is_deleted', false)
+            .eq('is_hidden', false)
             .single();
 
         if (error || !post) {
@@ -43,12 +38,19 @@ export async function GET(
         // 조회수 증가
         await supabase.rpc('increment_post_view_count', { post_id_param: postId });
 
+        // 작성자 정보 가져오기
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('id, email, full_name, avatar_url')
+            .eq('id', post.user_id)
+            .single();
+
         // 현재 사용자의 좋아요 여부 확인
-        const { data: { user } } = await supabase.auth.getUser();
+        const { user } = await getAuthUser(request);
         
         if (user) {
             const { data: userLike } = await supabase
-                .from('post_likes')
+                .from('likes')
                 .select('post_id')
                 .eq('user_id', user.id)
                 .eq('post_id', postId)
@@ -59,6 +61,7 @@ export async function GET(
 
         const processedPost: any = {
             ...post,
+            user: profile || null,
             comments_count: (post as any).comments?.[0]?.count || 0,
             likes_count: (post as any).likes?.[0]?.count || 0
         };
@@ -85,7 +88,7 @@ export async function PUT(
         const postId = params.id;
         
         // 인증 확인
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const { user, error: authError } = await getAuthUser(request);
         
         if (authError || !user) {
             return NextResponse.json(
@@ -145,7 +148,7 @@ export async function DELETE(
         const postId = params.id;
         
         // 인증 확인
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const { user, error: authError } = await getAuthUser(request);
         
         if (authError || !user) {
             return NextResponse.json(
@@ -157,7 +160,7 @@ export async function DELETE(
         // 게시글 soft delete (RLS 정책에 의해 본인 글만 삭제 가능)
         const { error } = await supabase
             .from('posts')
-            .update({ is_deleted: true })
+            .update({ is_hidden: true })
             .eq('id', postId)
             .eq('user_id', user.id);
 
