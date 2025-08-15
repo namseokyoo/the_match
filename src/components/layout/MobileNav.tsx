@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Trophy, Users, User, Plus } from 'lucide-react';
+import { Home, Trophy, Users, User, Plus, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 const MobileNav: React.FC = () => {
@@ -57,6 +57,12 @@ const MobileNav: React.FC = () => {
             path: '/matches',
             icon: Trophy,
             label: '경기',
+            requireAuth: false,
+        },
+        {
+            path: '/community',
+            icon: MessageSquare,
+            label: '커뮤니티',
             requireAuth: false,
         },
         {
