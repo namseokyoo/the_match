@@ -183,15 +183,29 @@ export default function PostDetailPage() {
         }
 
         try {
+            const supabase = createSupabaseBrowser();
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (session?.access_token) {
+                headers['Authorization'] = `Bearer ${session.access_token}`;
+            }
+
             const response = await fetch(`/api/posts/${postId}`, {
                 method: 'DELETE',
+                headers,
+                credentials: 'include',
             });
 
             if (response.ok) {
                 toast.success('게시글이 삭제되었습니다.');
                 router.push('/community');
             } else {
-                toast.error('게시글 삭제에 실패했습니다.');
+                const data = await response.json();
+                toast.error(data.error || '게시글 삭제에 실패했습니다.');
             }
         } catch (error) {
             console.error('Error deleting post:', error);

@@ -34,21 +34,27 @@ export async function GET(
         }
 
         // 사용자 정보 조회
-        const userIds = Array.from(new Set(comments.map(c => (c as any).user_id)));
+        const userIds = Array.from(new Set(comments.map(c => (c as any).user_id).filter(Boolean)));
+        if (userIds.length === 0) {
+            return NextResponse.json({ comments: [] });
+        }
+
         const { data: profiles } = await supabase
             .from('profiles')
-            .select('user_id, id, username, email, avatar_url')
-            .in('user_id', userIds);
+            .select('id, email, full_name, avatar_url')
+            .in('id', userIds);
 
         const profileMap = new Map();
         profiles?.forEach(profile => {
-            profileMap.set(profile.user_id, profile);
+            if (profile.id) {
+                profileMap.set(profile.id, profile);
+            }
         });
 
         // 댓글에 사용자 정보 추가
         const commentsWithProfiles = comments.map(comment => ({
             ...comment,
-            profiles: profileMap.get((comment as any).user_id) || null
+            user: profileMap.get((comment as any).user_id) || null
         }));
 
         // 대댓글 조회
@@ -62,21 +68,23 @@ export async function GET(
 
         if (replies && replies.length > 0) {
             // 대댓글 사용자 정보 조회
-            const replyUserIds = Array.from(new Set(replies.map(r => (r as any).user_id)));
+            const replyUserIds = Array.from(new Set(replies.map(r => (r as any).user_id).filter(Boolean)));
             const { data: replyProfiles } = await supabase
                 .from('profiles')
-                .select('user_id, id, username, email, avatar_url')
-                .in('user_id', replyUserIds);
+                .select('id, email, full_name, avatar_url')
+                .in('id', replyUserIds);
 
             const replyProfileMap = new Map();
             replyProfiles?.forEach(profile => {
-                replyProfileMap.set(profile.user_id, profile);
+                if (profile.id) {
+                    replyProfileMap.set(profile.id, profile);
+                }
             });
 
             // 대댓글에 사용자 정보 추가
             const repliesWithProfiles = replies.map(reply => ({
                 ...reply,
-                profiles: replyProfileMap.get((reply as any).user_id) || null
+                user: replyProfileMap.get((reply as any).user_id) || null
             }));
 
             // 대댓글을 부모 댓글에 추가
@@ -161,13 +169,13 @@ export async function POST(
         // 사용자 정보 조회
         const { data: profile } = await supabase
             .from('profiles')
-            .select('user_id, id, username, email, avatar_url')
-            .eq('user_id', userId)
+            .select('id, email, full_name, avatar_url')
+            .eq('id', userId)
             .single();
 
         const commentWithProfile = {
             ...comment,
-            profiles: profile || null
+            user: profile || null
         };
 
         return NextResponse.json({ comment: commentWithProfile }, { status: 201 });

@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
 // API Route용 Supabase 클라이언트 생성 (쿠키 기반 인증)
 export function createSupabaseServerClient() {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,21 +22,6 @@ function CommunityContent() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
-    // 게시판 목록 조회
-    useEffect(() => {
-        fetchBoards();
-    }, []);
-
-    // 게시글 목록 조회
-    useEffect(() => {
-        const boardSlug = searchParams.get('board') || '';
-        const page = searchParams.get('page') || '1';
-        
-        setCurrentPage(parseInt(page));
-        setSelectedBoard(boardSlug);
-        fetchPosts(boardSlug, parseInt(page));
-    }, [searchParams]);
-
     const fetchBoards = async () => {
         try {
             const response = await fetch('/api/boards');
@@ -50,7 +35,7 @@ function CommunityContent() {
         }
     };
 
-    const fetchPosts = async (boardSlug: string, page: number) => {
+    const fetchPosts = useCallback(async (boardSlug: string, page: number) => {
         setLoading(true);
         try {
             let url = `/api/posts?page=${page}&limit=20`;
@@ -74,7 +59,22 @@ function CommunityContent() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [boards]);
+
+    // 게시판 목록 조회
+    useEffect(() => {
+        fetchBoards();
+    }, []);
+
+    // 게시글 목록 조회
+    useEffect(() => {
+        const boardSlug = searchParams.get('board') || '';
+        const page = searchParams.get('page') || '1';
+        
+        setCurrentPage(parseInt(page));
+        setSelectedBoard(boardSlug);
+        fetchPosts(boardSlug, parseInt(page));
+    }, [searchParams, fetchPosts]);
 
     const handleBoardChange = (boardSlug: string) => {
         if (boardSlug === selectedBoard) {
