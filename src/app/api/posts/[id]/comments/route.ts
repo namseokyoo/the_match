@@ -121,10 +121,24 @@ export async function POST(
     { params }: { params: { id: string } }
 ) {
     try {
-        // 인증 확인
-        const user = await getAuthUserFromRequestObject(request);
+        // 먼저 getAuthUserFromRequestObject로 시도
+        let user = await getAuthUserFromRequestObject(request);
+        
+        // 실패하면 Authorization 헤더에서 직접 확인
+        if (!user) {
+            const authHeader = request.headers.get('authorization');
+            if (authHeader && authHeader.startsWith('Bearer ')) {
+                const token = authHeader.substring(7);
+                const supabase = getSupabaseAdmin();
+                const { data: { user: authUser }, error } = await supabase.auth.getUser(token);
+                if (!error && authUser) {
+                    user = authUser;
+                }
+            }
+        }
         
         if (!user) {
+            console.log('No user found in comments route');
             return NextResponse.json(
                 { error: '로그인이 필요합니다.' },
                 { status: 401 }

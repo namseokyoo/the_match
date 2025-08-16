@@ -8,7 +8,6 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Button from '@/components/ui/Button';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { 
     ArrowLeft, 
     Heart, 
@@ -25,7 +24,7 @@ import toast from 'react-hot-toast';
 export default function PostDetailPage() {
     const router = useRouter();
     const params = useParams();
-    const { user } = useAuth();
+    const { user, session, loading: authLoading } = useAuth();
     const postId = params.id as string;
     
     const [post, setPost] = useState<Post | null>(null);
@@ -76,22 +75,24 @@ export default function PostDetailPage() {
     }, [fetchPost, fetchComments]);
 
     const handleLike = async () => {
-        if (!user) {
+        console.log('handleLike called, user:', user, 'session:', session, 'authLoading:', authLoading);
+        
+        // 인증 정보가 아직 로딩 중이면 기다림
+        if (authLoading) {
+            console.log('Auth is still loading...');
+            return;
+        }
+        
+        if (!user || !session) {
             toast.error('로그인이 필요합니다.');
             return;
         }
 
         try {
-            const supabase = createSupabaseBrowser();
-            const { data: { session } } = await supabase.auth.getSession();
-            
             const headers: HeadersInit = {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`,
             };
-            
-            if (session?.access_token) {
-                headers['Authorization'] = `Bearer ${session.access_token}`;
-            }
             
             const response = await fetch(`/api/posts/${postId}/likes`, {
                 method: 'POST',
@@ -125,7 +126,7 @@ export default function PostDetailPage() {
     const handleCommentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
-        if (!user) {
+        if (!user || !session) {
             toast.error('로그인이 필요합니다.');
             return;
         }
@@ -137,16 +138,10 @@ export default function PostDetailPage() {
 
         setSubmitting(true);
         try {
-            const supabase = createSupabaseBrowser();
-            const { data: { session } } = await supabase.auth.getSession();
-            
             const headers: HeadersInit = {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`,
             };
-            
-            if (session?.access_token) {
-                headers['Authorization'] = `Bearer ${session.access_token}`;
-            }
             
             const response = await fetch(`/api/posts/${postId}/comments`, {
                 method: 'POST',
@@ -183,9 +178,6 @@ export default function PostDetailPage() {
         }
 
         try {
-            const supabase = createSupabaseBrowser();
-            const { data: { session } } = await supabase.auth.getSession();
-            
             const headers: HeadersInit = {
                 'Content-Type': 'application/json',
             };
@@ -340,14 +332,17 @@ export default function PostDetailPage() {
                     <div className="flex justify-center pt-4 border-t border-gray-200">
                         <button
                             onClick={handleLike}
+                            disabled={authLoading}
                             className={`flex items-center gap-2 px-6 py-2 rounded-lg transition-colors ${
-                                post.is_liked
+                                authLoading
+                                    ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                                    : post.is_liked
                                     ? 'bg-red-50 text-red-600 hover:bg-red-100'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             }`}
                         >
                             <Heart className={`w-5 h-5 ${post.is_liked ? 'fill-current' : ''}`} />
-                            <span className="font-medium">좋아요 {post.likes_count || 0}</span>
+                            <span className="font-medium">{authLoading ? '로딩 중...' : `좋아요 ${post.likes_count || 0}`}</span>
                         </button>
                     </div>
                 </article>

@@ -45,6 +45,7 @@ export async function getAuthUserFromRequest() {
 
 // Request 객체에서 직접 쿠키를 읽는 방식 (API Route Handler용)
 export function createSupabaseServerClientFromRequest(request: NextRequest) {
+  // cookies() 함수를 직접 사용
   const cookieStore = cookies();
   
   return createServerClient(
@@ -53,21 +54,19 @@ export function createSupabaseServerClientFromRequest(request: NextRequest) {
     {
       cookies: {
         get(name: string) {
-          // 먼저 request headers에서 cookie를 확인
-          const cookieHeader = request.headers.get('cookie');
-          if (cookieHeader) {
-            const cookies = Object.fromEntries(
-              cookieHeader.split('; ').map(cookie => {
-                const [key, ...values] = cookie.split('=');
-                return [key, values.join('=')];
-              })
-            );
-            if (cookies[name]) {
-              return cookies[name];
-            }
+          // cookieStore에서 직접 가져오기
+          const value = cookieStore.get(name)?.value;
+          if (value) {
+            return value;
           }
-          // 그 다음 cookieStore 확인
-          return cookieStore.get(name)?.value;
+          
+          // Authorization 헤더에서 토큰 확인 (폴백)
+          const auth = request.headers.get('authorization');
+          if (auth && name === 'sb-access-token') {
+            return auth.replace('Bearer ', '');
+          }
+          
+          return undefined;
         },
         set(name: string, value: string, options: any) {
           cookieStore.set({ name, value, ...options });
