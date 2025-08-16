@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-server';
-import { getAuthUser } from '@/lib/supabase-auth';
+import { getAuthUserFromRequestObject } from '@/lib/supabase-server-client';
 
 // GET /api/posts/[id]/likes - 좋아요 상태 조회
 export async function GET(
@@ -12,7 +12,7 @@ export async function GET(
     const postId = params.id;
     
     // 현재 사용자 확인
-    const user = await getAuthUser(request);
+    const user = await getAuthUserFromRequestObject(request);
     
     // 전체 좋아요 수 조회
     const { count, error: countError } = await supabase
@@ -32,7 +32,7 @@ export async function GET(
         .from('likes')
         .select('id')
         .eq('post_id', postId)
-        .eq('user_id', (user as any).id)
+        .eq('user_id', user.id)
         .single();
       
       isLiked = !!userLike;
@@ -57,7 +57,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = await getAuthUser(request);
+    const user = await getAuthUserFromRequestObject(request);
     
     if (!user) {
       return NextResponse.json(
@@ -68,7 +68,7 @@ export async function POST(
     
     const supabase = getSupabaseAdmin();
     const postId = params.id;
-    const userId = (user as any).id;
+    const userId = user.id;
     
     // 기존 좋아요 확인
     const { data: existingLike } = await supabase

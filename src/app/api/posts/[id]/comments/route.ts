@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-server';
-import { getAuthUser } from '@/lib/supabase-auth';
+import { getAuthUserFromRequestObject } from '@/lib/supabase-server-client';
 
 // GET /api/posts/[id]/comments - 댓글 목록 조회
 export async function GET(
@@ -114,7 +114,7 @@ export async function POST(
 ) {
     try {
         // 인증 확인
-        const user = await getAuthUser(request);
+        const user = await getAuthUserFromRequestObject(request);
         
         if (!user) {
             return NextResponse.json(
@@ -125,7 +125,7 @@ export async function POST(
         
         const supabase = getSupabaseAdmin();
         const postId = params.id;
-        const userId = (user as any).id;
+        const userId = user.id;
 
         const body = await request.json();
         const { content, parent_id } = body;

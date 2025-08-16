@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-server';
-import { getAuthUser } from '@/lib/supabase-auth';
+import { getAuthUserFromRequestObject } from '@/lib/supabase-server-client';
 
 // GET /api/posts/[id] - 게시글 상세 조회
 export async function GET(
@@ -46,7 +46,7 @@ export async function GET(
             .single();
 
         // 현재 사용자의 좋아요 여부 확인
-        const user = await getAuthUser(request);
+        const user = await getAuthUserFromRequestObject(request);
         
         if (user) {
             const { data: userLike } = await supabase
@@ -88,7 +88,7 @@ export async function PUT(
         const postId = params.id;
         
         // 인증 확인
-        const user = await getAuthUser(request);
+        const user = await getAuthUserFromRequestObject(request);
         
         if (!user) {
             return NextResponse.json(
@@ -149,7 +149,7 @@ export async function DELETE(
         const postId = params.id;
         
         // 인증 확인
-        const user = await getAuthUser(request);
+        const user = await getAuthUserFromRequestObject(request);
         
         if (!user) {
             return NextResponse.json(
