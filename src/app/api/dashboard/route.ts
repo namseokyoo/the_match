@@ -26,7 +26,7 @@ export async function GET() {
             // 2. 팀 데이터 - 필요한 필드만 선택
             supabaseAdmin
                 .from('teams')
-                .select('id, name, description, captain_id, match_id, created_at')
+                .select('id, name, description, captain_id, match_id, recruitment_count, current_members, created_at')
                 .order('created_at', { ascending: false })
                 .limit(20),
 
@@ -94,9 +94,16 @@ export async function GET() {
             })
             .slice(0, 4);
 
-        // 팀원 모집 중인 팀들 (생성된 모든 팀 표시)
+        // 팀원 모집 중인 팀들 (recruitment_count가 있고 현재 멤버수보다 많은 팀)
         const recruitingTeams = (teams || [])
-            .filter(team => team.name && (team.name as string).trim()) // 이름이 있는 팀만
+            .filter(team => {
+                const recruitmentCount = team.recruitment_count as number;
+                const currentMembers = team.current_members as number || 0;
+                return team.name && 
+                       (team.name as string).trim() && 
+                       recruitmentCount && 
+                       recruitmentCount > currentMembers;
+            })
             .slice(0, 4);
 
         // 통계 데이터 정리

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Heart, MessageCircle, Eye, TrendingUp, Clock, ArrowRight } from 'lucide-react';
+import { MessageCircle, Eye, TrendingUp, Clock, ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -11,14 +11,12 @@ interface Post {
     id: string;
     title: string;
     content: string;
-    author_id: string;
+    user_id: string;
     created_at: string;
     updated_at: string;
-    views: number;
-    likes: number;
-    comments_count: number;
+    view_count: number;
     profiles: {
-        full_name: string | null;
+        username: string | null;
         email: string;
     };
 }
@@ -39,11 +37,17 @@ export default function CommunitySection() {
 
             // 최신글 가져오기 (최근 5개)
             const { data: latest, error: latestError } = await supabase
-                .from('community_posts')
+                .from('posts')
                 .select(`
-                    *,
-                    profiles:author_id (
-                        full_name,
+                    id,
+                    title,
+                    content,
+                    user_id,
+                    created_at,
+                    updated_at,
+                    view_count,
+                    profiles:user_id (
+                        username,
                         email
                     )
                 `)
@@ -53,31 +57,46 @@ export default function CommunitySection() {
             if (latestError) {
                 console.error('Error fetching latest posts:', latestError);
             } else {
-                setLatestPosts(latest || []);
+                // profiles는 단일 객체로 반환됨 (user_id로 조인)
+                const formattedLatest = (latest || []).map(post => ({
+                    ...post,
+                    profiles: Array.isArray(post.profiles) ? post.profiles[0] : post.profiles
+                })) as Post[];
+                setLatestPosts(formattedLatest);
             }
 
-            // 인기글 가져오기 (최근 1일간 좋아요 순, 같으면 조회수 순)
-            const oneDayAgo = new Date();
-            oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+            // 인기글 가져오기 (최근 7일간 조회수 순)
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
             const { data: popular, error: popularError } = await supabase
-                .from('community_posts')
+                .from('posts')
                 .select(`
-                    *,
-                    profiles:author_id (
-                        full_name,
+                    id,
+                    title,
+                    content,
+                    user_id,
+                    created_at,
+                    updated_at,
+                    view_count,
+                    profiles:user_id (
+                        username,
                         email
                     )
                 `)
-                .gte('created_at', oneDayAgo.toISOString())
-                .order('likes', { ascending: false })
-                .order('views', { ascending: false })
+                .gte('created_at', sevenDaysAgo.toISOString())
+                .order('view_count', { ascending: false })
                 .limit(5);
 
             if (popularError) {
                 console.error('Error fetching popular posts:', popularError);
             } else {
-                setPopularPosts(popular || []);
+                // profiles는 단일 객체로 반환됨 (user_id로 조인)
+                const formattedPopular = (popular || []).map(post => ({
+                    ...post,
+                    profiles: Array.isArray(post.profiles) ? post.profiles[0] : post.profiles
+                })) as Post[];
+                setPopularPosts(formattedPopular);
             }
         } catch (error) {
             console.error('Error fetching community posts:', error);
@@ -153,15 +172,11 @@ export default function CommunitySection() {
                                             <div className="flex items-center gap-4 text-xs text-gray-400">
                                                 <span className="flex items-center gap-1">
                                                     <Eye className="w-3 h-3" />
-                                                    {post.views}
-                                                </span>
-                                                <span className="flex items-center gap-1">
-                                                    <Heart className="w-3 h-3" />
-                                                    {post.likes}
+                                                    {post.view_count || 0}
                                                 </span>
                                                 <span className="flex items-center gap-1">
                                                     <MessageCircle className="w-3 h-3" />
-                                                    {post.comments_count || 0}
+                                                    댓글
                                                 </span>
                                                 <span className="flex items-center gap-1">
                                                     <Clock className="w-3 h-3" />

@@ -202,26 +202,13 @@ export default function Home() {
                             ))}
                         </div>
                     ) : upcomingMatches.filter(match => {
-                        // registration 상태인 경기만 표시
-                        const status = calculateMatchStatus(
-                            match.registration_start_date,
-                            match.registration_deadline,
-                            match.start_date,
-                            match.end_date,
-                            match.status
-                        );
-                        return status === 'registration';
+                        // DB의 status가 registration인 경기만 표시 (calculateMatchStatus 대신 실제 status 사용)
+                        return match.status === 'registration';
                     }).slice(0, 6).length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {upcomingMatches.filter(match => {
-                                const status = calculateMatchStatus(
-                                    match.registration_start_date,
-                                    match.registration_deadline,
-                                    match.start_date,
-                                    match.end_date,
-                                    match.status
-                                );
-                                return status === 'registration';
+                                // DB의 status가 registration인 경기만 표시
+                                return match.status === 'registration';
                             }).slice(0, 6).map(match => {
                                 const calculatedStatus = calculateMatchStatus(
                                     match.registration_start_date,
