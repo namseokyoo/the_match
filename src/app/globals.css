@@ -203,7 +203,7 @@
   }
 }
 
-/* Mobile Container Fixed Size - 완전 고정 */
+/* Mobile Container - Responsive Design */
 .mobile-wrapper {
   min-height: 100vh;
   background-color: rgb(243 244 246);
@@ -214,9 +214,8 @@
 }
 
 .mobile-container {
-  width: 430px !important;
-  min-width: 430px !important;
-  max-width: 430px !important;
+  width: 100%;
+  max-width: 430px;
   min-height: 100vh;
   background: var(--background);
   font-family: system-ui, -apple-system, sans-serif;
@@ -232,24 +231,46 @@
   max-width: 100%;
 }
 
-/* 모든 화면 크기에서 동일한 레이아웃 유지 */
-@media screen {
+/* 작은 화면에서 패딩 추가 */
+@media (max-width: 430px) {
   .mobile-wrapper {
-    background-color: rgb(243 244 246);
+    background-color: var(--background);
   }
   
   .mobile-container {
-    width: 430px !important;
-    min-width: 430px !important;
-    max-width: 430px !important;
+    width: 100vw;
+    box-shadow: none;
   }
   
-  /* 반응형 클래스 무효화 */
-  [class*="sm:"],
-  [class*="md:"],
-  [class*="lg:"],
-  [class*="xl:"],
-  [class*="2xl:"] {
-    /* 반응형 속성 무시 */
+  /* 작은 화면에서 패딩 조정 */
+  .mobile-container main {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* 태블릿 이상 크기에서 고정 너비 */
+@media (min-width: 431px) {
+  .mobile-container {
+    width: 430px;
+  }
+}
+
+/* Touch targets 최소 크기 보장 */
+@media (max-width: 430px) {
+  button, a, .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* 네비게이션 버튼 간격 조정 */
+  nav button, nav a {
+    padding: 0.75rem;
+  }
+  
+  /* 입력 필드 크기 조정 */
+  input, textarea, select {
+    min-height: 44px;
+    padding: 0.75rem;
   }
 }

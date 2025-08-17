@@ -7,6 +7,7 @@ import { ErrorBoundary } from '@/components/ui';
 import { ToastContainer } from '@/components/ui/Toast';
 import ClientProviders from '@/components/providers/ClientProviders';
 import PWAProvider from '@/components/pwa/PWAProvider';
+import GlobalLoader from '@/components/ui/GlobalLoader';
 import './globals.css';
 
 // ConfigStatus는 클라이언트 사이드에서만 렌더링
@@ -88,6 +89,9 @@ export default function RootLayout({
                 <ErrorBoundary>
                     <ClientProviders>
                         <PWAProvider>
+                            {/* 글로벌 로더 */}
+                            <GlobalLoader />
+                            
                             {/* 모바일 사이즈 고정 래퍼 */}
                             <div className="mobile-wrapper">
                                 <div className="mobile-container">

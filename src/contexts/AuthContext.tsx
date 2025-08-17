@@ -35,6 +35,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
+    const [sessionCheckInterval, setSessionCheckInterval] = useState<NodeJS.Timeout | null>(null);
+
+    // 세션 자동 갱신 함수
+    const refreshSession = async () => {
+        try {
+            const { data: { session: refreshedSession }, error } = await supabase.auth.refreshSession();
+            if (!error && refreshedSession) {
+                setSession(refreshedSession);
+                setUser(refreshedSession.user);
+                return refreshedSession;
+            }
+        } catch (error) {
+            console.error('Session refresh error:', error);
+        }
+        return null;
+    };
 
     // 초기화 - Supabase 세션만 확인 (캐시 없음)
     useEffect(() => {
@@ -107,12 +123,46 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // 초기 인증 상태 확인
         initializeAuth();
 
+        // 세션 자동 갱신 설정 (30분마다)
+        const interval = setInterval(() => {
+            if (session) {
+                refreshSession();
+            }
+        }, 30 * 60 * 1000); // 30분
+
+        setSessionCheckInterval(interval);
+
         // Cleanup
         return () => {
             mounted = false;
             subscription.unsubscribe();
+            if (interval) {
+                clearInterval(interval);
+            }
         };
     }, []); // 빈 의존성 배열 - 한 번만 실행
+
+    // 세션 변경 시 자동 갱신 타이머 재설정
+    useEffect(() => {
+        if (sessionCheckInterval) {
+            clearInterval(sessionCheckInterval);
+        }
+
+        if (session) {
+            // 세션이 있을 때만 자동 갱신 설정
+            const interval = setInterval(() => {
+                refreshSession();
+            }, 30 * 60 * 1000); // 30분
+            setSessionCheckInterval(interval);
+        }
+
+        return () => {
+            if (sessionCheckInterval) {
+                clearInterval(sessionCheckInterval);
+            }
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session?.access_token]); // 세션 토큰이 변경될 때마다 재설정
 
     // 로그인
     const signIn = async (email: string, password: string) => {
