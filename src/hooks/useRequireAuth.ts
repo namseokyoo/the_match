@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './useAuth';
 
@@ -11,11 +11,24 @@ import { useAuth } from './useAuth';
 export function useRequireAuth(redirectTo: string = '/login') {
     const { user, loading } = useAuth();
     const router = useRouter();
+    const hasRedirected = useRef(false);
 
     useEffect(() => {
         // 로딩이 완료되고 사용자가 없으면 리다이렉트
-        if (!loading && !user) {
-            router.push(redirectTo);
+        // hasRedirected를 사용하여 중복 리다이렉트 방지
+        if (!loading && !user && !hasRedirected.current) {
+            console.log('[useRequireAuth] Redirecting to login - no user detected');
+            hasRedirected.current = true;
+            
+            // 현재 경로를 redirectTo 파라미터로 추가
+            const currentPath = window.location.pathname;
+            const loginUrl = `${redirectTo}?redirectTo=${encodeURIComponent(currentPath)}`;
+            router.push(loginUrl);
+        }
+        
+        // 사용자가 로그인하면 플래그 리셋
+        if (user && hasRedirected.current) {
+            hasRedirected.current = false;
         }
     }, [loading, user, router, redirectTo]);
 

@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { MatchForm } from '@/components/match';
 import { CreateMatchForm, MatchTemplate } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
-import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useNotification } from '@/contexts/NotificationContext';
 import { postWithAuth } from '@/lib/api-client';
 
@@ -13,12 +12,21 @@ export default function CreateMatchClient() {
     const [isLoading, setIsLoading] = useState(false);
     const [template, setTemplate] = useState<MatchTemplate | null>(null);
     const [loadingTemplate, setLoadingTemplate] = useState(false);
-    const { user, loading: authLoading } = useRequireAuth();
+    const { user, loading: authLoading } = useAuth(); // useAuth 직접 사용
     const { getAccessToken } = useAuth();
     const { showNotification } = useNotification();
     const router = useRouter();
     const searchParams = useSearchParams();
     const templateId = searchParams.get('templateId');
+    
+    // 수동으로 인증 체크 및 리다이렉트
+    useEffect(() => {
+        if (!authLoading && !user) {
+            console.log('[CreateMatchClient] No user detected, redirecting to login');
+            const currentPath = window.location.pathname;
+            router.push(`/login?redirectTo=${encodeURIComponent(currentPath)}`);
+        }
+    }, [authLoading, user, router]);
 
     const loadTemplate = useCallback(async (id: string) => {
         try {

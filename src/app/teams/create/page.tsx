@@ -1,16 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CreateTeamForm } from '@/types';
 import { TeamForm } from '@/components/team';
-import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 
 export default function CreateTeamPage() {
     const [loading, setLoading] = useState(false);
-    const { user, loading: authLoading } = useRequireAuth();
+    const { user, loading: authLoading } = useAuth(); // useAuth 직접 사용
     const router = useRouter();
+    
+    // 수동으로 인증 체크 및 리다이렉트
+    useEffect(() => {
+        if (!authLoading && !user) {
+            console.log('[CreateTeamPage] No user detected, redirecting to login');
+            const currentPath = window.location.pathname;
+            router.push(`/login?redirectTo=${encodeURIComponent(currentPath)}`);
+        }
+    }, [authLoading, user, router]);
 
 
     // 팀 생성 핸들러

@@ -32,12 +32,6 @@ export async function middleware(request: NextRequest) {
       cookie.name.startsWith('sb-pkeycuoaeddmblcwzhpo-auth-token')
     );
   
-  // 디버그 로깅
-  if (pathname === '/profile') {
-    console.log(`[Middleware] Profile access - Cookies: ${Array.from(request.cookies.getAll()).map(c => c.name).join(', ')}`);
-    console.log(`[Middleware] HasAuth: ${hasAuthCookie}`);
-  }
-  
   // 생성/작성 페이지만 엄격하게 보호
   const isStrictProtected = strictProtectedRoutes.some(route => 
     pathname === route || pathname.startsWith(route + '/')

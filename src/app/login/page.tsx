@@ -21,8 +21,10 @@ function LoginContent() {
     // Redirect if already logged in
     useEffect(() => {
         if (user && !loading) {
-            const returnUrl = searchParams.get('returnUrl');
-            router.push(returnUrl || '/matches');
+            // redirectTo 또는 returnUrl 파라미터 확인
+            const redirectTo = searchParams.get('redirectTo') || searchParams.get('returnUrl');
+            console.log('[Login] User logged in, redirecting to:', redirectTo || '/dashboard');
+            router.push(redirectTo || '/dashboard');
         }
     }, [user, loading, router, searchParams]);
 
