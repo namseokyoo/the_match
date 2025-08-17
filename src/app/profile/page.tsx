@@ -21,6 +21,9 @@ interface UserProfile {
 }
 
 export default function ProfilePage() {
+    const { user, loading: authLoading } = useAuth();
+    const router = useRouter();
+    
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [myTeams, setMyTeams] = useState<Team[]>([]);
     const [myMatches, setMyMatches] = useState<Match[]>([]);
@@ -32,9 +35,6 @@ export default function ProfilePage() {
         full_name: '',
         bio: '',
     });
-    
-    const { user, loading: authLoading } = useAuth();
-    const router = useRouter();
 
     // 프로필 정보 조회
     const fetchProfile = useCallback(async () => {
@@ -150,11 +150,10 @@ export default function ProfilePage() {
         // 로딩이 완료되고 사용자가 있을 때만 프로필 로드
         if (!authLoading && user) {
             fetchProfile();
-        } else if (!authLoading && !user) {
-            // 로딩이 완료되었는데 사용자가 없으면 로그인 페이지로
-            router.push('/login');
         }
-    }, [authLoading, user, fetchProfile, router]);
+        // middleware가 인증을 처리하므로 여기서는 리다이렉트하지 않음
+        // else if 블록을 제거하여 middleware와 충돌 방지
+    }, [authLoading, user, fetchProfile]);
 
     // 프로필 수정
     const handleSaveProfile = async () => {
@@ -199,18 +198,13 @@ export default function ProfilePage() {
         }
     };
 
-    // 로딩 상태
-    if (loading || authLoading) {
+    // 로딩 상태 또는 인증 확인 중
+    if (loading || authLoading || !user) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-match-blue"></div>
             </div>
         );
-    }
-
-    // 인증되지 않은 사용자
-    if (!user) {
-        return null;
     }
 
     return (

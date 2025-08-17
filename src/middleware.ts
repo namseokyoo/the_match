@@ -59,7 +59,7 @@ export async function middleware(request: NextRequest) {
       const pattern = route.replace('*', '.*');
       return new RegExp(`^${pattern}$`).test(pathname);
     }
-    return pathname.startsWith(route);
+    return pathname === route || pathname.startsWith(route + '/');
   });
 
   // 인증 전용 라우트 확인
