@@ -6,6 +6,7 @@ import { useNotifications } from '@/hooks/useRealtimeUpdates';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { EmptyState } from '@/components/ui';
 
 interface Notification {
     id: string;
@@ -174,9 +175,12 @@ export const NotificationCenter: React.FC = () => {
                                 );
                             })
                         ) : (
-                            <div className="p-8 text-center text-gray-500">
-                                <Bell className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                                <p className="text-sm">새로운 알림이 없습니다</p>
+                            <div className="py-4">
+                                <EmptyState
+                                    icon={Bell}
+                                    title="알림이 없습니다"
+                                    description="새로운 알림이 오면 여기에 표시됩니다"
+                                />
                             </div>
                         )}
                     </div>
@@ -355,14 +359,12 @@ export const NotificationPage: React.FC = () => {
                         );
                     })
                 ) : (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-                        <Bell className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                        <p className="text-lg font-medium text-gray-900 mb-2">
-                            {filter === 'unread' ? '읽지 않은 알림이 없습니다' : '알림이 없습니다'}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                            새로운 알림이 오면 여기에 표시됩니다
-                        </p>
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <EmptyState
+                            icon={Bell}
+                            title={filter === 'unread' ? '읽지 않은 알림이 없습니다' : '알림이 없습니다'}
+                            description="새로운 알림이 오면 여기에 표시됩니다"
+                        />
                     </div>
                 )}
             </div>

@@ -28,7 +28,7 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
     const { user, getAccessToken } = useAuth();
     const [refreshKey, setRefreshKey] = useState(0);
     const [match, setMatch] = useState(initialMatch);
-    const [activeTab, setActiveTab] = useState<'overview' | 'bracket' | 'participants' | 'settings'>('overview');
+    const [activeTab, setActiveTab] = useState<'info' | 'bracket' | 'manage'>('info');
     const [teams, setTeams] = useState<Team[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -246,16 +246,16 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                 <div className="border-b">
                     <nav className="flex -mb-px">
                         <button
-                            onClick={() => setActiveTab('overview')}
+                            onClick={() => setActiveTab('info')}
                             className={`px-6 py-3 text-sm font-medium transition-colors ${
-                                activeTab === 'overview'
+                                activeTab === 'info'
                                     ? 'border-b-2 border-blue-600 text-blue-600'
                                     : 'text-gray-600 hover:text-gray-900'
                             }`}
                         >
                             <div className="flex items-center gap-2">
                                 <Trophy className="w-4 h-4" />
-                                대회 정보
+                                정보
                             </div>
                         </button>
                         
@@ -275,36 +275,11 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                             </button>
                         )}
                         
-                        <button
-                            onClick={() => setActiveTab('participants')}
-                            className={`px-6 py-3 text-sm font-medium transition-colors ${
-                                activeTab === 'participants'
-                                    ? 'border-b-2 border-blue-600 text-blue-600'
-                                    : 'text-gray-600 hover:text-gray-900'
-                            }`}
-                        >
-                            <div className="flex items-center gap-2">
-                                <Users className="w-4 h-4" />
-                                참가팀
-                            </div>
-                        </button>
-                        
-                        <button
-                            onClick={() => match?.id && router.push(`/matches/${match.id}/checkin`)}
-                            disabled={!match?.id}
-                            className="px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <div className="flex items-center gap-2">
-                                <QrCode className="w-4 h-4" />
-                                체크인
-                            </div>
-                        </button>
-                        
                         {isOwner && (
                             <button
-                                onClick={() => setActiveTab('settings')}
+                                onClick={() => setActiveTab('manage')}
                                 className={`px-6 py-3 text-sm font-medium transition-colors ${
-                                    activeTab === 'settings'
+                                    activeTab === 'manage'
                                         ? 'border-b-2 border-blue-600 text-blue-600'
                                         : 'text-gray-600 hover:text-gray-900'
                                 }`}
@@ -315,17 +290,54 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                                 </div>
                             </button>
                         )}
+                        
+                        {/* 체크인은 별도 링크로 이동 */}
+                        <div className="ml-auto flex items-center px-4">
+                            <button
+                                onClick={() => match?.id && router.push(`/matches/${match.id}/checkin`)}
+                                disabled={!match?.id}
+                                className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <QrCode className="w-4 h-4" />
+                                    체크인
+                                </div>
+                            </button>
+                        </div>
                     </nav>
                 </div>
 
                 {/* 탭 컨텐츠 */}
                 <div className="p-6">
-                    {activeTab === 'overview' && (
+                    {activeTab === 'info' && (
                         <div className="space-y-6">
+                            {/* 경기 상세 정보 */}
                             <MatchDetail
                                 match={match}
                                 onJoined={handleJoined}
                             />
+                            
+                            {/* 참가팀 목록 */}
+                            <div className="border-t pt-6">
+                                <div className="mb-4">
+                                    <h2 className="text-xl font-bold text-gray-900">참가팀</h2>
+                                    <p className="text-sm text-gray-600 mt-1">
+                                        현재 이 경기에 참가 중인 팀들입니다.
+                                    </p>
+                                </div>
+                                {match?.id ? (
+                                    <ParticipantManagement
+                                        matchId={match.id}
+                                        isCreator={false}
+                                        onUpdate={() => setRefreshKey(prev => prev + 1)}
+                                        key={`info-${refreshKey}`}
+                                    />
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <p className="text-gray-500">참가팀 정보를 불러오는 중입니다...</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
                     
@@ -338,47 +350,44 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                         />
                     )}
                     
-                    {activeTab === 'participants' && (
-                        <div>
-                            <div className="mb-4">
-                                <h2 className="text-xl font-bold text-gray-900">
-                                    {isOwner ? '참가 신청 관리' : '참가 신청 현황'}
-                                </h2>
-                                <p className="text-sm text-gray-600 mt-1">
-                                    {isOwner
-                                        ? '참가 신청을 검토하고 승인/거부할 수 있습니다.'
-                                        : '현재 이 대회에 참가 신청한 팀들을 확인할 수 있습니다.'
-                                    }
-                                </p>
-                            </div>
-                            {match?.id ? (
-                                <ParticipantManagement
-                                    matchId={match.id}
-                                    isCreator={isOwner}
-                                    onUpdate={() => setRefreshKey(prev => prev + 1)}
-                                    key={refreshKey}
-                                />
-                            ) : (
-                                <div className="text-center py-8">
-                                    <p className="text-gray-500">경기 정보를 불러오는 중입니다...</p>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                    
-                    {activeTab === 'settings' && isOwner && (
+                    {activeTab === 'manage' && isOwner && (
                         <div className="space-y-6">
-                            {match?.id ? (
-                                <MatchStatusManager
-                                    match={match}
-                                    isCreator={isOwner}
-                                    onStatusChange={handleStatusChange}
-                                />
-                            ) : (
-                                <div className="text-center py-8">
-                                    <p className="text-gray-500">경기 정보를 불러오는 중입니다...</p>
+                            {/* 참가 신청 관리 */}
+                            <div>
+                                <div className="mb-4">
+                                    <h2 className="text-xl font-bold text-gray-900">참가 신청 관리</h2>
+                                    <p className="text-sm text-gray-600 mt-1">
+                                        참가 신청을 검토하고 승인/거부할 수 있습니다.
+                                    </p>
                                 </div>
-                            )}
+                                {match?.id ? (
+                                    <ParticipantManagement
+                                        matchId={match.id}
+                                        isCreator={true}
+                                        onUpdate={() => setRefreshKey(prev => prev + 1)}
+                                        key={`manage-${refreshKey}`}
+                                    />
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <p className="text-gray-500">참가 신청 정보를 불러오는 중입니다...</p>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {/* 경기 상태 관리 */}
+                            <div className="border-t pt-6">
+                                {match?.id ? (
+                                    <MatchStatusManager
+                                        match={match}
+                                        isCreator={isOwner}
+                                        onStatusChange={handleStatusChange}
+                                    />
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <p className="text-gray-500">경기 정보를 불러오는 중입니다...</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

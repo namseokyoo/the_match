@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Match, MatchType, MatchStatus } from '@/types';
 import { MatchCard } from './MatchCard';
-import { Button, Input } from '@/components/ui';
+import { Button, Input, EmptyState } from '@/components/ui';
+import { Trophy } from 'lucide-react';
 import { debounce } from '@/lib/utils';
 
 interface MatchListProps {
@@ -229,19 +230,20 @@ export const MatchList: React.FC<MatchListProps> = ({
                     ))}
                 </div>
             ) : filteredMatches.length === 0 ? (
-                <div className="text-center py-12">
-                    <div className="text-gray-500 mb-4">
-                        <svg className="w-12 h-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                        <p className="text-lg font-semibold">경기가 없습니다</p>
-                        <p className="text-gray-600">
-                            {matches.length === 0
-                                ? "아직 생성된 경기가 없습니다."
-                                : "검색 조건에 맞는 경기가 없습니다."}
-                        </p>
-                    </div>
-                </div>
+                <EmptyState
+                    icon={Trophy}
+                    title={matches.length === 0 ? "아직 경기가 없습니다" : "검색 결과가 없습니다"}
+                    description={
+                        matches.length === 0
+                            ? "새로운 경기를 생성하거나 다른 경기에 참가해보세요"
+                            : "다른 검색 조건으로 다시 시도해보세요"
+                    }
+                    action={
+                        matches.length === 0
+                            ? { label: "경기 생성하기", href: "/matches/create" }
+                            : undefined
+                    }
+                />
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredMatches.map((match) => (

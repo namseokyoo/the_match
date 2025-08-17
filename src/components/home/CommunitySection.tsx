@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { MessageCircle, Eye, TrendingUp, Clock, ArrowRight } from 'lucide-react';
+import { MessageCircle, Eye, TrendingUp, Clock, ArrowRight, MessageSquare } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { EmptyState } from '@/components/ui';
 
 interface Post {
     id: string;
@@ -221,17 +222,13 @@ export default function CommunitySection() {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-8 bg-gray-100 rounded-lg">
-                        <MessageCircle className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                        <p className="text-sm text-gray-500 mb-4">
-                            {activeTab === 'latest' ? '아직 게시글이 없습니다' : '인기 게시글이 없습니다'}
-                        </p>
-                        <Link 
-                            href="/community/posts/create" 
-                            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                        >
-                            첫 글 작성하기
-                        </Link>
+                    <div className="bg-gray-100 rounded-lg">
+                        <EmptyState
+                            icon={MessageSquare}
+                            title={activeTab === 'latest' ? '게시글이 없습니다' : '인기 게시글이 없습니다'}
+                            description="첫 번째 게시글을 작성해보세요"
+                            action={{ label: "글 작성하기", href: "/community/posts/create" }}
+                        />
                     </div>
                 )}
             </div>

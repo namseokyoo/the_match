@@ -146,13 +146,6 @@ const MobileNavbar = () => {
                                 <Users className="w-5 h-5" />
                                 <span>팀</span>
                             </Link>
-                            <Link 
-                                href="/players"
-                                className={isActive('/players') ? activeMenuItemClass : menuItemClass}
-                            >
-                                <UserCheck className="w-5 h-5" />
-                                <span>선수</span>
-                            </Link>
                             {/* 템플릿 메뉴 - 임시 숨김
                             <Link 
                                 href="/matches/templates"
@@ -162,13 +155,6 @@ const MobileNavbar = () => {
                                 <span>템플릿</span>
                             </Link>
                             */}
-                            <Link 
-                                href="/stats"
-                                className={isActive('/stats') ? activeMenuItemClass : menuItemClass}
-                            >
-                                <BarChart3 className="w-5 h-5" />
-                                <span>통계</span>
-                            </Link>
                             <Link 
                                 href="/community"
                                 className={isActive('/community') ? activeMenuItemClass : menuItemClass}
@@ -308,18 +294,6 @@ const MobileNavbar = () => {
                                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                             >
                                 팀
-                            </Link>
-                            <Link
-                                href="/players"
-                                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                            >
-                                선수
-                            </Link>
-                            <Link
-                                href="/stats"
-                                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                            >
-                                통계
                             </Link>
                             <Link
                                 href="/community"

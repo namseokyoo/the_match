@@ -12,6 +12,7 @@ export {
 } from './Card';
 export { default as Badge } from './Badge';
 export { default as Notification } from './Notification';
+export { default as EmptyState } from './EmptyState';
 export { 
     default as ErrorBoundary, 
     useAsyncError, 

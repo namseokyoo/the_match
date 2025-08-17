@@ -4,7 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { ParticipantStatus } from '@/types';
-import { Button } from '@/components/ui';
+import { Button, EmptyState } from '@/components/ui';
+import { Users } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { showToast } from '@/components/ui/Toast';
 
@@ -363,12 +364,21 @@ export default function ParticipantManagement({
 
             {/* 참가자 목록 */}
             {filteredParticipants.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                    {activeTab === 'all' ? '아직 참가 신청이 없습니다.' :
-                     activeTab === 'pending' ? '대기중인 신청이 없습니다.' :
-                     activeTab === 'approved' ? '승인된 팀이 없습니다.' :
-                     '거부된 신청이 없습니다.'}
-                </div>
+                <EmptyState
+                    icon={Users}
+                    title={
+                        activeTab === 'all' ? '참가 신청이 없습니다' :
+                        activeTab === 'pending' ? '대기중인 신청이 없습니다' :
+                        activeTab === 'approved' ? '승인된 팀이 없습니다' :
+                        '거부된 신청이 없습니다'
+                    }
+                    description={
+                        activeTab === 'all' ? '아직 이 경기에 참가 신청한 팀이 없습니다' :
+                        activeTab === 'pending' ? '검토 대기중인 신청이 없습니다' :
+                        activeTab === 'approved' ? '승인된 참가팀이 없습니다' :
+                        '거부된 신청 내역이 없습니다'
+                    }
+                />
             ) : (
                 <div className="space-y-3">
                     {filteredParticipants.map((participant) => (

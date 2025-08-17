@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Calendar, Trophy, Users, Clock, ChevronRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui';
+import { Button, EmptyState } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { showToast } from '@/components/ui/Toast';
@@ -185,9 +185,12 @@ export default function DashboardPage() {
                         </CardHeader>
                         <CardContent>
                             {dashboardData?.upcomingMatches.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    예정된 경기가 없습니다
-                                </div>
+                                <EmptyState
+                                    icon={Trophy}
+                                    title="예정된 경기가 없습니다"
+                                    description="새로운 경기를 생성하거나 다른 경기에 참가해보세요"
+                                    action={{ label: "경기 둘러보기", href: "/matches" }}
+                                />
                             ) : (
                                 <div className="space-y-4">
                                     {dashboardData?.upcomingMatches.map((match) => (
@@ -227,9 +230,12 @@ export default function DashboardPage() {
                         </CardHeader>
                         <CardContent>
                             {dashboardData?.myTeams.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    소속된 팀이 없습니다
-                                </div>
+                                <EmptyState
+                                    icon={Users}
+                                    title="소속된 팀이 없습니다"
+                                    description="새로운 팀을 만들거나 기존 팀에 가입해보세요"
+                                    action={{ label: "팀 생성하기", href: "/teams/create" }}
+                                />
                             ) : (
                                 <div className="space-y-4">
                                     {dashboardData?.myTeams.map((team) => (
