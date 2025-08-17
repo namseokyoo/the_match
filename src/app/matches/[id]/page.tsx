@@ -1,5 +1,5 @@
 import React from 'react';
-import { redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { Match } from '@/types';
 import MatchDetailClient from './MatchDetailClient';
@@ -16,15 +16,31 @@ const supabaseAdmin = createClient(
 
 async function getMatch(id: string): Promise<Match | null> {
     try {
+        // ID 유효성 검사
+        if (!id || typeof id !== 'string' || id.trim() === '') {
+            console.error('Invalid match ID provided:', id);
+            return null;
+        }
+
         // 직접 Supabase에서 데이터 조회
         const { data: match, error } = await supabaseAdmin
             .from('matches')
             .select('*')
-            .eq('id', id)
+            .eq('id', id.trim())
             .single();
 
         if (error) {
             console.error('경기 조회 오류:', error);
+            // PGRST116은 데이터가 없는 경우 (404)
+            if (error.code === 'PGRST116') {
+                return null;
+            }
+            throw error;
+        }
+
+        // 필수 필드 검증
+        if (!match || !match.id || !match.title || !match.creator_id) {
+            console.error('Invalid match data received:', match);
             return null;
         }
 
@@ -36,10 +52,15 @@ async function getMatch(id: string): Promise<Match | null> {
 }
 
 export default async function MatchDetailPage({ params }: MatchDetailPageProps) {
+    // params 유효성 검사
+    if (!params?.id) {
+        notFound();
+    }
+
     const match = await getMatch(params.id);
 
     if (!match) {
-        redirect('/matches');
+        notFound();
     }
 
     return (
@@ -58,8 +79,8 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
                                 <svg className="w-4 h-4 text-gray-400 mx-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
-                                <span className="ml-1 text-sm font-medium text-gray-900" title={match.title}>
-                                    {match.title.length > 30 ? `${match.title.substring(0, 30)}...` : match.title}
+                                <span className="ml-1 text-sm font-medium text-gray-900" title={match.title || '제목 없음'}>
+                                    {match.title && match.title.length > 30 ? `${match.title.substring(0, 30)}...` : (match.title || '제목 없음')}
                                 </span>
                             </div>
                         </li>

@@ -28,6 +28,16 @@ interface MatchDetailProps {
 }
 
 const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
+    // match 데이터 유효성 검증
+    if (!match || !match.id || !match.title) {
+        return (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                <h2 className="text-lg font-semibold text-red-800 mb-2">경기 정보 오류</h2>
+                <p className="text-red-700">경기 정보가 올바르지 않거나 누락되었습니다.</p>
+            </div>
+        );
+    }
+
     // 날짜 기반으로 상태 자동 계산
     const calculatedStatus = calculateMatchStatus(
         match.registration_start_date,
@@ -48,12 +58,17 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
         );
     };
 
-    const getTypeIcon = (type: string) => {
+    const getTypeIcon = (type: string | undefined) => {
+        if (!type || typeof type !== 'string') return '🎮';
+        
         const typeIcons = {
             tournament: '🏆',
             league: '🏟️',
             friendly: '⚽',
             championship: '👑',
+            single_elimination: '🏆',
+            double_elimination: '🏆',
+            round_robin: '🏟️',
         };
         return typeIcons[type as keyof typeof typeIcons] || '🎮';
     };
@@ -67,11 +82,11 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                         <div className="flex items-center gap-3 mb-3">
                             <span className="text-2xl">{getTypeIcon(match.type)}</span>
                             <div>
-                                <h1 className="text-2xl font-bold text-gray-900">{match.title}</h1>
+                                <h1 className="text-2xl font-bold text-gray-900">{match.title || '제목 없음'}</h1>
                                 <div className="flex items-center gap-2 mt-1">
                                     {getStatusBadge(calculatedStatus)}
                                     <span className="text-sm text-gray-500">
-                                        {match.type.charAt(0).toUpperCase() + match.type.slice(1)}
+                                        {match.type ? (match.type.charAt(0).toUpperCase() + match.type.slice(1)) : '타입 미지정'}
                                     </span>
                                 </div>
                             </div>
@@ -85,21 +100,27 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                             {match.start_date && (
                                 <div>
                                     <span className="font-medium text-gray-700 whitespace-nowrap">📅 시작일:</span>
-                                    <p className="text-gray-600 whitespace-nowrap">{formatDate(match.start_date)}</p>
+                                    <p className="text-gray-600 whitespace-nowrap">
+                                        {formatDate(match.start_date) || '날짜 정보 없음'}
+                                    </p>
                                 </div>
                             )}
 
                             {match.end_date && (
                                 <div>
                                     <span className="font-medium text-gray-700 whitespace-nowrap">📅 종료일:</span>
-                                    <p className="text-gray-600 whitespace-nowrap">{formatDate(match.end_date)}</p>
+                                    <p className="text-gray-600 whitespace-nowrap">
+                                        {formatDate(match.end_date) || '날짜 정보 없음'}
+                                    </p>
                                 </div>
                             )}
 
                             {match.registration_deadline && (
                                 <div>
                                     <span className="font-medium text-gray-700 whitespace-nowrap">⏰ 등록 마감:</span>
-                                    <p className="text-gray-600 whitespace-nowrap">{formatDate(match.registration_deadline)}</p>
+                                    <p className="text-gray-600 whitespace-nowrap">
+                                        {formatDate(match.registration_deadline) || '날짜 정보 없음'}
+                                    </p>
                                 </div>
                             )}
 
@@ -119,26 +140,30 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                             onJoined={onJoined}
                             className="w-full md:w-auto"
                         />
-                        {match.type === 'single_elimination' && (
+                        {match.type === 'single_elimination' && match.id && (
                             <a
-                                href={`/matches/${match.id}/bracket`}
+                                href={`/matches/${encodeURIComponent(match.id)}/bracket`}
                                 className="block w-full md:w-auto px-4 py-2 bg-purple-600 text-white text-center rounded-md hover:bg-purple-700 transition-colors"
                             >
                                 🏆 토너먼트 브라켓 보기
                             </a>
                         )}
-                        <a
-                            href={`/matches/${match.id}/results`}
-                            className="block w-full md:w-auto px-4 py-2 bg-indigo-600 text-white text-center rounded-md hover:bg-indigo-700 transition-colors"
-                        >
-                            📊 경기 결과 및 통계
-                        </a>
-                        <a
-                            href={`/stats?matchId=${match.id}`}
-                            className="block w-full md:w-auto px-4 py-2 bg-purple-600 text-white text-center rounded-md hover:bg-purple-700 transition-colors"
-                        >
-                            📈 선수 통계 보기
-                        </a>
+                        {match.id && (
+                            <>
+                                <a
+                                    href={`/matches/${encodeURIComponent(match.id)}/results`}
+                                    className="block w-full md:w-auto px-4 py-2 bg-indigo-600 text-white text-center rounded-md hover:bg-indigo-700 transition-colors"
+                                >
+                                    📊 경기 결과 및 통계
+                                </a>
+                                <a
+                                    href={`/stats?matchId=${encodeURIComponent(match.id)}`}
+                                    className="block w-full md:w-auto px-4 py-2 bg-purple-600 text-white text-center rounded-md hover:bg-purple-700 transition-colors"
+                                >
+                                    📈 선수 통계 보기
+                                </a>
+                            </>
+                        )}
                     </div>
                 </div>
             </Card>
@@ -148,7 +173,13 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                 <Card className="p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-3">📋 경기 규칙</h2>
                     <div className="text-gray-600 whitespace-pre-line">
-                        {typeof match.rules === 'string' ? match.rules : JSON.stringify(match.rules, null, 2)}
+                        {match.rules ? (
+                            typeof match.rules === 'string' 
+                                ? match.rules 
+                                : JSON.stringify(match.rules, null, 2)
+                        ) : (
+                            '경기 규칙이 설정되지 않았습니다.'
+                        )}
                     </div>
                 </Card>
             )}
@@ -162,10 +193,10 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                     </h2>
                     <NaverMap
                         address={match.venue_address || match.venue || ''}
-                        title={match.title}
-                        phoneNumber={match.venue_phone}
-                        openingHours={match.venue_hours}
-                        additionalInfo={match.venue_info}
+                        title={match.title || '경기장'}
+                        phoneNumber={match.venue_phone || undefined}
+                        openingHours={match.venue_hours || undefined}
+                        additionalInfo={match.venue_info || undefined}
                         editable={false}
                         showInfo={true}
                         height="400px"
@@ -178,11 +209,13 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">ℹ️ 경기 정보</h2>
                 <div className="text-sm text-gray-600 space-y-2">
                     <p className="whitespace-nowrap">
-                        <span className="font-medium">생성일:</span> {formatDate(match.created_at)}
+                        <span className="font-medium">생성일:</span> 
+                        {match.created_at ? formatDate(match.created_at) : '정보 없음'}
                     </p>
-                    {match.updated_at !== match.created_at && (
+                    {match.updated_at && match.updated_at !== match.created_at && (
                         <p className="whitespace-nowrap">
-                            <span className="font-medium">수정일:</span> {formatDate(match.updated_at)}
+                            <span className="font-medium">수정일:</span> 
+                            {formatDate(match.updated_at) || '정보 없음'}
                         </p>
                     )}
                 </div>

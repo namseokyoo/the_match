@@ -18,6 +18,11 @@ interface MatchDetailClientProps {
     match: Match;
 }
 
+// Match 데이터 유효성 검증 함수
+function validateMatchData(match: Match): boolean {
+    return !!(match && match.id && match.title && match.creator_id);
+}
+
 export default function MatchDetailClient({ match: initialMatch }: MatchDetailClientProps) {
     const router = useRouter();
     const { user, getAccessToken } = useAuth();
@@ -25,20 +30,72 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
     const [match, setMatch] = useState(initialMatch);
     const [activeTab, setActiveTab] = useState<'overview' | 'bracket' | 'participants' | 'settings'>('overview');
     const [teams, setTeams] = useState<Team[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-    // 실시간 업데이트 구독
-    useMatchRealtime(match.id, {
+    // 실시간 업데이트 구독 - 항상 호출하되 match.id가 없으면 빈 문자열 전달
+    useMatchRealtime(match?.id || '', {
         onUpdate: useCallback((payload: RealtimePostgresChangesPayload<any>) => {
-            console.log('Match updated:', payload);
-            const updatedMatch = payload.new as Match;
-            setMatch(updatedMatch);
-            
-            // 다른 사용자가 업데이트한 경우 알림 표시
-            if (payload.new && user && (payload.new as any).updated_by !== user.id) {
-                showToast('경기 정보가 업데이트되었습니다', 'info');
+            try {
+                if (!match?.id) return; // 유효한 match ID가 없으면 무시
+                
+                console.log('Match updated:', payload);
+                const updatedMatch = payload.new as Match;
+                
+                // 업데이트된 데이터 유효성 검증
+                if (validateMatchData(updatedMatch)) {
+                    setMatch(updatedMatch);
+                    
+                    // 다른 사용자가 업데이트한 경우 알림 표시
+                    if (payload.new && user && (payload.new as any).updated_by !== user.id) {
+                        showToast('경기 정보가 업데이트되었습니다', 'info');
+                    }
+                } else {
+                    console.error('Invalid match data received from realtime update:', updatedMatch);
+                    setError('경기 정보 업데이트 중 오류가 발생했습니다.');
+                }
+            } catch (error) {
+                console.error('Error processing realtime update:', error);
+                setError('실시간 업데이트 처리 중 오류가 발생했습니다.');
             }
-        }, [user]),
+        }, [user, match?.id]),
     });
+
+    // 참가 팀 조회 - 항상 호출하되 조건을 내부에서 처리
+    useEffect(() => {
+        if (!match?.id) {
+            console.warn('Match ID is not available for fetching teams');
+            return;
+        }
+
+        const fetchTeams = async () => {
+            try {
+                setIsLoading(true);
+                const response = await fetch(`/api/matches/${encodeURIComponent(match.id)}/participants`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const approvedTeams = data.participants
+                        ?.filter((p: any) => p && p.status === 'approved' && p.team)
+                        ?.map((p: any) => p.team)
+                        ?.filter((team: any) => team && team.id) || [];
+                    setTeams(approvedTeams);
+                } else {
+                    console.error('Failed to fetch participants:', response.status, response.statusText);
+                    if (response.status !== 404) {
+                        setError('참가팀 목록을 불러오는 중 오류가 발생했습니다.');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch teams:', error);
+                setError('참가팀 정보를 불러오는 중 네트워크 오류가 발생했습니다.');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        fetchTeams();
+    }, [match?.id, refreshKey]);
 
     const handleJoined = () => {
         // 참가 신청 후 페이지 새로고침
@@ -59,7 +116,12 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
 
     const handleDelete = async (id: string) => {
         if (!user) {
-            alert('로그인이 필요합니다.');
+            showToast('로그인이 필요합니다.', 'error');
+            return;
+        }
+
+        if (!id || typeof id !== 'string') {
+            showToast('잘못된 경기 ID입니다.', 'error');
             return;
         }
     
@@ -68,13 +130,16 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
 
         const token = getAccessToken();
         if (!token) {
-            alert('인증 토큰을 가져올 수 없습니다. 다시 로그인해주세요.');
+            showToast('인증 토큰을 가져올 수 없습니다. 다시 로그인해주세요.', 'error');
             router.push('/login');
             return;
         }
     
+        setIsLoading(true);
+        setError(null);
+
         try {
-            const response = await fetch(`/api/matches/${id}`, {
+            const response = await fetch(`/api/matches/${encodeURIComponent(id)}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -88,39 +153,69 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                 throw new Error(data.error || '경기 삭제에 실패했습니다.');
             }
     
-            alert('경기가 성공적으로 삭제되었습니다.');
+            showToast('경기가 성공적으로 삭제되었습니다.', 'success');
             router.push('/matches');
         } catch (err) {
             console.error('경기 삭제 오류:', err);
-            alert(err instanceof Error ? err.message : '경기 삭제 중 오류가 발생했습니다.');
+            const errorMessage = err instanceof Error ? err.message : '경기 삭제 중 오류가 발생했습니다.';
+            setError(errorMessage);
+            showToast(errorMessage, 'error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const isOwner = user?.id === match.creator_id;
+    const isOwner = user?.id === match?.creator_id;
+    
+    // 데이터가 유효하지 않은 경우 에러 표시
+    if (!validateMatchData(match)) {
+        return (
+            <div className="max-w-7xl mx-auto space-y-6">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <h2 className="text-lg font-semibold text-red-800 mb-2">경기 데이터 오류</h2>
+                    <p className="text-red-700">경기 정보를 불러오는 중 오류가 발생했습니다. 필수 정보가 누락되었거나 손상된 것 같습니다.</p>
+                    <button
+                        onClick={() => router.push('/matches')}
+                        className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                    >
+                        경기 목록으로 돌아가기
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // 에러 상태 표시
+    if (error) {
+        return (
+            <div className="max-w-7xl mx-auto space-y-6">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <h2 className="text-lg font-semibold text-red-800 mb-2">오류 발생</h2>
+                    <p className="text-red-700 mb-4">{error}</p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => {
+                                setError(null);
+                                setRefreshKey(prev => prev + 1);
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                        >
+                            다시 시도
+                        </button>
+                        <button
+                            onClick={() => router.push('/matches')}
+                            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                        >
+                            경기 목록으로 돌아가기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     // 대회 타입에 따라 대진표 탭 표시 여부 결정
-    const showBracket = ['single_elimination', 'double_elimination', 'round_robin'].includes((match as any).match_type || '');
-
-    // 참가 팀 조회
-    useEffect(() => {
-        const fetchTeams = async () => {
-            try {
-                // 참가 승인된 팀 목록 조회
-                const response = await fetch(`/api/matches/${match.id}/participants`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const approvedTeams = data.participants
-                        ?.filter((p: any) => p.status === 'approved')
-                        ?.map((p: any) => p.team) || [];
-                    setTeams(approvedTeams);
-                }
-            } catch (error) {
-                console.error('Failed to fetch teams:', error);
-            }
-        };
-        
-        fetchTeams();
-    }, [match.id, refreshKey]);
+    const showBracket = match?.type && ['single_elimination', 'double_elimination', 'round_robin'].includes(match.type);
 
     return (
         <div className="max-w-7xl mx-auto space-y-6">
@@ -129,16 +224,18 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                 <div className="bg-white rounded-lg shadow-sm border p-4">
                     <div className="flex justify-end space-x-2">
                         <button
-                            onClick={() => handleEdit(match.id)}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                            onClick={() => match?.id && handleEdit(match.id)}
+                            disabled={!match?.id || isLoading}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            대회 수정
+                            {isLoading ? '처리 중...' : '대회 수정'}
                         </button>
                         <button
-                            onClick={() => handleDelete(match.id)}
-                            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                            onClick={() => match?.id && handleDelete(match.id)}
+                            disabled={!match?.id || isLoading}
+                            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            대회 삭제
+                            {isLoading ? '처리 중...' : '대회 삭제'}
                         </button>
                     </div>
                 </div>
@@ -193,8 +290,9 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                         </button>
                         
                         <button
-                            onClick={() => router.push(`/matches/${match.id}/checkin`)}
-                            className="px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                            onClick={() => match?.id && router.push(`/matches/${match.id}/checkin`)}
+                            disabled={!match?.id}
+                            className="px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <div className="flex items-center gap-2">
                                 <QrCode className="w-4 h-4" />
@@ -231,7 +329,7 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                         </div>
                     )}
                     
-                    {activeTab === 'bracket' && showBracket && (
+                    {activeTab === 'bracket' && showBracket && match?.id && (
                         <TournamentManager
                             matchId={match.id}
                             matchData={match}
@@ -253,22 +351,34 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                                     }
                                 </p>
                             </div>
-                            <ParticipantManagement
-                                matchId={match.id}
-                                isCreator={isOwner}
-                                onUpdate={() => setRefreshKey(prev => prev + 1)}
-                                key={refreshKey}
-                            />
+                            {match?.id ? (
+                                <ParticipantManagement
+                                    matchId={match.id}
+                                    isCreator={isOwner}
+                                    onUpdate={() => setRefreshKey(prev => prev + 1)}
+                                    key={refreshKey}
+                                />
+                            ) : (
+                                <div className="text-center py-8">
+                                    <p className="text-gray-500">경기 정보를 불러오는 중입니다...</p>
+                                </div>
+                            )}
                         </div>
                     )}
                     
                     {activeTab === 'settings' && isOwner && (
                         <div className="space-y-6">
-                            <MatchStatusManager
-                                match={match}
-                                isCreator={isOwner}
-                                onStatusChange={handleStatusChange}
-                            />
+                            {match?.id ? (
+                                <MatchStatusManager
+                                    match={match}
+                                    isCreator={isOwner}
+                                    onStatusChange={handleStatusChange}
+                                />
+                            ) : (
+                                <div className="text-center py-8">
+                                    <p className="text-gray-500">경기 정보를 불러오는 중입니다...</p>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
