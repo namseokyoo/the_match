@@ -62,18 +62,24 @@ export default function MatchCheckInPage() {
       // QR 코드 데이터 처리
       console.log('Scanned data:', data);
 
-      // TODO: 실제 체크인 처리
-      // const { error } = await supabase
-      //   .from('checkins')
-      //   .insert({
-      //     match_id: data.matchId,
-      //     team_id: data.teamId,
-      //     player_id: data.playerId,
-      //     user_id: user?.id,
-      //     type: data.type,
-      //     checked_in_at: new Date().toISOString(),
-      //     status: 'checked_in'
-      //   });
+      // 실제 체크인 처리
+      const { error } = await supabase
+        .from('check_ins')
+        .insert({
+          match_id: data.matchId || params.id,
+          team_id: data.teamId,
+          player_id: data.playerId,
+          user_id: user?.id,
+          type: data.type || 'player',
+          checked_in_at: new Date().toISOString(),
+          status: 'checked_in'
+        });
+
+      if (error) {
+        console.error('체크인 오류:', error);
+        showToast('체크인에 실패했습니다', 'error');
+        return;
+      }
 
       showToast('체크인이 완료되었습니다!', 'success');
       setShowScanner(false);

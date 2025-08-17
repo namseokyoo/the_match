@@ -152,20 +152,166 @@ export async function createSingleEliminationBracket(
  * 더블 엘리미네이션 토너먼트 대진표 생성
  */
 export async function createDoubleEliminationBracket(
-    _matchId: string,
-    _teamIds: string[]
+    matchId: string,
+    teamIds: string[]
 ): Promise<TournamentBracket> {
-    // 위너스 브라켓과 루저스 브라켓 생성
-    const _doubleElimGames: Game[] = []; // Future use for double elimination logic
-    const doubleElimRounds: Game[][] = [];
+    const teamCount = teamIds.length;
+    const bracketPowerOfTwo = Math.pow(2, Math.ceil(Math.log2(teamCount)));
+    const totalWinnersRounds = Math.log2(bracketPowerOfTwo);
+    const totalLosersRounds = (totalWinnersRounds - 1) * 2;
     
-    // TODO: 더블 엘리미네이션 로직 구현
-    // 복잡한 로직이므로 추후 구현
+    // 팀 배열 섹기 (랜덤 시딩)
+    const shuffledTeams = [...teamIds].sort(() => Math.random() - 0.5);
+    
+    // 부전승을 위한 빈 슬롯 추가
+    while (shuffledTeams.length < bracketPowerOfTwo) {
+        shuffledTeams.push('');
+    }
+    
+    const games: Game[] = [];
+    const allRounds: Game[][] = [];
+    let gameNumber = 1;
+    
+    // Winners Bracket 생성
+    const winnersRounds: Game[][] = [];
+    
+    // 첫 라운드
+    const firstRoundGames: Game[] = [];
+    for (let i = 0; i < bracketPowerOfTwo / 2; i++) {
+        const team1 = shuffledTeams[i * 2] || '';
+        const team2 = shuffledTeams[i * 2 + 1] || '';
+        
+        const game: Game = {
+            match_id: matchId,
+            round: 1,
+            game_number: gameNumber++,
+            team1_id: team1 || undefined,
+            team2_id: team2 || undefined,
+            status: 'scheduled',
+            is_bye: !team1 || !team2,
+            venue: 'Winners Bracket R1',
+        };
+        
+        // 부전승 처리
+        if (game.is_bye) {
+            game.winner_id = team1 || team2 || undefined;
+            game.status = 'completed';
+        }
+        
+        firstRoundGames.push(game);
+        games.push(game);
+    }
+    winnersRounds.push(firstRoundGames);
+    
+    // Winners Bracket 나머지 라운드
+    let previousWinnersRound = firstRoundGames;
+    for (let round = 2; round <= totalWinnersRounds; round++) {
+        const roundGames: Game[] = [];
+        const gamesInRound = previousWinnersRound.length / 2;
+        
+        for (let i = 0; i < gamesInRound; i++) {
+            const game: Game = {
+                match_id: matchId,
+                round: round,
+                game_number: gameNumber++,
+                status: 'scheduled',
+                venue: `Winners Bracket R${round}`,
+            };
+            
+            roundGames.push(game);
+            games.push(game);
+        }
+        
+        winnersRounds.push(roundGames);
+        previousWinnersRound = roundGames;
+    }
+    
+    // Losers Bracket 생성
+    const losersRounds: Game[][] = [];
+    let losersRoundNum = totalWinnersRounds + 1;
+    let previousLosersGames: Game[] = [];
+    
+    for (let round = 1; round <= totalLosersRounds; round++) {
+        const roundGames: Game[] = [];
+        let gamesInRound: number;
+        
+        // Losers Bracket은 두 종류의 라운드가 번갈아 나타남
+        if (round % 2 === 1) {
+            // Winners에서 떨어진 팀들과 기존 Losers 팀들의 경기
+            const winnersRoundIndex = Math.floor((round + 1) / 2);
+            if (winnersRoundIndex <= winnersRounds.length) {
+                gamesInRound = winnersRounds[Math.max(0, winnersRoundIndex - 1)].length;
+            } else {
+                gamesInRound = Math.max(1, previousLosersGames.length / 2);
+            }
+        } else {
+            // Losers Bracket 내부 경기
+            gamesInRound = Math.max(1, previousLosersGames.length / 2);
+        }
+        
+        for (let i = 0; i < gamesInRound; i++) {
+            const game: Game = {
+                match_id: matchId,
+                round: losersRoundNum,
+                game_number: gameNumber++,
+                status: 'scheduled',
+                venue: `Losers Bracket R${round}`,
+            };
+            
+            roundGames.push(game);
+            games.push(game);
+        }
+        
+        if (roundGames.length > 0) {
+            losersRounds.push(roundGames);
+            previousLosersGames = roundGames;
+            losersRoundNum++;
+        }
+    }
+    
+    // Grand Final 생성
+    const grandFinalRound: Game[] = [];
+    
+    // Grand Final Game 1
+    grandFinalRound.push({
+        match_id: matchId,
+        round: losersRoundNum,
+        game_number: gameNumber++,
+        status: 'scheduled',
+        venue: 'Grand Final',
+    });
+    
+    // Grand Final Game 2 (필요시)
+    grandFinalRound.push({
+        match_id: matchId,
+        round: losersRoundNum + 1,
+        game_number: gameNumber++,
+        status: 'scheduled',
+        venue: 'Grand Final (if necessary)',
+    });
+    
+    games.push(...grandFinalRound);
+    
+    // 모든 라운드를 하나의 배열로 통합
+    allRounds.push(...winnersRounds);
+    allRounds.push(...losersRounds);
+    allRounds.push(grandFinalRound);
+    
+    // 데이터베이스에 저장
+    const { error } = await supabase
+        .from('games')
+        .insert(games)
+        .select();
+    
+    if (error) {
+        console.error('Error creating double elimination bracket:', error);
+        throw error;
+    }
     
     return {
-        rounds: doubleElimRounds,
-        totalRounds: 0,
-        totalGames: 0,
+        rounds: allRounds,
+        totalRounds: losersRoundNum + 1,
+        totalGames: games.length,
     };
 }
 
@@ -235,14 +381,135 @@ export async function createRoundRobinSchedule(
  * 스위스 시스템 대진표 생성
  */
 export async function createSwissSystemSchedule(
-    _matchId: string,
-    _teamIds: string[],
-    _rounds: number = 5
+    matchId: string,
+    teamIds: string[],
+    rounds: number = 5
 ): Promise<Game[]> {
     const games: Game[] = [];
+    let gameNumber = 1;
     
-    // TODO: 스위스 시스템 로직 구현
-    // 각 라운드마다 비슷한 성적의 팀끼리 매칭
+    // 팀별 성적 초기화
+    interface TeamRecord {
+        teamId: string;
+        wins: number;
+        losses: number;
+        draws: number;
+        points: number;
+        opponentHistory: Set<string>;
+        buchholz: number; // 타이브레이커 점수
+    }
+    
+    const teamRecords: Map<string, TeamRecord> = new Map();
+    teamIds.forEach(teamId => {
+        teamRecords.set(teamId, {
+            teamId,
+            wins: 0,
+            losses: 0,
+            draws: 0,
+            points: 0,
+            opponentHistory: new Set(),
+            buchholz: 0,
+        });
+    });
+    
+    // 각 라운드마다 대진 생성
+    for (let round = 1; round <= rounds; round++) {
+        const roundGames: Game[] = [];
+        
+        // 현재 순위별로 팀 정렬
+        const sortedTeams = Array.from(teamRecords.values()).sort((a, b) => {
+            // 1. 승점 비교
+            if (b.points !== a.points) return b.points - a.points;
+            // 2. Buchholz 점수 비교
+            if (b.buchholz !== a.buchholz) return b.buchholz - a.buchholz;
+            // 3. 승수 비교
+            if (b.wins !== a.wins) return b.wins - a.wins;
+            // 4. 랜덤
+            return Math.random() - 0.5;
+        });
+        
+        // 이미 매칭된 팀 추적
+        const matchedInRound = new Set<string>();
+        
+        // 순위가 비슷한 팀끼리 매칭
+        for (let i = 0; i < sortedTeams.length; i++) {
+            const team1 = sortedTeams[i];
+            if (matchedInRound.has(team1.teamId)) continue;
+            
+            // 가능한 상대 찾기
+            for (let j = i + 1; j < sortedTeams.length; j++) {
+                const team2 = sortedTeams[j];
+                
+                // 이미 매칭된 팀이거나 이전에 만난 적이 있으면 건너뛰기
+                if (matchedInRound.has(team2.teamId) || 
+                    team1.opponentHistory.has(team2.teamId)) {
+                    continue;
+                }
+                
+                // 매칭 생성
+                const game: Game = {
+                    match_id: matchId,
+                    round: round,
+                    game_number: gameNumber++,
+                    team1_id: team1.teamId,
+                    team2_id: team2.teamId,
+                    status: 'scheduled',
+                    venue: `Swiss Round ${round}`,
+                };
+                
+                roundGames.push(game);
+                games.push(game);
+                
+                // 매칭 기록
+                matchedInRound.add(team1.teamId);
+                matchedInRound.add(team2.teamId);
+                team1.opponentHistory.add(team2.teamId);
+                team2.opponentHistory.add(team1.teamId);
+                
+                break;
+            }
+        }
+        
+        // 홀수 팀일 경우 부전승 처리
+        const unmatchedTeams = sortedTeams.filter(
+            team => !matchedInRound.has(team.teamId)
+        );
+        
+        if (unmatchedTeams.length === 1) {
+            const byeTeam = unmatchedTeams[0];
+            const byeGame: Game = {
+                match_id: matchId,
+                round: round,
+                game_number: gameNumber++,
+                team1_id: byeTeam.teamId,
+                team2_id: undefined,
+                status: 'completed',
+                is_bye: true,
+                winner_id: byeTeam.teamId,
+                team1_score: 1,
+                team2_score: 0,
+                venue: `Swiss Round ${round} (Bye)`,
+            };
+            
+            roundGames.push(byeGame);
+            games.push(byeGame);
+            
+            // 부전승 팀에게 승점 부여
+            byeTeam.wins++;
+            byeTeam.points += 3;
+        }
+    }
+    
+    // 데이터베이스에 저장
+    const { error } = await supabase
+        .from('games')
+        .insert(games)
+        .select();
+    
+    if (error) {
+        console.error('Error creating Swiss system schedule:', error);
+        throw error;
+    }
     
     return games;
 }

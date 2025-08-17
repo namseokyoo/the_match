@@ -140,7 +140,7 @@ export default function MatchBracketPage() {
         setShowUpdateModal(true);
     };
 
-    const handleUpdateMatch = (team1Score: number, team2Score: number) => {
+    const handleUpdateMatch = async (team1Score: number, team2Score: number) => {
         if (!selectedMatch || !bracket) return;
 
         let winner: string | undefined;
@@ -162,7 +162,28 @@ export default function MatchBracketPage() {
         setSelectedMatch(null);
         showToast('경기 결과가 업데이트되었습니다', 'success');
 
-        // TODO: 실제 데이터베이스에 저장
+        // 실제 데이터베이스에 저장
+        try {
+            const response = await fetch(`/api/matches/${matchId}/games/${selectedMatch.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    team1_score: team1Score,
+                    team2_score: team2Score,
+                    winner_id: winner,
+                    status: 'completed'
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('경기 결과 저장 실패');
+            }
+        } catch (error) {
+            console.error('경기 결과 저장 오류:', error);
+            showToast('경기 결과 저장에 실패했습니다', 'error');
+        }
     };
 
     // 데이터 로딩 중

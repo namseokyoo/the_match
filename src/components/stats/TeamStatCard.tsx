@@ -7,9 +7,10 @@ import { TeamStats } from '@/types';
 interface TeamStatCardProps {
     stats: TeamStats;
     teamName: string;
+    recentResults?: ('win' | 'loss' | 'draw')[];
 }
 
-export const TeamStatCard: React.FC<TeamStatCardProps> = ({ stats, teamName }) => {
+export const TeamStatCard: React.FC<TeamStatCardProps> = ({ stats, teamName, recentResults }) => {
     const winRate = stats.games_played > 0 
         ? (stats.wins / stats.games_played * 100).toFixed(1) 
         : '0.0';
@@ -69,22 +70,31 @@ export const TeamStatCard: React.FC<TeamStatCardProps> = ({ stats, teamName }) =
             <div className="mt-4">
                 <p className="text-sm text-gray-600 mb-2">최근 경기 결과</p>
                 <div className="flex space-x-1">
-                    {/* TODO: 실제 최근 경기 결과 데이터 연동 */}
-                    <span className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">
-                        W
-                    </span>
-                    <span className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs">
-                        D
-                    </span>
-                    <span className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">
-                        W
-                    </span>
-                    <span className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">
-                        L
-                    </span>
-                    <span className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">
-                        W
-                    </span>
+                    {recentResults ? (
+                        recentResults.slice(-5).map((result: 'win' | 'loss' | 'draw', index: number) => {
+                            let bgColor = 'bg-gray-400';
+                            let label = 'D';
+                            
+                            if (result === 'win') {
+                                bgColor = 'bg-green-500';
+                                label = 'W';
+                            } else if (result === 'loss') {
+                                bgColor = 'bg-red-500';
+                                label = 'L';
+                            }
+                            
+                            return (
+                                <span 
+                                    key={index}
+                                    className={`w-6 h-6 ${bgColor} rounded-full flex items-center justify-center text-white text-xs`}
+                                >
+                                    {label}
+                                </span>
+                            );
+                        })
+                    ) : (
+                        <span className="text-xs text-gray-500">경기 기록 없음</span>
+                    )}
                 </div>
             </div>
         </Card>

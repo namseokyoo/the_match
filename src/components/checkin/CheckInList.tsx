@@ -5,6 +5,7 @@ import { CheckCircle, XCircle, Clock, Users, Search } from 'lucide-react';
 import { showToast } from '@/components/ui/Toast';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { supabase } from '@/lib/supabase';
 
 interface CheckIn {
   id: string;
@@ -162,7 +163,21 @@ export default function CheckInList({
     }
 
     try {
-      // TODO: 실제 DB 업데이트
+      // Supabase를 통한 DB 업데이트
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from('check_ins')
+        .update({ 
+          status: newStatus,
+          checked_in_at: newStatus === 'checked_in' ? new Date().toISOString() : null,
+          checked_in_by: user?.id
+        })
+        .eq('id', checkInId);
+
+      if (error) throw error;
+
+      // 로컬 상태 업데이트
       setCheckIns(prev => prev.map(c => 
         c.id === checkInId 
           ? { 
