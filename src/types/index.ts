@@ -370,7 +370,8 @@ export interface ButtonProps extends BaseComponentProps {
 
 export interface InputProps extends BaseComponentProps {
     id?: string;
-    type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+    name?: string;
+    type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date' | 'datetime-local' | 'time' | 'search';
     placeholder?: string;
     // eslint-disable-next-line no-unused-vars
     value?: string;
@@ -387,6 +388,7 @@ export interface InputProps extends BaseComponentProps {
     autoComplete?: string;
     autoFocus?: boolean;
     readOnly?: boolean;
+    onBlur?: () => void;
 }
 
 // Utility types

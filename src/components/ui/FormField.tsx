@@ -1,278 +1,170 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react';
-
-interface ValidationRule {
-    test: (value: unknown) => boolean;
-    message: string;
-}
+import Input from './Input';
+import { cn } from '@/lib/utils';
 
 interface FormFieldProps {
     label: string;
     name: string;
-    type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date' | 'datetime-local' | 'textarea' | 'select';
-    value: string | number;
-    onChange: (value: string | number) => void;
+    type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date' | 'datetime-local' | 'time';
+    value: string;
+    onChange: (value: string) => void;
     onBlur?: () => void;
-    placeholder?: string;
-    required?: boolean;
-    disabled?: boolean;
-    readOnly?: boolean;
     error?: string;
-    helperText?: string;
-    validationRules?: ValidationRule[];
-    showValidation?: boolean;
-    options?: { value: string; label: string }[]; // for select
-    rows?: number; // for textarea
-    min?: string | number; // for number, date inputs
-    max?: string | number; // for number, date inputs
+    required?: boolean;
+    placeholder?: string;
+    helpText?: string;
+    disabled?: boolean;
     autoComplete?: string;
+    maxLength?: number;
+    showCharCount?: boolean;
+    validate?: (value: string) => { isValid: boolean; message?: string };
+    validateOnBlur?: boolean;
+    validateOnChange?: boolean;
     className?: string;
 }
 
-export const FormField: React.FC<FormFieldProps> = ({
+const FormField: React.FC<FormFieldProps> = ({
     label,
     name,
     type = 'text',
     value,
     onChange,
     onBlur,
-    placeholder,
+    error: externalError,
     required = false,
+    placeholder,
+    helpText,
     disabled = false,
-    readOnly = false,
-    error,
-    helperText,
-    validationRules = [],
-    showValidation = true,
-    options = [],
-    rows = 3,
-    min,
-    max,
     autoComplete,
-    className = '',
+    maxLength,
+    showCharCount = false,
+    validate,
+    validateOnBlur = true,
+    validateOnChange = false,
+    className
 }) => {
+    const [internalError, setInternalError] = useState<string>('');
     const [touched, setTouched] = useState(false);
-    const [validationState, setValidationState] = useState<'idle' | 'valid' | 'invalid'>('idle');
-    const [validationMessage, setValidationMessage] = useState('');
-
-    // 유효성 검사 실행
+    
+    const error = externalError || internalError;
+    
+    // 실시간 검증 (onChange)
     useEffect(() => {
-        if (!showValidation || !touched) {
-            setValidationState('idle');
-            return;
+        if (validateOnChange && touched && validate) {
+            const result = validate(value);
+            setInternalError(result.message || '');
         }
-
-        // 외부에서 전달된 에러가 있으면 우선 표시
-        if (error) {
-            setValidationState('invalid');
-            setValidationMessage(error);
-            return;
-        }
-
-        // 필수 필드 검사
-        if (required && !value) {
-            setValidationState('invalid');
-            setValidationMessage(`${label}은(는) 필수 입력 항목입니다.`);
-            return;
-        }
-
-        // 커스텀 유효성 규칙 검사
-        for (const rule of validationRules) {
-            if (!rule.test(value)) {
-                setValidationState('invalid');
-                setValidationMessage(rule.message);
-                return;
-            }
-        }
-
-        // 모든 검사 통과
-        if (value) {
-            setValidationState('valid');
-            setValidationMessage('');
-        } else {
-            setValidationState('idle');
-            setValidationMessage('');
-        }
-    }, [value, touched, error, required, validationRules, label, showValidation]);
-
+    }, [value, validate, validateOnChange, touched]);
+    
     const handleBlur = () => {
         setTouched(true);
+        
+        // onBlur 검증
+        if (validateOnBlur && validate) {
+            const result = validate(value);
+            setInternalError(result.message || '');
+        }
+        
         onBlur?.();
     };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const newValue = type === 'number' ? Number(e.target.value) : e.target.value;
+    
+    const handleChange = (newValue: string) => {
         onChange(newValue);
-    };
-
-    const fieldId = `field-${name}`;
-    const errorId = `${fieldId}-error`;
-    const helperId = `${fieldId}-helper`;
-
-    const inputClasses = `
-        w-full px-3 py-2 border rounded-md transition-all
-        ${validationState === 'valid' ? 'border-green-500 focus:ring-green-500' : ''}
-        ${validationState === 'invalid' ? 'border-red-500 focus:ring-red-500' : ''}
-        ${validationState === 'idle' ? 'border-gray-300 focus:ring-blue-500' : ''}
-        ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}
-        focus:outline-none focus:ring-2 focus:ring-opacity-50
-        ${className}
-    `.trim();
-
-    const renderValidationIcon = () => {
-        if (!showValidation || !touched) return null;
-
-        switch (validationState) {
-            case 'valid':
-                return <CheckCircle className="w-5 h-5 text-green-500" />;
-            case 'invalid':
-                return <XCircle className="w-5 h-5 text-red-500" />;
-            default:
-                return null;
+        
+        // 에러가 있었다면 입력 시작하면 초기화
+        if (error && !validateOnChange) {
+            setInternalError('');
         }
     };
-
-    const renderField = () => {
-        const commonProps = {
-            id: fieldId,
-            name,
-            value: value || '',
-            onChange: handleChange,
-            onBlur: handleBlur,
-            disabled,
-            readOnly,
-            placeholder,
-            required,
-            autoComplete,
-            'aria-invalid': validationState === 'invalid',
-            'aria-describedby': validationMessage ? errorId : helperText ? helperId : undefined,
-            className: inputClasses,
-        };
-
-        if (type === 'textarea') {
-            return (
-                <textarea
-                    {...commonProps}
-                    rows={rows}
-                />
-            );
-        }
-
-        if (type === 'select') {
-            return (
-                <select {...commonProps}>
-                    <option value="">선택하세요</option>
-                    {options.map((option) => (
-                        <option key={option.value} value={option.value}>
-                            {option.label}
-                        </option>
-                    ))}
-                </select>
-            );
-        }
-
-        return (
-            <input
-                {...commonProps}
-                type={type}
-                min={min}
-                max={max}
-            />
-        );
-    };
-
+    
     return (
-        <div className="mb-4">
-            <label htmlFor={fieldId} className="block mb-2">
-                <span className="text-sm font-medium text-gray-700">
-                    {label}
-                    {required && <span className="text-red-500 ml-1">*</span>}
-                </span>
+        <div className={cn('space-y-1', className)}>
+            {/* Label */}
+            <label 
+                htmlFor={name} 
+                className="block text-sm font-medium text-gray-700"
+            >
+                {label}
+                {required && (
+                    <span className="text-red-500 ml-1" aria-label="필수">
+                        *
+                    </span>
+                )}
             </label>
-
+            
+            {/* Input Field */}
             <div className="relative">
-                {renderField()}
-                {renderValidationIcon() && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        {renderValidationIcon()}
+                <Input
+                    id={name}
+                    name={name}
+                    type={type}
+                    value={value}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder={placeholder}
+                    disabled={disabled}
+                    autoComplete={autoComplete}
+                    maxLength={maxLength}
+                    className={cn(
+                        error && 'border-red-500 focus:ring-red-500',
+                        'w-full'
+                    )}
+                    aria-invalid={!!error}
+                    aria-describedby={
+                        error ? `${name}-error` : 
+                        helpText ? `${name}-help` : 
+                        undefined
+                    }
+                />
+                
+                {/* Character Count */}
+                {showCharCount && maxLength && (
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <span className={cn(
+                            'text-xs',
+                            value.length >= maxLength ? 'text-red-500' : 'text-gray-400'
+                        )}>
+                            {value.length}/{maxLength}
+                        </span>
                     </div>
                 )}
             </div>
-
-            {/* 유효성 검사 메시지 */}
-            {validationState === 'invalid' && validationMessage && (
-                <p id={errorId} className="mt-1 text-sm text-red-600 flex items-center">
-                    <AlertCircle className="w-4 h-4 mr-1" />
-                    {validationMessage}
+            
+            {/* Error Message */}
+            {error && touched && (
+                <p 
+                    id={`${name}-error`} 
+                    className="text-sm text-red-600 flex items-center gap-1"
+                    role="alert"
+                >
+                    <svg 
+                        className="w-4 h-4" 
+                        fill="currentColor" 
+                        viewBox="0 0 20 20"
+                    >
+                        <path 
+                            fillRule="evenodd" 
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" 
+                            clipRule="evenodd" 
+                        />
+                    </svg>
+                    {error}
                 </p>
             )}
-
-            {/* 도움말 텍스트 */}
-            {helperText && validationState !== 'invalid' && (
-                <p id={helperId} className="mt-1 text-sm text-gray-500 flex items-center">
-                    <Info className="w-4 h-4 mr-1" />
-                    {helperText}
-                </p>
-            )}
-
-            {/* 성공 메시지 */}
-            {validationState === 'valid' && showValidation && (
-                <p className="mt-1 text-sm text-green-600 flex items-center">
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                    올바른 입력입니다
+            
+            {/* Help Text */}
+            {helpText && !error && (
+                <p 
+                    id={`${name}-help`} 
+                    className="text-sm text-gray-500"
+                >
+                    {helpText}
                 </p>
             )}
         </div>
     );
-};
-
-// 일반적으로 사용되는 유효성 검사 규칙들
-export const validationRules = {
-    email: {
-        test: (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-        message: '올바른 이메일 형식이 아닙니다',
-    },
-    minLength: (min: number) => ({
-        test: (value: string) => value.length >= min,
-        message: `최소 ${min}자 이상 입력해주세요`,
-    }),
-    maxLength: (max: number) => ({
-        test: (value: string) => value.length <= max,
-        message: `최대 ${max}자까지 입력 가능합니다`,
-    }),
-    pattern: (pattern: RegExp, message: string) => ({
-        test: (value: string) => pattern.test(value),
-        message,
-    }),
-    phone: {
-        test: (value: string) => /^[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}$/.test(value),
-        message: '올바른 전화번호 형식이 아닙니다 (예: 010-1234-5678)',
-    },
-    url: {
-        test: (value: string) => {
-            try {
-                new URL(value);
-                return true;
-            } catch {
-                return false;
-            }
-        },
-        message: '올바른 URL 형식이 아닙니다',
-    },
-    number: {
-        test: (value: unknown) => !isNaN(Number(value)),
-        message: '숫자만 입력 가능합니다',
-    },
-    min: (min: number) => ({
-        test: (value: number) => value >= min,
-        message: `${min} 이상의 값을 입력해주세요`,
-    }),
-    max: (max: number) => ({
-        test: (value: number) => value <= max,
-        message: `${max} 이하의 값을 입력해주세요`,
-    }),
 };
 
 export default FormField;

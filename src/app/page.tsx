@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Trophy, Calendar, Clock, ArrowRight, UserPlus, Users } from 'lucide-react';
+import { Trophy, Calendar, Clock, ArrowRight, UserPlus, Users, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { OnboardingTour } from '@/components/onboarding';
+import WelcomeGuide from '@/components/onboarding/WelcomeGuide';
 import { Match, Team } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { dashboardAPI } from '@/lib/api-client';
@@ -19,6 +20,7 @@ export default function Home() {
     const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
     const [loading, setLoading] = useState(true);
     const [liveMatches, setLiveMatches] = useState<Match[]>([]);
+    const [showGuideFromFooter, setShowGuideFromFooter] = useState(false);
 
     useEffect(() => {
         fetchDynamicContent();
@@ -124,6 +126,17 @@ export default function Home() {
         <div className="flex min-h-screen flex-col bg-gray-50">
             {/* Onboarding Tour for new users */}
             <OnboardingTour autoStart={!!user} />
+            
+            {/* Welcome Guide for first-time visitors */}
+            <WelcomeGuide />
+            
+            {/* Welcome Guide from footer */}
+            {showGuideFromFooter && (
+                <WelcomeGuide 
+                    isFooterVersion={true} 
+                    onClose={() => setShowGuideFromFooter(false)} 
+                />
+            )}
 
             {/* Hero Section with Live Now */}
             <section className="relative py-6 px-4 sm:px-6 lg:px-8 bg-white border-b border-gray-200">
@@ -394,6 +407,13 @@ export default function Home() {
                             <Link href="/community" className="hover:text-white transition-colors">
                                 커뮤니티
                             </Link>
+                            <button 
+                                onClick={() => setShowGuideFromFooter(true)}
+                                className="hover:text-white transition-colors flex items-center gap-1"
+                            >
+                                <HelpCircle className="w-4 h-4" />
+                                시작 가이드
+                            </button>
                         </div>
                         <div className="text-sm text-gray-400">
                             © 2024 The Match
