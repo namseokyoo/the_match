@@ -45,24 +45,33 @@ export default function CommunitySection() {
                     user_id,
                     created_at,
                     updated_at,
-                    view_count,
-                    profiles:user_id (
-                        username,
-                        email
-                    )
+                    view_count
                 `)
                 .order('created_at', { ascending: false })
                 .limit(5);
+            
+            // 각 포스트에 대한 프로필 정보 가져오기
+            let postsWithProfiles: Post[] = [];
+            if (latest && latest.length > 0) {
+                const userIds = Array.from(new Set(latest.map(p => p.user_id)));
+                const { data: profiles } = await supabase
+                    .from('profiles')
+                    .select('user_id, username, email')
+                    .in('user_id', userIds);
+                
+                postsWithProfiles = latest.map(post => ({
+                    ...post,
+                    profiles: profiles?.find(p => p.user_id === post.user_id) || {
+                        username: null,
+                        email: ''
+                    }
+                })) as Post[];
+            }
 
             if (latestError) {
                 console.error('Error fetching latest posts:', latestError);
             } else {
-                // profiles는 단일 객체로 반환됨 (user_id로 조인)
-                const formattedLatest = (latest || []).map(post => ({
-                    ...post,
-                    profiles: Array.isArray(post.profiles) ? post.profiles[0] : post.profiles
-                })) as Post[];
-                setLatestPosts(formattedLatest);
+                setLatestPosts(postsWithProfiles);
             }
 
             // 인기글 가져오기 (최근 7일간 조회수 순)
@@ -78,25 +87,34 @@ export default function CommunitySection() {
                     user_id,
                     created_at,
                     updated_at,
-                    view_count,
-                    profiles:user_id (
-                        username,
-                        email
-                    )
+                    view_count
                 `)
                 .gte('created_at', sevenDaysAgo.toISOString())
                 .order('view_count', { ascending: false })
                 .limit(5);
+            
+            // 각 포스트에 대한 프로필 정보 가져오기
+            let popularWithProfiles: Post[] = [];
+            if (popular && popular.length > 0) {
+                const userIds = Array.from(new Set(popular.map(p => p.user_id)));
+                const { data: profiles } = await supabase
+                    .from('profiles')
+                    .select('user_id, username, email')
+                    .in('user_id', userIds);
+                
+                popularWithProfiles = popular.map(post => ({
+                    ...post,
+                    profiles: profiles?.find(p => p.user_id === post.user_id) || {
+                        username: null,
+                        email: ''
+                    }
+                })) as Post[];
+            }
 
             if (popularError) {
                 console.error('Error fetching popular posts:', popularError);
             } else {
-                // profiles는 단일 객체로 반환됨 (user_id로 조인)
-                const formattedPopular = (popular || []).map(post => ({
-                    ...post,
-                    profiles: Array.isArray(post.profiles) ? post.profiles[0] : post.profiles
-                })) as Post[];
-                setPopularPosts(formattedPopular);
+                setPopularPosts(popularWithProfiles);
             }
         } catch (error) {
             console.error('Error fetching community posts:', error);
