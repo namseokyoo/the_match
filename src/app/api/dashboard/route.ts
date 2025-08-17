@@ -129,9 +129,10 @@ export async function GET() {
             timestamp: new Date().toISOString()
         });
 
-        // HTTP 캐시 헤더 추가 - 30초간 캐시, 최대 1분간 stale 허용
-        response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
-        response.headers.set('CDN-Cache-Control', 'public, s-maxage=30');
+        // HTTP 캐시 헤더 추가 - 캐시 사용하지 않음 (실시간 데이터 중요)
+        response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        response.headers.set('Pragma', 'no-cache');
+        response.headers.set('Expires', '0');
         
         return response;
         

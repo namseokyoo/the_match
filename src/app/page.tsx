@@ -28,6 +28,12 @@ export default function Home() {
         try {
             setLoading(true);
             
+            // 캐시 무효화 - 페이지 로드 시 항상 최신 데이터 가져오기
+            if (typeof window !== 'undefined') {
+                const apiClient = (await import('@/lib/api-client')).performanceUtils;
+                apiClient.clearCache('/api/dashboard');
+            }
+            
             // 단일 API 호출로 모든 데이터 가져오기
             const dashboardData = await dashboardAPI.getHomeData().catch(err => {
                 console.error('Dashboard API error:', err);
