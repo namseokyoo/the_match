@@ -1,148 +1,73 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
 
-// 보호된 라우트 정의
-const protectedRoutes = [
-  '/dashboard',
-  '/profile',
+// 인증이 필수인 라우트만 정의 (프로필 제외)
+const strictProtectedRoutes = [
   '/matches/create',
   '/teams/create',
-  '/teams/*/edit',
-  '/matches/*/edit',
   '/community/posts/create',
-  '/community/posts/*/edit',
 ];
 
-// 인증 전용 라우트 (로그인한 사용자는 접근 불가)
-const authRoutes = ['/login', '/signup', '/auth/reset-password'];
+// 로그인한 사용자가 접근하면 안 되는 라우트
+const authOnlyRoutes = ['/login', '/signup'];
 
 export async function middleware(request: NextRequest) {
-  // 먼저 response 객체를 생성
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
-  
   const { pathname } = request.nextUrl;
-
-  // API 라우트는 건너뛰기
-  if (pathname.startsWith('/api/')) {
-    return response;
+  
+  // API 라우트, 정적 파일은 건너뛰기
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.includes('.')
+  ) {
+    return NextResponse.next();
   }
 
-  try {
-    // Supabase 클라이언트 생성
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return request.cookies.get(name)?.value;
-          },
-          set(name: string, value: string, options: any) {
-            // 쿠키 설정을 response에 추가
-            request.cookies.set({
-              name,
-              value,
-              ...options,
-            });
-            response = NextResponse.next({
-              request,
-            });
-            response.cookies.set({
-              name,
-              value,
-              ...options,
-            });
-          },
-          remove(name: string, options: any) {
-            // 쿠키 제거를 response에 추가
-            request.cookies.set({
-              name,
-              value: '',
-              ...options,
-            });
-            response = NextResponse.next({
-              request,
-            });
-            response.cookies.set({
-              name,
-              value: '',
-              ...options,
-            });
-          },
-        },
-      }
+  // Supabase 세션 쿠키 확인 - 정확한 프로젝트 ID 사용
+  const hasAuthCookie = 
+    request.cookies.has('sb-pkeycuoaeddmblcwzhpo-auth-token') ||
+    request.cookies.has('sb-pkeycuoaeddmblcwzhpo-auth-token-code-verifier') ||
+    // 쿠키 목록에서 Supabase 관련 토큰 찾기
+    Array.from(request.cookies.getAll()).some(cookie => 
+      cookie.name.startsWith('sb-pkeycuoaeddmblcwzhpo-auth-token')
     );
-
-    // 세션 확인 - getUser를 사용하여 더 정확한 인증 상태 확인
-    const { data: { user }, error } = await supabase.auth.getUser();
-    
-    // 디버깅을 위한 로그 (프로덕션에서는 제거)
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[Middleware] Path: ${pathname}, User: ${user?.email || 'none'}, Error: ${error?.message || 'none'}`);
-    }
-
-    // 보호된 라우트 확인
-    const isProtectedRoute = protectedRoutes.some(route => {
-      if (route.includes('*')) {
-        const pattern = route.replace('*', '.*');
-        return new RegExp(`^${pattern}$`).test(pathname);
-      }
-      return pathname === route || pathname.startsWith(route + '/');
-    });
-
-    // 인증 전용 라우트 확인
-    const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
-
-    // 로그인하지 않은 사용자가 보호된 라우트에 접근하려는 경우
-    if (isProtectedRoute && (!user || error)) {
-      // 개발 환경에서는 경고만 표시하고 통과시킴 (클라이언트에서 리다이렉트 처리)
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[Middleware] Protected route accessed without auth: ${pathname}`);
-        // 헤더에 인증 필요 표시를 추가하고 요청 통과
-        response.headers.set('x-auth-required', 'true');
-        return response;
-      }
-      
-      const redirectUrl = new URL('/login', request.url);
-      redirectUrl.searchParams.set('redirectTo', pathname);
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    // 로그인한 사용자가 인증 페이지에 접근하려는 경우
-    if (isAuthRoute && user && !error) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-
-    // 세션 리프레시 헤더 추가
-    if (user) {
-      response.headers.set('x-session-status', 'active');
-      response.headers.set('x-user-email', user.email || '');
-    }
-
-    return response;
-  } catch (error) {
-    // 에러 발생 시 로그
-    console.error('[Middleware] Error:', error);
-    
-    // 에러가 발생해도 일단 요청을 통과시킴
-    return response;
+  
+  // 디버그 로깅
+  if (pathname === '/profile') {
+    console.log(`[Middleware] Profile access - Cookies: ${Array.from(request.cookies.getAll()).map(c => c.name).join(', ')}`);
+    console.log(`[Middleware] HasAuth: ${hasAuthCookie}`);
   }
+  
+  // 생성/작성 페이지만 엄격하게 보호
+  const isStrictProtected = strictProtectedRoutes.some(route => 
+    pathname === route || pathname.startsWith(route + '/')
+  );
+
+  // 인증 전용 페이지 확인
+  const isAuthOnly = authOnlyRoutes.some(route => 
+    pathname === route || pathname.startsWith(route + '/')
+  );
+
+  // 생성/작성 페이지는 쿠키가 없으면 로그인으로
+  if (isStrictProtected && !hasAuthCookie) {
+    console.log(`[Middleware] Redirecting to login from: ${pathname}`);
+    const redirectUrl = new URL('/login', request.url);
+    redirectUrl.searchParams.set('redirectTo', pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // 로그인/회원가입은 쿠키가 있으면 대시보드로
+  if (isAuthOnly && hasAuthCookie) {
+    console.log(`[Middleware] Redirecting to dashboard from: ${pathname}`);
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  // 나머지는 모두 통과 (프로필, 대시보드 등은 클라이언트에서 처리)
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder files
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };
