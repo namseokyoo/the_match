@@ -8,6 +8,7 @@ import { ToastContainer } from '@/components/ui/Toast';
 import ClientProviders from '@/components/providers/ClientProviders';
 import PWAProvider from '@/components/pwa/PWAProvider';
 import GlobalLoader from '@/components/ui/GlobalLoader';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import './globals.css';
 
 // ConfigStatus는 클라이언트 사이드에서만 렌더링
@@ -98,6 +99,9 @@ export default function RootLayout({
                                     <div className="relative flex min-h-screen flex-col">
                                         {/* 네비게이션 바 */}
                                         <MobileNavbar />
+                                        
+                                        {/* 브레드크럼 */}
+                                        <Breadcrumb />
 
                                         {/* 메인 콘텐츠 */}
                                         <main className="flex-1 pb-16">

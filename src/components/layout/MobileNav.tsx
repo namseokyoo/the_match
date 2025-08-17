@@ -82,7 +82,16 @@ const MobileNav: React.FC = () => {
     return (
         <>
             <div className="fixed bottom-0 bg-white border-t border-gray-200 z-40" style={{ width: '430px', left: '50%', transform: 'translateX(-50%)' }}>
-                <nav className="flex items-center justify-around h-16">
+                <nav className="flex items-center justify-around h-16 relative">
+                    {/* 활성 아이템 인디케이터 */}
+                    <div 
+                        className="absolute top-0 h-0.5 bg-blue-600 transition-all duration-300 ease-in-out"
+                        style={{
+                            width: `${100 / navItems.filter(item => !item.requireAuth || user).length}%`,
+                            left: `${(navItems.filter(item => !item.requireAuth || user).findIndex(item => isActive(item.path)) * 100) / navItems.filter(item => !item.requireAuth || user).length}%`
+                        }}
+                    />
+                    
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.path);
@@ -95,14 +104,23 @@ const MobileNav: React.FC = () => {
                             <button
                                 key={item.path}
                                 onClick={() => router.push(item.path)}
-                                className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+                                className={`relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-200 ${
                                     active 
                                         ? 'text-blue-600' 
-                                        : 'text-gray-600 hover:text-gray-900'
+                                        : 'text-gray-500 hover:text-gray-700'
                                 }`}
                             >
-                                <Icon className={`w-5 h-5 ${active ? 'stroke-2' : ''}`} />
-                                <span className="text-xs mt-1">{item.label}</span>
+                                <div className={`relative transition-transform duration-200 ${active ? 'scale-110' : 'scale-100'}`}>
+                                    <Icon className={`w-5 h-5 ${active ? 'stroke-2' : ''}`} />
+                                    {active && (
+                                        <div className="absolute -inset-2 bg-blue-100 rounded-full opacity-30 animate-pulse" />
+                                    )}
+                                </div>
+                                <span className={`text-xs mt-1 font-medium transition-all duration-200 ${
+                                    active ? 'text-blue-600' : 'text-gray-500'
+                                }`}>
+                                    {item.label}
+                                </span>
                             </button>
                         );
                     })}
