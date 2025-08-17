@@ -28,7 +28,7 @@ export async function middleware(request: NextRequest) {
   const authOnlyRoutes = ['/login', '/signup'];
 
   // Response를 먼저 생성
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },

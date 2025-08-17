@@ -15,7 +15,6 @@ import CommunitySection from '@/components/home/CommunitySection';
 
 export default function Home() {
     const { user } = useAuth();
-    const [activeMatches, setActiveMatches] = useState<Match[]>([]);
     const [recruitingTeams, setRecruitingTeams] = useState<Team[]>([]);
     const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
     const [loading, setLoading] = useState(true);
@@ -45,8 +44,6 @@ export default function Home() {
 
             if (dashboardData.success && dashboardData.data) {
                 const { activeMatches, upcomingMatches, recruitingTeams } = dashboardData.data;
-                
-                setActiveMatches(activeMatches || []);
                 setUpcomingMatches(upcomingMatches || []);
                 setRecruitingTeams(recruitingTeams || []);
 
@@ -99,7 +96,6 @@ export default function Home() {
             }
         } catch (error) {
             console.error('Error fetching dynamic content:', error);
-            setActiveMatches([]);
             setRecruitingTeams([]);
             setUpcomingMatches([]);
             setLiveMatches([]);
