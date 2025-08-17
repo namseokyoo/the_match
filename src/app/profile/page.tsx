@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Team, Match, Player, TeamJoinRequest } from '@/types';
@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { formatDate } from '@/lib/utils';
 import { Clock, Check, X } from 'lucide-react';
+import SkeletonLoader from '@/components/ui/SkeletonLoader';
 
 interface UserProfile {
     id: string;
@@ -20,8 +21,8 @@ interface UserProfile {
     updated_at?: string;
 }
 
-export default function ProfilePage() {
-    const { user, loading: authLoading } = useAuth();
+function ProfileContent() {
+    const { user, session, loading: authLoading } = useAuth();
     const router = useRouter();
     
     const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -38,10 +39,14 @@ export default function ProfilePage() {
 
     // 프로필 정보 조회
     const fetchProfile = useCallback(async () => {
-        if (!user) return;
+        if (!user || !session) {
+            console.log('[Profile] No user or session available');
+            return;
+        }
 
         try {
             setLoading(true);
+            console.log('[Profile] Fetching profile for user:', user.email);
 
             // 사용자 프로필 조회
             const { data: profileData, error: profileError } = await supabase
@@ -100,7 +105,7 @@ export default function ProfilePage() {
 
             // 내가 만든 경기 조회
             const { data: matchesData, error: matchesError } = await supabase
-                .from('matches') // DB 테이블명은 일단 유지
+                .from('matches')
                 .select('*')
                 .eq('creator_id', user.id)
                 .order('created_at', { ascending: false });
@@ -143,17 +148,20 @@ export default function ProfilePage() {
         } finally {
             setLoading(false);
         }
-    }, [user]);
+    }, [user, session]);
 
     // 컴포넌트 마운트 시 데이터 로드
     useEffect(() => {
-        // 로딩이 완료되고 사용자가 있을 때만 프로필 로드
-        if (!authLoading && user) {
+        console.log('[Profile] Auth state:', { authLoading, user: user?.email, session: !!session });
+        
+        // 인증 로딩이 완료되고 사용자와 세션이 모두 있을 때만 프로필 로드
+        if (!authLoading && user && session) {
             fetchProfile();
+        } else if (!authLoading && !user) {
+            // 인증 로딩이 완료되었는데 사용자가 없으면 로딩 상태 해제
+            setLoading(false);
         }
-        // middleware가 인증을 처리하므로 여기서는 리다이렉트하지 않음
-        // else if 블록을 제거하여 middleware와 충돌 방지
-    }, [authLoading, user, fetchProfile]);
+    }, [authLoading, user, session, fetchProfile]);
 
     // 프로필 수정
     const handleSaveProfile = async () => {
@@ -198,11 +206,42 @@ export default function ProfilePage() {
         }
     };
 
-    // 로딩 상태 또는 인증 확인 중
-    if (loading || authLoading || !user) {
+    // 인증 확인 중
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <SkeletonLoader variant="card" count={3} className="mb-6" />
+                </div>
+            </div>
+        );
+    }
+
+    // 로그인하지 않은 상태
+    if (!user || !session) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-match-blue"></div>
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4">로그인이 필요합니다</h2>
+                    <p className="text-gray-600 mb-6">프로필을 보려면 먼저 로그인해주세요.</p>
+                    <Button
+                        onClick={() => router.push('/login')}
+                        variant="primary"
+                    >
+                        로그인하기
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
+    // 데이터 로딩 중
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <SkeletonLoader variant="card" count={3} className="mb-6" />
+                </div>
             </div>
         );
     }
@@ -533,5 +572,17 @@ export default function ProfilePage() {
                 )}
             </div>
         </div>
+    );
+}
+
+export default function ProfilePage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-match-blue"></div>
+            </div>
+        }>
+            <ProfileContent />
+        </Suspense>
     );
 }
