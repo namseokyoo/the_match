@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
-import { supabase, hasValidSupabaseConfig } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 
 interface AuthContextType {
     user: User | null;
@@ -36,6 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
     const [sessionCheckInterval, setSessionCheckInterval] = useState<NodeJS.Timeout | null>(null);
+    const supabase = React.useMemo(() => createClient(), []);
 
     // 세션 자동 갱신 함수
     const refreshSession = async () => {
@@ -54,13 +55,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // 초기화 - Supabase 세션만 확인 (캐시 없음)
     useEffect(() => {
-        // Supabase 설정 확인
-        if (!hasValidSupabaseConfig()) {
-            console.warn('Invalid Supabase configuration');
-            setLoading(false);
-            return;
-        }
-
         let mounted = true;
 
         const initializeAuth = async () => {
@@ -91,7 +85,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         // 인증 상태 변경 리스너
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, newSession) => {
+            async (event: string, newSession: Session | null) => {
                 console.log('Auth state changed:', event);
                 
                 if (mounted) {

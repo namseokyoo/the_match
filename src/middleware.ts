@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { updateSession } from '@/utils/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -27,43 +27,15 @@ export async function middleware(request: NextRequest) {
   // 로그인한 사용자가 접근하면 안 되는 라우트
   const authOnlyRoutes = ['/login', '/signup'];
 
-  // Response를 먼저 생성
-  const response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
-
-  // Supabase 클라이언트 생성 (SSR용)
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options: any) {
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-        },
-        remove(name: string, options: any) {
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          });
-        },
-      },
-    }
-  );
-
-  // 세션 확인
-  const { data: { session } } = await supabase.auth.getSession();
-  const isAuthenticated = !!session;
+  // 세션 업데이트 및 사용자 정보 가져오기
+  const { response, user } = await updateSession(request);
+  
+  // 디버깅 로그
+  if (pathname === '/profile' || pathname === '/dashboard' || pathname === '/matches/create' || pathname === '/teams/create') {
+    console.log(`[Middleware] Path: ${pathname}, User: ${user?.email || 'none'}`);
+  }
+  
+  const isAuthenticated = !!user;
 
   // 보호된 라우트 확인
   const isProtectedRoute = protectedRoutes.some(route => 
