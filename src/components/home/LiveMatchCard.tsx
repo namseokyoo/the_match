@@ -53,65 +53,62 @@ export default function LiveMatchCard({ match }: LiveMatchCardProps) {
 
     return (
         <Link href={`/matches/${match.id}`}>
-            <div className="relative bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white hover:shadow-2xl transition-all duration-300 cursor-pointer h-full">
+            <div className="relative bg-blue-600 rounded-lg p-4 text-white hover:bg-blue-700 transition-colors duration-150 cursor-pointer h-full">
                 {/* Live 인디케이터 */}
                 {isLive && (
-                    <div className="absolute top-4 right-4 flex items-center gap-2">
-                        <span className="relative flex h-3 w-3">
+                    <div className="absolute top-3 right-3 flex items-center gap-1">
+                        <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                         </span>
-                        <span className="text-sm font-bold">LIVE</span>
+                        <span className="text-xs font-bold">LIVE</span>
                     </div>
                 )}
 
                 {/* D-Day 표시 */}
                 {!isLive && dDay && (
-                    <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                        <span className="text-sm font-bold">{dDay}</span>
+                    <div className="absolute top-3 right-3 bg-white/20 px-2 py-0.5 rounded">
+                        <span className="text-xs font-medium">{dDay}</span>
                     </div>
                 )}
 
                 {/* 경기 정보 */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                     {/* 제목 */}
                     <div>
-                        <h3 className="text-xl font-bold mb-1 line-clamp-1">
+                        <h3 className="text-lg font-bold mb-1 line-clamp-1">
                             {match.title}
                         </h3>
                         <div className="flex items-center gap-2">
-                            <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${statusColor} bg-white/90`}>
+                            <span className={`px-2 py-0.5 text-xs rounded font-medium ${statusColor}`}>
                                 {statusLabel}
                             </span>
-                            <span className="text-sm opacity-90">
+                            <span className="text-xs opacity-90">
                                 {getTypeLabel(match.type)}
                             </span>
                         </div>
                     </div>
 
                     {/* 상세 정보 */}
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-1.5 text-sm">
                         {match.start_date && (
                             <div className="flex items-center gap-2 opacity-90">
-                                <Calendar className="w-4 h-4" />
-                                <span>{formatDate(match.start_date)}</span>
-                                {match.end_date && match.start_date !== match.end_date && (
-                                    <span>~ {formatDate(match.end_date)}</span>
-                                )}
+                                <Calendar className="w-3.5 h-3.5" />
+                                <span className="text-xs">{formatDate(match.start_date)}</span>
                             </div>
                         )}
 
                         {match.venue && (
                             <div className="flex items-center gap-2 opacity-90">
-                                <MapPin className="w-4 h-4" />
-                                <span className="line-clamp-1">{match.venue}</span>
+                                <MapPin className="w-3.5 h-3.5" />
+                                <span className="text-xs line-clamp-1">{match.venue}</span>
                             </div>
                         )}
 
                         {match.max_participants && (
                             <div className="flex items-center gap-2 opacity-90">
-                                <Users className="w-4 h-4" />
-                                <span>
+                                <Users className="w-3.5 h-3.5" />
+                                <span className="text-xs">
                                     {(match as any).current_participants || 0} / {match.max_participants} 팀
                                 </span>
                             </div>
@@ -119,30 +116,13 @@ export default function LiveMatchCard({ match }: LiveMatchCardProps) {
 
                         {match.registration_deadline && !isLive && (
                             <div className="flex items-center gap-2 text-yellow-200">
-                                <Clock className="w-4 h-4" />
-                                <span className="text-sm">
+                                <Clock className="w-3.5 h-3.5" />
+                                <span className="text-xs">
                                     신청 마감: {formatDate(match.registration_deadline)}
                                 </span>
                             </div>
                         )}
                     </div>
-
-                    {/* 참가 버튼 또는 상태 */}
-                    {!isLive && calculatedStatus === 'registration' && (
-                        <div className="pt-2">
-                            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-center font-medium">
-                                참가 신청하기
-                            </div>
-                        </div>
-                    )}
-
-                    {isLive && (
-                        <div className="pt-2">
-                            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-center font-medium">
-                                경기 상세 보기
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
         </Link>

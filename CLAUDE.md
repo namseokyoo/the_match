@@ -275,6 +275,212 @@ export function ProtectedRoute({
 4. **Session Management**: Implement proper session timeout and refresh
 5. **Error Handling**: Don't expose sensitive permission details in errors
 
+## Design System Guidelines
+
+### Core Design Principles
+1. **Minimalism**: Less is more - focus on content and functionality
+2. **Consistency**: Uniform design patterns across all pages
+3. **Hierarchy**: Clear visual hierarchy through spacing and typography
+4. **Accessibility**: WCAG 2.1 AA compliance minimum
+5. **Performance**: Optimize for mobile-first experience
+
+### Color Palette
+**Primary Colors** (Limited, purposeful use)
+- **Primary Blue**: `#2563EB` (blue-600) - Main actions, links
+- **Primary Dark**: `#1E40AF` (blue-800) - Hover states
+- **Success Green**: `#10B981` (emerald-500) - Positive actions, success states
+- **Error Red**: `#EF4444` (red-500) - Errors, critical actions
+- **Warning Orange**: `#F59E0B` (amber-500) - Warnings, deadlines
+
+**Neutral Colors** (Main UI colors)
+- **Gray-900**: `#111827` - Primary text
+- **Gray-700**: `#374151` - Secondary text
+- **Gray-500**: `#6B7280` - Tertiary text, placeholders
+- **Gray-200**: `#E5E7EB` - Borders
+- **Gray-100**: `#F3F4F6` - Backgrounds
+- **Gray-50**: `#F9FAFB` - Light backgrounds
+- **White**: `#FFFFFF` - Cards, primary backgrounds
+
+**Usage Rules**
+- Maximum 3 colors per component (excluding neutrals)
+- Primary color for main CTAs only
+- Semantic colors for status (green=success, red=error)
+- 60-30-10 rule: 60% neutral, 30% secondary, 10% accent
+
+### Typography Scale
+**Mobile-First Sizing** (Base: 16px)
+```css
+/* Headings */
+h1: text-2xl (24px) / lg:text-3xl (30px) - Page titles
+h2: text-xl (20px) / lg:text-2xl (24px) - Section headers  
+h3: text-lg (18px) / lg:text-xl (20px) - Card titles
+h4: text-base (16px) / lg:text-lg (18px) - Subsections
+
+/* Body Text */
+body: text-sm (14px) / lg:text-base (16px) - Main content
+small: text-xs (12px) / lg:text-sm (14px) - Secondary info
+caption: text-xs (12px) - Metadata, timestamps
+
+/* Font Weights */
+- Regular (400): Body text
+- Medium (500): Important text
+- Semibold (600): Buttons, links
+- Bold (700): Headings only
+```
+
+### Spacing System
+**8px Grid System** (Consistent spacing)
+```css
+/* Spacing Scale */
+space-0: 0px
+space-1: 4px (0.25rem)
+space-2: 8px (0.5rem) - Minimum spacing
+space-3: 12px (0.75rem)
+space-4: 16px (1rem) - Default element spacing
+space-5: 20px (1.25rem)
+space-6: 24px (1.5rem) - Section spacing
+space-8: 32px (2rem) - Large section spacing
+space-10: 40px (2.5rem) - Page sections
+
+/* Mobile Padding */
+px-4 (16px) - Mobile horizontal padding
+py-6 (24px) - Mobile section padding
+
+/* Desktop Padding */
+lg:px-8 (32px) - Desktop horizontal padding
+lg:py-8 (32px) - Desktop section padding
+```
+
+### Component Design Standards
+
+#### Cards
+```css
+/* Base Card */
+- Background: white
+- Border: border-gray-200 (1px)
+- Border Radius: rounded-lg (8px)
+- Padding: p-4 (16px) mobile / p-5 (20px) desktop
+- Shadow: shadow-sm on hover
+- Transition: all 150ms ease
+
+/* Interactive Card */
+- Hover: shadow-md, border-blue-300, translateY(-2px)
+- Active: scale(0.98)
+```
+
+#### Buttons
+```css
+/* Primary Button */
+- Background: bg-blue-600
+- Text: text-white, text-sm, font-medium
+- Padding: px-4 py-2
+- Border Radius: rounded-lg
+- Hover: bg-blue-700
+
+/* Secondary Button */  
+- Background: bg-gray-100
+- Text: text-gray-700
+- Border: border-gray-300
+
+/* Button Sizes */
+- Small: px-3 py-1.5 text-xs
+- Medium: px-4 py-2 text-sm (default)
+- Large: px-6 py-3 text-base
+```
+
+#### Forms
+```css
+/* Input Fields */
+- Height: h-10 (40px)
+- Padding: px-3
+- Border: border-gray-300
+- Border Radius: rounded-lg
+- Focus: ring-2 ring-blue-500
+```
+
+### Layout Guidelines
+
+#### Mobile-First Grid
+```css
+/* Container */
+max-w-7xl mx-auto
+
+/* Grid Layouts */
+- Mobile: grid-cols-1
+- Tablet: sm:grid-cols-2
+- Desktop: lg:grid-cols-3 or lg:grid-cols-4
+
+/* Gap */
+- gap-4 (16px) - Default
+- gap-6 (24px) - Large sections
+```
+
+#### Section Structure
+```css
+/* Section Padding */
+- Mobile: py-6 px-4
+- Tablet: sm:py-8 sm:px-6
+- Desktop: lg:py-10 lg:px-8
+
+/* Content Width */
+- max-w-7xl for main content
+- max-w-4xl for reading content
+- max-w-2xl for forms
+```
+
+### Animation & Interaction
+```css
+/* Transitions */
+- Default: transition-all duration-150
+- Hover effects: duration-200
+- Page transitions: duration-300
+
+/* Hover States */
+- Subtle: opacity-80
+- Cards: shadow-md, translateY(-2px)
+- Buttons: darker background
+- Links: underline or color change
+
+/* Disabled States */
+- opacity-50
+- cursor-not-allowed
+- no hover effects
+```
+
+### Icon Usage
+- Size: w-4 h-4 (16px) for inline, w-5 h-5 (20px) for standalone
+- Color: Match text color or use semantic colors
+- Placement: Left of text with gap-2 spacing
+
+### Responsive Design Breakpoints
+```css
+/* Breakpoints */
+- Mobile: 320px - 767px (default)
+- Tablet: 768px - 1023px (sm:)
+- Desktop: 1024px+ (lg:)
+- Wide: 1280px+ (xl:)
+
+/* Content Priorities */
+- Mobile: Essential content only
+- Tablet: Add secondary content
+- Desktop: Full feature set
+```
+
+### Performance Guidelines
+- Lazy load images below the fold
+- Use Next.js Image component for optimization
+- Minimize CSS classes per element
+- Avoid deep nesting in components
+- Use CSS Grid/Flexbox over absolute positioning
+
+### Accessibility Requirements
+- Minimum touch target: 44x44px
+- Color contrast: 4.5:1 for normal text, 3:1 for large text
+- Focus indicators on all interactive elements
+- Semantic HTML elements
+- ARIA labels where needed
+- Keyboard navigation support
+
 ## Development Guidelines
 
 ### Code Style

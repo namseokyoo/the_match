@@ -126,34 +126,34 @@ export default function CommunitySection() {
     const displayPosts = activeTab === 'latest' ? latestPosts : popularPosts;
 
     return (
-        <section className="py-10 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-purple-50/30">
+        <section className="py-6 px-4 sm:px-6 lg:px-8 bg-white">
             <div className="mx-auto max-w-7xl">
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center gap-4">
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-1">
-                                💬 커뮤니티
+                            <h2 className="text-xl font-bold text-gray-900 lg:text-2xl">
+                                커뮤니티
                             </h2>
                             <p className="text-sm text-gray-500">다른 플레이어들과 소통해보세요</p>
                         </div>
                         {/* 탭 버튼 */}
-                        <div className="flex bg-gradient-to-r from-purple-100 to-indigo-100 rounded-xl p-1.5 shadow-sm ml-4">
+                        <div className="hidden sm:flex bg-gray-100 rounded-lg p-1">
                             <button
                                 onClick={() => setActiveTab('latest')}
-                                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                                     activeTab === 'latest'
-                                        ? 'bg-white text-purple-700 shadow-md'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-gray-900 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-700'
                                 }`}
                             >
                                 최신글
                             </button>
                             <button
                                 onClick={() => setActiveTab('popular')}
-                                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                                     activeTab === 'popular'
-                                        ? 'bg-white text-purple-700 shadow-md'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-gray-900 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-700'
                                 }`}
                             >
                                 인기글
@@ -162,10 +162,10 @@ export default function CommunitySection() {
                     </div>
                     <Link 
                         href="/community" 
-                        className="group flex items-center gap-1.5 text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors"
+                        className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
                     >
                         모두 보기 
-                        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        <ArrowRight className="w-4 h-4" />
                     </Link>
                 </div>
 
@@ -179,42 +179,40 @@ export default function CommunitySection() {
                         ))}
                     </div>
                 ) : displayPosts.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         {displayPosts.map((post) => (
                             <Link key={post.id} href={`/community/posts/${post.id}`}>
-                                <div className="group bg-white rounded-xl p-5 border border-gray-100 hover:shadow-lg hover:border-purple-200 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+                                <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-150 cursor-pointer">
                                     <div className="flex justify-between items-start">
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-1 group-hover:text-purple-600 transition-colors">
+                                            <h3 className="font-semibold text-gray-900 text-base mb-1 line-clamp-1">
                                                 {post.title}
                                             </h3>
-                                            <p className="text-sm text-gray-600 line-clamp-2 mb-3 leading-relaxed">
+                                            <p className="text-sm text-gray-500 line-clamp-1 mb-2">
                                                 {post.content}
                                             </p>
-                                            <div className="flex items-center gap-4 text-xs">
-                                                <span className="flex items-center gap-1.5 text-gray-500">
-                                                    <Eye className="w-3.5 h-3.5 text-purple-400" />
-                                                    <span className="font-medium">{post.view_count || 0}</span>
+                                            <div className="flex items-center gap-3 text-xs text-gray-400">
+                                                <span className="flex items-center gap-1">
+                                                    <Eye className="w-3 h-3" />
+                                                    {post.view_count || 0}
                                                 </span>
-                                                <span className="flex items-center gap-1.5 text-gray-500">
-                                                    <MessageCircle className="w-3.5 h-3.5 text-blue-400" />
-                                                    <span className="font-medium">댓글</span>
+                                                <span className="flex items-center gap-1">
+                                                    <MessageCircle className="w-3 h-3" />
+                                                    댓글
                                                 </span>
-                                                <span className="flex items-center gap-1.5 text-gray-500">
-                                                    <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                                    <span className="font-medium">
-                                                        {formatDistanceToNow(new Date(post.created_at), { 
-                                                            addSuffix: true, 
-                                                            locale: ko 
-                                                        })}
-                                                    </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Clock className="w-3 h-3" />
+                                                    {formatDistanceToNow(new Date(post.created_at), { 
+                                                        addSuffix: true, 
+                                                        locale: ko 
+                                                    })}
                                                 </span>
                                             </div>
                                         </div>
                                         {activeTab === 'popular' && (
-                                            <div className="ml-4 flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-amber-50 rounded-full">
-                                                <TrendingUp className="w-4 h-4 text-orange-500" />
-                                                <span className="text-xs font-bold text-orange-600">인기</span>
+                                            <div className="ml-4 flex items-center gap-1 text-amber-500">
+                                                <TrendingUp className="w-4 h-4" />
+                                                <span className="text-xs font-medium">인기</span>
                                             </div>
                                         )}
                                     </div>
@@ -223,15 +221,14 @@ export default function CommunitySection() {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-12 bg-gradient-to-br from-gray-50 to-purple-50 rounded-2xl">
-                        <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-gray-700 mb-2">
+                    <div className="text-center py-8 bg-gray-100 rounded-lg">
+                        <MessageCircle className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                        <p className="text-sm text-gray-500 mb-4">
                             {activeTab === 'latest' ? '아직 게시글이 없습니다' : '인기 게시글이 없습니다'}
-                        </h3>
-                        <p className="text-gray-600 mb-6">커뮤니티의 첫 글을 작성해보세요!</p>
+                        </p>
                         <Link 
                             href="/community/posts/create" 
-                            className="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-sm font-medium"
+                            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                         >
                             첫 글 작성하기
                         </Link>
