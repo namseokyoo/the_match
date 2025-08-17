@@ -24,9 +24,8 @@ export default function WritePostPage() {
     });
 
     useEffect(() => {
+        // 미들웨어에서 인증을 처리하므로 여기서는 체크만 함
         if (!user) {
-            toast.error('로그인이 필요합니다.');
-            router.push('/login?redirect=/community/write');
             return;
         }
         
@@ -68,8 +67,7 @@ export default function WritePostPage() {
             const { data: { session } } = await supabase.auth.getSession();
             
             if (!session) {
-                toast.error('로그인이 필요합니다.');
-                router.push('/login?redirect=/community/write');
+                toast.error('세션이 만료되었습니다. 다시 로그인해주세요.');
                 return;
             }
 

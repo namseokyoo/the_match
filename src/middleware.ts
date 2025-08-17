@@ -1,15 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-// 인증이 필수인 라우트만 정의 (프로필 제외)
-const strictProtectedRoutes = [
-  '/matches/create',
-  '/teams/create',
-  '/community/posts/create',
-];
-
-// 로그인한 사용자가 접근하면 안 되는 라우트
-const authOnlyRoutes = ['/login', '/signup'];
+import { createServerClient } from '@supabase/ssr';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -23,41 +14,81 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Supabase 세션 쿠키 확인 - 정확한 프로젝트 ID 사용
-  const hasAuthCookie = 
-    request.cookies.has('sb-pkeycuoaeddmblcwzhpo-auth-token') ||
-    request.cookies.has('sb-pkeycuoaeddmblcwzhpo-auth-token-code-verifier') ||
-    // 쿠키 목록에서 Supabase 관련 토큰 찾기
-    Array.from(request.cookies.getAll()).some(cookie => 
-      cookie.name.startsWith('sb-pkeycuoaeddmblcwzhpo-auth-token')
-    );
-  
-  // 생성/작성 페이지만 엄격하게 보호
-  const isStrictProtected = strictProtectedRoutes.some(route => 
+  // 인증이 필수인 라우트만 정의
+  const protectedRoutes = [
+    '/matches/create',
+    '/teams/create',
+    '/community/write',
+    '/community/posts/create',
+    '/profile',
+    '/dashboard',
+  ];
+
+  // 로그인한 사용자가 접근하면 안 되는 라우트
+  const authOnlyRoutes = ['/login', '/signup'];
+
+  // Response를 먼저 생성
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+
+  // Supabase 클라이언트 생성 (SSR용)
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: any) {
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+        },
+        remove(name: string, options: any) {
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
+        },
+      },
+    }
+  );
+
+  // 세션 확인
+  const { data: { session } } = await supabase.auth.getSession();
+  const isAuthenticated = !!session;
+
+  // 보호된 라우트 확인
+  const isProtectedRoute = protectedRoutes.some(route => 
     pathname === route || pathname.startsWith(route + '/')
   );
 
   // 인증 전용 페이지 확인
-  const isAuthOnly = authOnlyRoutes.some(route => 
+  const isAuthOnlyRoute = authOnlyRoutes.some(route => 
     pathname === route || pathname.startsWith(route + '/')
   );
 
-  // 생성/작성 페이지는 쿠키가 없으면 로그인으로
-  if (isStrictProtected && !hasAuthCookie) {
-    console.log(`[Middleware] Redirecting to login from: ${pathname}`);
+  // 보호된 라우트인데 로그인하지 않은 경우
+  if (isProtectedRoute && !isAuthenticated) {
     const redirectUrl = new URL('/login', request.url);
     redirectUrl.searchParams.set('redirectTo', pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
-  // 로그인/회원가입은 쿠키가 있으면 대시보드로
-  if (isAuthOnly && hasAuthCookie) {
-    console.log(`[Middleware] Redirecting to dashboard from: ${pathname}`);
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  // 로그인/회원가입 페이지인데 이미 로그인한 경우
+  if (isAuthOnlyRoute && isAuthenticated) {
+    const redirectTo = request.nextUrl.searchParams.get('redirectTo');
+    return NextResponse.redirect(new URL(redirectTo || '/dashboard', request.url));
   }
 
-  // 나머지는 모두 통과 (프로필, 대시보드 등은 클라이언트에서 처리)
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {

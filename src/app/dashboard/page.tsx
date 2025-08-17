@@ -22,7 +22,6 @@ interface DashboardData {
 }
 
 export default function DashboardPage() {
-    const router = useRouter();
     const { user, loading } = useAuth();
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [dataLoading, setDataLoading] = useState(true);
@@ -81,13 +80,11 @@ export default function DashboardPage() {
 
     useEffect(() => {
         // 로딩이 완료되고 사용자가 있을 때만 데이터 로드
+        // 미들웨어에서 인증을 처리하므로 여기서는 리다이렉트하지 않음
         if (!loading && user) {
             fetchDashboardData();
-        } else if (!loading && !user) {
-            // 로딩이 완료되었는데 사용자가 없으면 로그인 페이지로
-            router.push('/login');
         }
-    }, [loading, user, router, fetchDashboardData]);
+    }, [loading, user, fetchDashboardData]);
 
     // 인증 로딩 중
     if (loading) {
