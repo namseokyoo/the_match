@@ -114,7 +114,8 @@ export const MatchList: React.FC<MatchListProps> = ({
     }, [matches, filters, sortBy, sortOrder, currentUserId]);
 
     // 검색 디바운스
-    const debouncedSearchChange = debounce((value: string) => {
+    const debouncedSearchChange = debounce((...args: unknown[]) => {
+        const value = args[0] as string;
         setFilters(prev => ({ ...prev, search: value }));
     }, 300);
 

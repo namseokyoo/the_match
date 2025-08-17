@@ -129,14 +129,19 @@ export async function POST(
         }
         
         // 토너먼트 진행 상태 업데이트
-        const updateData: any = {
+        const updateData: {
+            results: Record<string, unknown>[];
+            updated_at: string;
+            status?: string;
+            current_round?: number;
+        } = {
             results: currentResults,
             updated_at: new Date().toISOString()
         };
         
         // 모든 경기가 완료되었는지 확인
         const totalMatches = match.total_matches || 0;
-        const completedMatches = currentResults.filter((r: any) => r.status === 'completed').length;
+        const completedMatches = currentResults.filter((r: Record<string, unknown>) => r.status === 'completed').length;
         
         if (completedMatches === totalMatches && totalMatches > 0) {
             updateData.status = 'completed';

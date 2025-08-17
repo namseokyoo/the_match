@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react';
 
 interface ValidationRule {
-    test: (_value: any) => boolean;
+    test: (value: unknown) => boolean;
     message: string;
 }
 
@@ -12,8 +12,8 @@ interface FormFieldProps {
     label: string;
     name: string;
     type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date' | 'datetime-local' | 'textarea' | 'select';
-    value: any;
-    onChange: (_value: any) => void;
+    value: string | number;
+    onChange: (value: string | number) => void;
     onBlur?: () => void;
     placeholder?: string;
     required?: boolean;
@@ -262,7 +262,7 @@ export const validationRules = {
         message: '올바른 URL 형식이 아닙니다',
     },
     number: {
-        test: (value: any) => !isNaN(Number(value)),
+        test: (value: unknown) => !isNaN(Number(value)),
         message: '숫자만 입력 가능합니다',
     },
     min: (min: number) => ({

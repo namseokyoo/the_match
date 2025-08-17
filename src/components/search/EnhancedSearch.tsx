@@ -140,7 +140,8 @@ export const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
 
     // Debounced search
     const debouncedSearch = useMemo(
-        () => debounce((searchQuery: string) => {
+        () => debounce((...args: unknown[]) => {
+            const searchQuery = args[0] as string;
             performSearch(searchQuery);
         }, 300),
         [performSearch]

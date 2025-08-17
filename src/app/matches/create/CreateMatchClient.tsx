@@ -65,10 +65,10 @@ export default function CreateMatchClient() {
             }
 
             // postWithAuth 헬퍼 함수 사용
-            const data = await postWithAuth('/api/matches', accessToken, formData);
+            const data = await postWithAuth<{data: {id: string}}>('/api/matches', accessToken, formData as unknown as Record<string, unknown>);
 
             showNotification('경기가 성공적으로 생성되었습니다!', 'success');
-            router.push(`/matches/${data.data.id}`);
+            router.push(`/matches/${data.data?.id}`);
         } catch (error) {
             console.error('경기 생성 오류:', error);
             showNotification(error instanceof Error ? error.message : '경기 생성 중 오류가 발생했습니다.', 'error');

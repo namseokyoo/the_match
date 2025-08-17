@@ -5,7 +5,7 @@ import { GripVertical } from 'lucide-react';
 
 interface DraggableItem {
     id: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface DragAndDropProps<T extends DraggableItem> {

@@ -129,47 +129,50 @@ export const NotificationCenter: React.FC = () => {
                     {/* 알림 목록 */}
                     <div className="max-h-96 overflow-y-auto">
                         {notifications.length > 0 ? (
-                            notifications.map((notification) => (
-                                <div
-                                    key={notification.id}
-                                    onClick={() => handleNotificationClick(notification)}
-                                    className={`
-                                        p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors
-                                        ${!notification.read ? 'bg-blue-50' : ''}
-                                    `}
-                                >
-                                    <div className="flex items-start space-x-3">
-                                        <div className={`
-                                            flex-shrink-0 p-2 rounded-full
-                                            ${!notification.read ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}
-                                        `}>
-                                            {getIcon(notification.type)}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className={`
-                                                text-sm font-medium text-gray-900
-                                                ${!notification.read ? 'font-semibold' : ''}
+                            notifications.map((notification) => {
+                                const notificationUI = notification as any;
+                                return (
+                                    <div
+                                        key={notification.id}
+                                        onClick={() => handleNotificationClick(notificationUI)}
+                                        className={`
+                                            p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors
+                                            ${!notification.read ? 'bg-blue-50' : ''}
+                                        `}
+                                    >
+                                        <div className="flex items-start space-x-3">
+                                            <div className={`
+                                                flex-shrink-0 p-2 rounded-full
+                                                ${!notification.read ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}
                                             `}>
-                                                {notification.title}
-                                            </p>
-                                            <p className="text-sm text-gray-600 mt-1">
-                                                {notification.message}
-                                            </p>
-                                            <p className="text-xs text-gray-400 mt-2">
-                                                {formatDistanceToNow(new Date(notification.created_at), {
-                                                    addSuffix: true,
-                                                    locale: ko,
-                                                })}
-                                            </p>
-                                        </div>
-                                        {!notification.read && (
-                                            <div className="flex-shrink-0">
-                                                <span className="w-2 h-2 bg-blue-600 rounded-full inline-block" />
+                                                {getIcon(notificationUI.type)}
                                             </div>
-                                        )}
+                                            <div className="flex-1 min-w-0">
+                                                <p className={`
+                                                    text-sm font-medium text-gray-900
+                                                    ${!notification.read ? 'font-semibold' : ''}
+                                                `}>
+                                                    {notification.title}
+                                                </p>
+                                                <p className="text-sm text-gray-600 mt-1">
+                                                    {notification.message}
+                                                </p>
+                                                <p className="text-xs text-gray-400 mt-2">
+                                                    {formatDistanceToNow(new Date(notification.created_at), {
+                                                        addSuffix: true,
+                                                        locale: ko,
+                                                    })}
+                                                </p>
+                                            </div>
+                                            {!notification.read && (
+                                                <div className="flex-shrink-0">
+                                                    <span className="w-2 h-2 bg-blue-600 rounded-full inline-block" />
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))
+                                );
+                            })
                         ) : (
                             <div className="p-8 text-center text-gray-500">
                                 <Bell className="w-12 h-12 mx-auto mb-3 text-gray-300" />
@@ -294,27 +297,29 @@ export const NotificationPage: React.FC = () => {
             {/* 알림 목록 */}
             <div className="space-y-4">
                 {filteredNotifications.length > 0 ? (
-                    filteredNotifications.map((notification) => (
-                        <div
-                            key={notification.id}
-                            className={`
-                                bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer
-                                hover:shadow-md transition-shadow
-                                ${!notification.read ? 'border-l-4 border-l-blue-500' : ''}
-                            `}
-                            onClick={() => {
-                                if (!notification.read) {
-                                    markAsRead(notification.id);
-                                }
-                                if (notification.link) {
-                                    window.location.href = notification.link;
-                                }
-                            }}
-                        >
-                            <div className="flex items-start space-x-4">
-                                <div className={`flex-shrink-0 p-3 rounded-full ${getTypeColor(notification.type)}`}>
-                                    {getIcon(notification.type)}
-                                </div>
+                    filteredNotifications.map((notification) => {
+                        const notificationUI = notification as any;
+                        return (
+                            <div
+                                key={notification.id}
+                                className={`
+                                    bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer
+                                    hover:shadow-md transition-shadow
+                                    ${!notification.read ? 'border-l-4 border-l-blue-500' : ''}
+                                `}
+                                onClick={() => {
+                                    if (!notification.read) {
+                                        markAsRead(notification.id);
+                                    }
+                                    if (notificationUI.link) {
+                                        window.location.href = notificationUI.link;
+                                    }
+                                }}
+                            >
+                                <div className="flex items-start space-x-4">
+                                    <div className={`flex-shrink-0 p-3 rounded-full ${getTypeColor(notificationUI.type)}`}>
+                                        {getIcon(notificationUI.type)}
+                                    </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between">
                                         <div>
@@ -338,7 +343,7 @@ export const NotificationPage: React.FC = () => {
                                                 locale: ko,
                                             })}
                                         </span>
-                                        {notification.link && (
+                                        {notificationUI.link && (
                                             <span className="text-sm text-blue-600 hover:text-blue-700">
                                                 자세히 보기 →
                                             </span>
@@ -347,7 +352,8 @@ export const NotificationPage: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                    ))
+                        );
+                    })
                 ) : (
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
                         <Bell className="w-16 h-16 mx-auto mb-4 text-gray-300" />

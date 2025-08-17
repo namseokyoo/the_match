@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MatchType } from '@/types';
+import { MatchType, type CreateMatchForm } from '@/types';
 import { verifyAuth, requireEmailVerified } from '@/lib/auth-middleware';
 import { getSupabaseAdmin } from '@/lib/supabase-server';
 import { calculateMatchStatus } from '@/lib/match-utils';
@@ -201,7 +201,7 @@ export async function POST(request: NextRequest) {
 }
 
 // 경기 데이터 검증 함수
-function validateMatchData(data: any): string[] {
+function validateMatchData(data: Partial<CreateMatchForm>): string[] {
     const errors: string[] = [];
 
     // 제목 검증

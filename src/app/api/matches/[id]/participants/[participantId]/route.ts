@@ -92,7 +92,7 @@ export async function PATCH(
         }
 
         // 상태 업데이트
-        const updateData: any = {
+        const updateData: Record<string, unknown> = {
             status,
             reviewed_at: new Date().toISOString(),
             reviewed_by: authResult.user.id,

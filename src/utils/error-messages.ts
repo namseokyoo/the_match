@@ -2,6 +2,16 @@
  * 사용자 친화적인 에러 메시지 매핑
  */
 
+export interface AppError {
+  message?: string;
+  code?: string;
+  status?: number;
+  statusCode?: number;
+  stack?: string;
+}
+
+export type ErrorInput = string | Error | AppError | unknown;
+
 export const ERROR_MESSAGES: Record<string, string> = {
   // 인증 관련
   'Invalid login credentials': '이메일 또는 비밀번호가 올바르지 않습니다.',
@@ -54,31 +64,32 @@ export const ERROR_MESSAGES: Record<string, string> = {
 /**
  * 에러 코드를 사용자 친화적인 메시지로 변환
  */
-export function getErrorMessage(error: any): string {
+export function getErrorMessage(error: ErrorInput): string {
   // 에러가 문자열인 경우
   if (typeof error === 'string') {
     return ERROR_MESSAGES[error] || error;
   }
   
   // 에러 객체의 메시지 확인
-  if (error?.message) {
+  if (error && typeof error === 'object' && 'message' in error && error.message) {
+    const messageStr = String(error.message);
     // 에러 메시지에서 매칭되는 부분 찾기
     for (const [key, value] of Object.entries(ERROR_MESSAGES)) {
-      if (error.message.toLowerCase().includes(key.toLowerCase())) {
+      if (messageStr.toLowerCase().includes(key.toLowerCase())) {
         return value;
       }
     }
-    return ERROR_MESSAGES[error.message] || error.message;
+    return ERROR_MESSAGES[messageStr] || messageStr;
   }
   
   // 에러 코드 확인
-  if (error?.code) {
-    return ERROR_MESSAGES[error.code] || `오류 코드: ${error.code}`;
+  if (error && typeof error === 'object' && 'code' in error && error.code) {
+    return ERROR_MESSAGES[String(error.code)] || `오류 코드: ${error.code}`;
   }
   
   // HTTP 상태 코드별 메시지
-  if (error?.status || error?.statusCode) {
-    const statusCode = error.status || error.statusCode;
+  if (error && typeof error === 'object' && (('status' in error && error.status) || ('statusCode' in error && error.statusCode))) {
+    const statusCode = ('status' in error && error.status) || ('statusCode' in error && error.statusCode);
     switch (statusCode) {
       case 400:
         return '잘못된 요청입니다. 입력 내용을 확인해주세요.';
@@ -118,11 +129,12 @@ export interface ErrorAction {
   variant?: 'primary' | 'secondary' | 'outline';
 }
 
-export function getErrorActions(error: any): ErrorAction[] {
+export function getErrorActions(error: ErrorInput): ErrorAction[] {
   const actions: ErrorAction[] = [];
   
   // 에러 타입에 따른 액션 제공
-  if (error?.message?.includes('Session expired') || error?.status === 401) {
+  if ((error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && error.message.includes('Session expired')) || 
+      (error && typeof error === 'object' && 'status' in error && error.status === 401)) {
     actions.push({
       label: '다시 로그인',
       action: () => window.location.href = '/login',
@@ -130,7 +142,8 @@ export function getErrorActions(error: any): ErrorAction[] {
     });
   }
   
-  if (error?.message?.includes('Network') || error?.message?.includes('fetch')) {
+  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && 
+      (error.message.includes('Network') || error.message.includes('fetch'))) {
     actions.push({
       label: '새로고침',
       action: () => window.location.reload(),
@@ -138,7 +151,7 @@ export function getErrorActions(error: any): ErrorAction[] {
     });
   }
   
-  if (error?.status === 404) {
+  if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
     actions.push({
       label: '홈으로',
       action: () => window.location.href = '/',

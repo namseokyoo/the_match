@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Match, Team, Player, GameResult, CreateMatchForm, CreateTeamForm, CreatePlayerForm } from '@/types';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -85,7 +86,7 @@ export const db = {
             return data;
         },
 
-        async create(match: any) {
+        async create(match: Omit<Match, 'id' | 'created_at' | 'updated_at'>) {
             const { data, error } = await supabase
                 .from('matches')
                 .insert([match])
@@ -96,7 +97,7 @@ export const db = {
             return data;
         },
 
-        async update(id: string, updates: any) {
+        async update(id: string, updates: Partial<Omit<Match, 'id' | 'created_at' | 'updated_at'>>) {
             const { data, error } = await supabase
                 .from('matches')
                 .update(updates)
@@ -131,7 +132,7 @@ export const db = {
             return data;
         },
 
-        async create(team: any) {
+        async create(team: Omit<Team, 'id' | 'created_at' | 'updated_at'>) {
             const { data, error } = await supabase
                 .from('teams')
                 .insert([team])
@@ -142,7 +143,7 @@ export const db = {
             return data;
         },
 
-        async update(id: string, updates: any) {
+        async update(id: string, updates: Partial<Omit<Team, 'id' | 'created_at' | 'updated_at'>>) {
             const { data, error } = await supabase
                 .from('teams')
                 .update(updates)
@@ -177,7 +178,7 @@ export const db = {
             return data;
         },
 
-        async create(player: any) {
+        async create(player: Omit<Player, 'id' | 'created_at' | 'updated_at'>) {
             const { data, error } = await supabase
                 .from('players')
                 .insert([player])
@@ -188,7 +189,7 @@ export const db = {
             return data;
         },
 
-        async update(id: string, updates: any) {
+        async update(id: string, updates: Partial<Omit<Player, 'id' | 'created_at' | 'updated_at'>>) {
             const { data, error } = await supabase
                 .from('players')
                 .update(updates)
@@ -228,7 +229,7 @@ export const db = {
             return data;
         },
 
-        async create(game: any) {
+        async create(game: Omit<GameResult, 'id' | 'created_at' | 'updated_at'>) {
             const { data, error } = await supabase
                 .from('game_results')
                 .insert([game])
@@ -239,7 +240,7 @@ export const db = {
             return data;
         },
 
-        async update(id: string, updates: any) {
+        async update(id: string, updates: Partial<Omit<GameResult, 'id' | 'created_at' | 'updated_at'>>) {
             const { data, error } = await supabase
                 .from('game_results')
                 .update(updates)

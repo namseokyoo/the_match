@@ -64,7 +64,7 @@ export function generateId(): string {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
-export function debounce<T extends (...args: any[]) => void>(
+export function debounce<T extends (...args: unknown[]) => void>(
     func: T,
     delay: number
 ): (...params: Parameters<T>) => void {
@@ -75,7 +75,7 @@ export function debounce<T extends (...args: any[]) => void>(
     };
 }
 
-export function throttle<T extends (...args: any[]) => void>(
+export function throttle<T extends (...args: unknown[]) => void>(
     func: T,
     limit: number
 ): (...params: Parameters<T>) => void {

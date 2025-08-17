@@ -129,7 +129,7 @@ export async function PATCH(
         }
 
         // 상태 업데이트 데이터 준비
-        const updateData: any = {
+        const updateData: Record<string, unknown> = {
             status: newStatus,
             updated_at: new Date().toISOString(),
         };

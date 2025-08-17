@@ -11,6 +11,19 @@ interface FetchOptions extends RequestInit {
     accessToken?: string | null;
 }
 
+interface CacheEntry<T = unknown> {
+    data: T;
+    timestamp: number;
+    etag?: string;
+}
+
+interface APIResponse<T = unknown> {
+    data?: T;
+    error?: string;
+    message?: string;
+    success?: boolean;
+}
+
 const DEFAULT_TIMEOUT = 8000; // 8초로 단축
 const DEFAULT_RETRIES = 2; // 재시도 횟수 감소
 const DEFAULT_RETRY_DELAY = 500; // 500ms로 단축
@@ -25,7 +38,7 @@ interface PerformanceMetrics {
 }
 
 class APIClient {
-    private cache: Map<string, { data: any; timestamp: number; etag?: string }> = new Map();
+    private cache: Map<string, CacheEntry> = new Map();
     private cacheTimeout = DEFAULT_CACHE_TIMEOUT;
     private metrics: PerformanceMetrics = {
         requestCount: 0,
@@ -35,7 +48,7 @@ class APIClient {
     };
     
     // 동일한 요청 중복 방지를 위한 프로미스 캐시
-    private inflightRequests: Map<string, Promise<any>> = new Map();
+    private inflightRequests: Map<string, Promise<unknown>> = new Map();
 
     async fetchWithRetry(
         url: string,
@@ -121,7 +134,7 @@ class APIClient {
         throw lastError || new Error('Unknown error');
     }
 
-    async get<T>(url: string, options?: FetchOptions): Promise<T> {
+    async get<T = unknown>(url: string, options?: FetchOptions): Promise<T> {
         const {
             cacheStrategy = 'stale-while-revalidate',
             maxAge = this.cacheTimeout,
@@ -132,7 +145,7 @@ class APIClient {
         
         // 중복 요청 방지 - 동일한 요청이 진행 중이면 기다림
         if (this.inflightRequests.has(cacheKey)) {
-            return this.inflightRequests.get(cacheKey)!;
+            return this.inflightRequests.get(cacheKey)! as Promise<T>;
         }
         
         const cached = this.cache.get(cacheKey);
@@ -142,11 +155,11 @@ class APIClient {
         if (cacheStrategy === 'cache-first' && cached && !isStale) {
             this.metrics.cacheHits++;
             console.log('Cache hit for:', url);
-            return cached.data;
+            return cached.data as T;
         }
         
         // 네트워크 요청 프로미스 생성
-        const requestPromise = this.executeNetworkRequest<T>(url, fetchOptions, cacheKey, cached);
+        const requestPromise = this.executeNetworkRequest<T>(url, fetchOptions, cacheKey, cached as CacheEntry<T>);
         
         // 진행 중인 요청으로 등록
         this.inflightRequests.set(cacheKey, requestPromise);
@@ -162,9 +175,9 @@ class APIClient {
     
     private async executeNetworkRequest<T>(
         url: string, 
-        fetchOptions: any, 
+        fetchOptions: RequestInit, 
         cacheKey: string, 
-        cached?: { data: any; timestamp: number; etag?: string }
+        cached?: CacheEntry<T>
     ): Promise<T> {
         try {
             const response = await this.fetchWithRetry(url, {
@@ -196,7 +209,7 @@ class APIClient {
             if (cached) {
                 console.warn('Using stale cache due to network error:', error);
                 this.metrics.cacheHits++;
-                return cached.data;
+                return cached.data as T;
             }
             throw error;
         }
@@ -253,12 +266,12 @@ export async function fetchWithAuth(
 }
 
 // POST 요청을 위한 간단한 헬퍼
-export async function postWithAuth(
+export async function postWithAuth<T = unknown>(
     url: string,
     accessToken: string | null,
-    body: any,
+    body: Record<string, unknown> | string,
     options: Omit<FetchOptions, 'accessToken' | 'requireAuth' | 'method' | 'body'> = {}
-): Promise<any> {
+): Promise<T> {
     const response = await fetchWithAuth(url, accessToken, {
         ...options,
         method: 'POST',
@@ -294,7 +307,7 @@ export const matchAPI = {
         
         const url = `${baseUrl}/api/matches${params.toString() ? `?${params.toString()}` : ''}`;
         
-        return apiClient.get<any>(url, {
+        return apiClient.get<APIResponse>(url, {
             cacheStrategy: options.cacheStrategy || 'stale-while-revalidate',
             maxAge: 45000, // 45초 캐시
         });
@@ -308,7 +321,7 @@ export const matchAPI = {
         
         const url = `${baseUrl}/api/matches/${id}${params.toString() ? `?${params.toString()}` : ''}`;
         
-        return apiClient.get<any>(url, {
+        return apiClient.get<APIResponse>(url, {
             cacheStrategy: 'cache-first',
             maxAge: 30000, // 30초 캐시
         });
@@ -347,7 +360,7 @@ export const teamAPI = {
         
         const url = `${baseUrl}/api/teams${params.toString() ? `?${params.toString()}` : ''}`;
         
-        return apiClient.get<any>(url, {
+        return apiClient.get<APIResponse>(url, {
             cacheStrategy: options.cacheStrategy || 'stale-while-revalidate',
             maxAge: 60000, // 60초 캐시 (팀 데이터는 상대적으로 안정적)
         });
@@ -361,7 +374,7 @@ export const teamAPI = {
         
         const url = `${baseUrl}/api/teams/${id}${params.toString() ? `?${params.toString()}` : ''}`;
         
-        return apiClient.get<any>(url, {
+        return apiClient.get<APIResponse>(url, {
             cacheStrategy: 'cache-first',
             maxAge: 30000,
         });
@@ -381,7 +394,7 @@ export const dashboardAPI = {
     async getHomeData() {
         const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
         
-        return apiClient.get<any>(`${baseUrl}/api/dashboard`, {
+        return apiClient.get<APIResponse>(`${baseUrl}/api/dashboard`, {
             cacheStrategy: 'stale-while-revalidate',
             maxAge: 30000, // 30초 캐시
         });

@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type PostgrestError } from '@supabase/supabase-js';
 
 // 서버 사이드용 Supabase 클라이언트
 // Connection pooling과 더 나은 에러 처리를 포함
@@ -46,9 +46,9 @@ export function getSupabaseAdmin() {
 
 // 재시도 로직이 있는 쿼리 함수
 export async function executeQuery<T>(
-    queryFn: () => Promise<{ data: T | null; error: any }>,
+    queryFn: () => Promise<{ data: T | null; error: PostgrestError | null }>,
     retries = 3
-): Promise<{ data: T | null; error: any }> {
+): Promise<{ data: T | null; error: PostgrestError | Error | null }> {
     let lastError = null;
     
     for (let i = 0; i < retries; i++) {
@@ -72,7 +72,7 @@ export async function executeQuery<T>(
             // 재시도 불가능한 에러는 즉시 반환
             return result;
         } catch (error) {
-            lastError = error;
+            lastError = error as PostgrestError | Error;
             if (i < retries - 1) {
                 await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
             }

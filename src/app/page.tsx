@@ -49,7 +49,8 @@ export default function Home() {
             });
 
             if (dashboardData.success && dashboardData.data) {
-                const { activeMatches, upcomingMatches, recruitingTeams } = dashboardData.data;
+                const data = dashboardData.data as any;
+                const { activeMatches, upcomingMatches, recruitingTeams } = data;
                 setUpcomingMatches(upcomingMatches || []);
                 setRecruitingTeams(recruitingTeams || []);
 

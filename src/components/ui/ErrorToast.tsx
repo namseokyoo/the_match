@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { X, AlertCircle, RefreshCw, Home, LogIn } from 'lucide-react';
-import { getErrorMessage, getErrorActions, type ErrorAction } from '@/utils/error-messages';
+import { getErrorMessage, getErrorActions, type ErrorAction, type ErrorInput } from '@/utils/error-messages';
 import Button from './Button';
 
 interface ErrorToastProps {
-  error: any;
+  error: ErrorInput;
   onClose: () => void;
   onRetry?: () => void;
 }
@@ -17,10 +17,11 @@ export default function ErrorToast({ error, onClose, onRetry }: ErrorToastProps)
   
   // 에러 타입에 따른 아이콘 색상
   const getIconColor = () => {
-    if (error?.status === 401 || error?.message?.includes('auth')) {
+    const errorObj = error as any;
+    if (errorObj?.status === 401 || errorObj?.message?.includes('auth')) {
       return 'text-yellow-500';
     }
-    if (error?.status >= 500 || error?.message?.includes('server')) {
+    if (errorObj?.status >= 500 || errorObj?.message?.includes('server')) {
       return 'text-red-500';
     }
     return 'text-orange-500';
@@ -89,13 +90,13 @@ export default function ErrorToast({ error, onClose, onRetry }: ErrorToastProps)
       </div>
       
       {/* 디버그 정보 (개발 환경에서만) */}
-      {process.env.NODE_ENV === 'development' && error?.stack && (
+      {process.env.NODE_ENV === 'development' && (error as any)?.stack && (
         <details className="mt-3 pt-3 border-t border-gray-200">
           <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700">
             개발자 정보
           </summary>
           <pre className="mt-2 text-xs text-gray-600 overflow-auto max-h-32 bg-gray-50 p-2 rounded">
-            {error.stack}
+            {(error as any).stack}
           </pre>
         </details>
       )}
@@ -106,7 +107,7 @@ export default function ErrorToast({ error, onClose, onRetry }: ErrorToastProps)
 /**
  * 에러 토스트를 표시하는 유틸리티 함수
  */
-export function showErrorToast(error: any, options?: { onRetry?: () => void }) {
+export function showErrorToast(error: ErrorInput, options?: { onRetry?: () => void }) {
   // 토스트 컨테이너가 없으면 생성
   let container = document.getElementById('error-toast-container');
   if (!container) {
@@ -120,7 +121,7 @@ export function showErrorToast(error: any, options?: { onRetry?: () => void }) {
   container.appendChild(root);
   
   // 자동으로 5초 후 제거 (에러가 심각하면 10초)
-  const duration = error?.status >= 500 ? 10000 : 5000;
+  const duration = (error as any)?.status >= 500 ? 10000 : 5000;
   const timer = setTimeout(() => {
     root.remove();
   }, duration);

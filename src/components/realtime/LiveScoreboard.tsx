@@ -36,7 +36,7 @@ export const LiveScoreboard: React.FC<LiveScoreboardProps> = ({
     // 점수 업데이트 효과
     useEffect(() => {
         if (scores && scores.length > 0) {
-            const latestScore = scores[scores.length - 1];
+            const latestScore = scores[scores.length - 1] as unknown as Score;
             setCurrentScore(latestScore);
             
             // 점수 변경 시 사운드 재생
@@ -183,7 +183,7 @@ export const MiniLiveScore: React.FC<{ matchId: string }> = ({ matchId }) => {
 
     useEffect(() => {
         if (scores && scores.length > 0) {
-            setCurrentScore(scores[scores.length - 1]);
+            setCurrentScore(scores[scores.length - 1] as unknown as Score);
         }
     }, [scores]);
 

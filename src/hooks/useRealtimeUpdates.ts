@@ -3,26 +3,33 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { showToast } from '@/components/ui/Toast';
+import type { Match, Team, Player, MatchParticipant } from '@/types';
 
-interface RealtimeConfig {
+interface RealtimePayload<T = Record<string, unknown>> {
+  new: T;
+  old: T;
+  eventType?: 'INSERT' | 'UPDATE' | 'DELETE';
+}
+
+interface RealtimeConfig<T = Record<string, unknown>> {
     channel: string;
     event?: string;
     table?: string;
     filter?: string;
-    onMessage?: (_payload: any) => void;
-    onInsert?: (_payload: any) => void;
-    onUpdate?: (_payload: any) => void;
-    onDelete?: (_payload: any) => void;
+    onMessage?: (payload: RealtimePayload<T> & Record<string, unknown>) => void;
+    onInsert?: (payload: { new: T }) => void;
+    onUpdate?: (payload: { new: T; old: T }) => void;
+    onDelete?: (payload: { old: T }) => void;
     onConnect?: () => void;
     onDisconnect?: () => void;
-    onError?: (_error: any) => void;
+    onError?: (error: Error) => void;
 }
 
 export function useRealtimeUpdates(config: RealtimeConfig) {
     const supabase = createClientComponentClient();
     const [isConnected, setIsConnected] = useState(false);
-    const [lastMessage, setLastMessage] = useState<any>(null);
-    const channelRef = useRef<any>(null);
+    const [lastMessage, setLastMessage] = useState<RealtimePayload | null>(null);
+    const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
     const reconnectAttemptsRef = useRef(0);
 
@@ -99,8 +106,13 @@ export function useRealtimeUpdates(config: RealtimeConfig) {
         // Broadcast subscription
         if (config.event) {
             channel.on('broadcast', { event: config.event }, (payload) => {
-                setLastMessage(payload);
-                config.onMessage?.(payload);
+                const broadcastPayload = {
+                    ...payload,
+                    new: payload as Record<string, unknown>,
+                    old: {} as Record<string, unknown>
+                };
+                setLastMessage(broadcastPayload);
+                config.onMessage?.(broadcastPayload);
             });
         }
 
@@ -110,11 +122,17 @@ export function useRealtimeUpdates(config: RealtimeConfig) {
                 reconnectAttemptsRef.current = 0;
             } else if (status === 'CHANNEL_ERROR') {
                 setIsConnected(false);
-                config.onError?.({ type: 'CHANNEL_ERROR', status });
+                const errorWithType = new Error('Channel error') as Error & { type: string; status: string };
+                errorWithType.type = 'CHANNEL_ERROR';
+                errorWithType.status = status;
+                config.onError?.(errorWithType);
                 handleReconnect();
             } else if (status === 'TIMED_OUT') {
                 setIsConnected(false);
-                config.onError?.({ type: 'TIMEOUT', status });
+                const errorWithType = new Error('Timeout') as Error & { type: string; status: string };
+                errorWithType.type = 'TIMEOUT';
+                errorWithType.status = status;
+                config.onError?.(errorWithType);
                 handleReconnect();
             } else if (status === 'CLOSED') {
                 setIsConnected(false);
@@ -127,9 +145,11 @@ export function useRealtimeUpdates(config: RealtimeConfig) {
 
     const connect = connectChannel;
 
-    const sendMessage = useCallback(async (event: string, payload: any) => {
+    const sendMessage = useCallback(async (event: string, payload: Record<string, unknown>) => {
         if (!channelRef.current) {
-            config.onError?.({ type: 'NOT_CONNECTED' });
+            const errorWithType = new Error('Not connected') as Error & { type: string };
+            errorWithType.type = 'NOT_CONNECTED';
+            config.onError?.(errorWithType);
             return false;
         }
 
@@ -176,16 +196,16 @@ export function useRealtimeUpdates(config: RealtimeConfig) {
 
 // 경기 실시간 업데이트
 export function useMatchRealtime(matchId: string) {
-    const [matchData, setMatchData] = useState<any>(null);
-    const [participants, setParticipants] = useState<any[]>([]);
-    const [scores, setScores] = useState<any[]>([]);
+    const [matchData, setMatchData] = useState<Match | null>(null);
+    const [participants, setParticipants] = useState<MatchParticipant[]>([]);
+    const [scores, setScores] = useState<Array<Record<string, unknown>>>([]);
 
     const { isConnected } = useRealtimeUpdates({
         channel: `match:${matchId}`,
         table: 'matches',
         filter: `id=eq.${matchId}`,
         onUpdate: (payload) => {
-            setMatchData(payload.new);
+            setMatchData(payload.new as unknown as Match);
             showToast('경기 정보가 업데이트되었습니다', 'info');
         },
     });
@@ -195,12 +215,12 @@ export function useMatchRealtime(matchId: string) {
         table: 'match_participants',
         filter: `match_id=eq.${matchId}`,
         onInsert: (payload) => {
-            setParticipants(prev => [...prev, payload.new]);
+            setParticipants(prev => [...prev, payload.new as unknown as MatchParticipant]);
             showToast('새로운 참가팀이 추가되었습니다', 'info');
         },
         onUpdate: (payload) => {
             setParticipants(prev =>
-                prev.map(p => p.id === payload.new.id ? payload.new : p)
+                prev.map(p => p.id === (payload.new as any).id ? payload.new as unknown as MatchParticipant : p)
             );
         },
         onDelete: (payload) => {
@@ -212,8 +232,9 @@ export function useMatchRealtime(matchId: string) {
         channel: `match-scores:${matchId}`,
         event: 'score-update',
         onMessage: (payload) => {
-            setScores(payload.scores);
-            showToast(`점수 업데이트: ${payload.team1} ${payload.score1} - ${payload.score2} ${payload.team2}`, 'info');
+            setScores((payload as any).scores || []);
+            const payloadData = payload as any;
+            showToast(`점수 업데이트: ${payloadData.team1} ${payloadData.score1} - ${payloadData.score2} ${payloadData.team2}`, 'info');
         },
     });
 
@@ -227,15 +248,15 @@ export function useMatchRealtime(matchId: string) {
 
 // 팀 실시간 업데이트
 export function useTeamRealtime(teamId: string) {
-    const [teamData, setTeamData] = useState<any>(null);
-    const [members, setMembers] = useState<any[]>([]);
+    const [teamData, setTeamData] = useState<Team | null>(null);
+    const [members, setMembers] = useState<Player[]>([]);
 
     const { isConnected } = useRealtimeUpdates({
         channel: `team:${teamId}`,
         table: 'teams',
         filter: `id=eq.${teamId}`,
         onUpdate: (payload) => {
-            setTeamData(payload.new);
+            setTeamData(payload.new as unknown as Team);
         },
     });
 
@@ -244,12 +265,12 @@ export function useTeamRealtime(teamId: string) {
         table: 'team_members',
         filter: `team_id=eq.${teamId}`,
         onInsert: (payload) => {
-            setMembers(prev => [...prev, payload.new]);
+            setMembers(prev => [...prev, payload.new as unknown as Player]);
             showToast('새로운 팀원이 추가되었습니다', 'info');
         },
         onUpdate: (payload) => {
             setMembers(prev =>
-                prev.map(m => m.id === payload.new.id ? payload.new : m)
+                prev.map(m => m.id === (payload.new as any).id ? payload.new as unknown as Player : m)
             );
         },
         onDelete: (payload) => {
@@ -266,8 +287,17 @@ export function useTeamRealtime(teamId: string) {
 }
 
 // 알림 실시간 수신
+interface Notification {
+    id: string;
+    user_id: string;
+    title: string;
+    message?: string;
+    read: boolean;
+    created_at: string;
+}
+
 export function useNotifications(userId: string) {
-    const [notifications, setNotifications] = useState<any[]>([]);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
 
     const { isConnected } = useRealtimeUpdates({
@@ -275,18 +305,21 @@ export function useNotifications(userId: string) {
         table: 'notifications',
         filter: `user_id=eq.${userId}`,
         onInsert: (payload) => {
-            setNotifications(prev => [payload.new, ...prev]);
-            if (!payload.new.read) {
+            const newNotification = payload.new as unknown as Notification;
+            setNotifications(prev => [newNotification, ...prev]);
+            if (!newNotification.read) {
                 setUnreadCount(prev => prev + 1);
-                showToast(payload.new.title, 'info');
+                showToast(newNotification.title || 'New notification', 'info');
             }
         },
         onUpdate: (payload) => {
+            const newNotification = payload.new as unknown as Notification;
+            const oldNotification = payload.old as unknown as Notification;
             setNotifications(prev =>
-                prev.map(n => n.id === payload.new.id ? payload.new : n)
+                prev.map(n => n.id === newNotification.id ? newNotification : n)
             );
-            if (payload.old.read !== payload.new.read) {
-                setUnreadCount(prev => payload.new.read ? prev - 1 : prev + 1);
+            if (oldNotification.read !== newNotification.read) {
+                setUnreadCount(prev => newNotification.read ? prev - 1 : prev + 1);
             }
         },
         onDelete: (payload) => {
