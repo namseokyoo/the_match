@@ -171,12 +171,12 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* 2. 참가팀 모집 */}
+            {/* 2. 참가 신청 가능한 경기 */}
             <section className="py-6 px-4 sm:px-6 lg:px-8 bg-white">
                 <div className="mx-auto max-w-7xl">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold text-gray-900">
-                            참가팀 모집
+                            참가 신청 가능한 경기
                         </h2>
                         <Link 
                             href="/matches?status=registration" 
@@ -195,9 +195,28 @@ export default function Home() {
                                 </div>
                             ))}
                         </div>
-                    ) : upcomingMatches.slice(0, 5).length > 0 ? (
+                    ) : upcomingMatches.filter(match => {
+                        // registration 상태인 경기만 표시
+                        const status = calculateMatchStatus(
+                            match.registration_start_date,
+                            match.registration_deadline,
+                            match.start_date,
+                            match.end_date,
+                            match.status
+                        );
+                        return status === 'registration';
+                    }).slice(0, 6).length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {upcomingMatches.slice(0, 5).map(match => {
+                            {upcomingMatches.filter(match => {
+                                const status = calculateMatchStatus(
+                                    match.registration_start_date,
+                                    match.registration_deadline,
+                                    match.start_date,
+                                    match.end_date,
+                                    match.status
+                                );
+                                return status === 'registration';
+                            }).slice(0, 6).map(match => {
                                 const calculatedStatus = calculateMatchStatus(
                                     match.registration_start_date,
                                     match.registration_deadline,
@@ -247,21 +266,36 @@ export default function Home() {
                     ) : (
                         <div className="text-center py-12 bg-gray-50 rounded-lg">
                             <Trophy className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-600 mb-4">참가 모집 중인 경기가 없습니다</p>
+                            <p className="text-gray-600 mb-4">참가 신청 가능한 경기가 없습니다</p>
+                            {user ? (
+                                <Link 
+                                    href="/matches/create" 
+                                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                                >
+                                    새 경기 만들기
+                                </Link>
+                            ) : (
+                                <Link 
+                                    href="/signup" 
+                                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                                >
+                                    회원가입하고 시작하기
+                                </Link>
+                            )}
                         </div>
                     )}
                 </div>
             </section>
 
-            {/* 3. 선수 모집 */}
+            {/* 3. 팀원 모집 */}
             <section className="py-6 px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-7xl">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold text-gray-900">
-                            선수 모집
+                            팀원 모집
                         </h2>
                         <Link 
-                            href="/teams?recruiting=true" 
+                            href="/teams" 
                             className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 text-sm"
                         >
                             모두 보기 <ArrowRight className="w-4 h-4" />
@@ -277,9 +311,9 @@ export default function Home() {
                                 </div>
                             ))}
                         </div>
-                    ) : recruitingTeams.slice(0, 5).length > 0 ? (
+                    ) : recruitingTeams.slice(0, 6).length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {recruitingTeams.slice(0, 5).map(team => (
+                            {recruitingTeams.slice(0, 6).map(team => (
                                 <Link key={team.id} href={`/teams/${team.id}`}>
                                     <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md hover:border-green-300 transition-all cursor-pointer h-full">
                                         <div className="flex justify-between items-start mb-2">
@@ -306,7 +340,22 @@ export default function Home() {
                     ) : (
                         <div className="text-center py-12 bg-white rounded-lg">
                             <UserPlus className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-600 mb-4">선수를 모집 중인 팀이 없습니다</p>
+                            <p className="text-gray-600 mb-4">팀원을 모집 중인 팀이 없습니다</p>
+                            {user ? (
+                                <Link 
+                                    href="/teams/create" 
+                                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                                >
+                                    새 팀 만들기
+                                </Link>
+                            ) : (
+                                <Link 
+                                    href="/signup" 
+                                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                                >
+                                    회원가입하고 시작하기
+                                </Link>
+                            )}
                         </div>
                     )}
                 </div>
