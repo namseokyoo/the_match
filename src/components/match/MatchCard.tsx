@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@/components/ui';
-import { Match } from '@/types';
+import { Match, MatchStatus } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { calculateMatchStatus, getMatchStatusLabel, getMatchStatusColor } from '@/lib/match-utils';
 
@@ -64,8 +64,29 @@ export const MatchCard: React.FC<MatchCardProps> = ({
     const statusInfo = getMatchStatusInfo(calculatedStatus);
     const typeText = getMatchTypeText(match.type);
 
+    // 상태에 따른 카드 스타일 결정
+    const getCardStatus = () => {
+        switch(calculatedStatus) {
+            case MatchStatus.REGISTRATION:
+                return 'info';
+            case MatchStatus.IN_PROGRESS:
+                return 'success';
+            case MatchStatus.CANCELLED:
+                return 'error';
+            case MatchStatus.DRAFT:
+                return 'warning';
+            case MatchStatus.COMPLETED:
+            default:
+                return 'default';
+        }
+    };
+
     return (
-        <Card className="w-full hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer">
+        <Card 
+            className="w-full" 
+            hover={true}
+            variant="default"
+            status={getCardStatus()}>
             <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">

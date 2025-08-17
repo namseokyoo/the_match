@@ -82,7 +82,7 @@ const MobileNav: React.FC = () => {
     return (
         <>
             <div className="fixed bottom-0 bg-white border-t border-gray-200 z-40" style={{ width: '430px', left: '50%', transform: 'translateX(-50%)' }}>
-                <nav className="flex items-center justify-around h-16 relative">
+                <nav className="flex items-center justify-around h-20 relative">
                     {/* 활성 아이템 인디케이터 */}
                     <div 
                         className="absolute top-0 h-0.5 bg-blue-600 transition-all duration-300 ease-in-out"
@@ -111,7 +111,7 @@ const MobileNav: React.FC = () => {
                                 }`}
                             >
                                 <div className={`relative transition-transform duration-200 ${active ? 'scale-110' : 'scale-100'}`}>
-                                    <Icon className={`w-5 h-5 ${active ? 'stroke-2' : ''}`} />
+                                    <Icon className={`w-6 h-6 ${active ? 'stroke-2' : ''}`} />
                                     {active && (
                                         <div className="absolute -inset-2 bg-blue-100 rounded-full opacity-30 animate-pulse" />
                                     )}
@@ -143,16 +143,16 @@ const MobileNav: React.FC = () => {
                         <div className="absolute bottom-full mb-2 right-0 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden animate-fade-in-up">
                             <button
                                 onClick={handleCreateMatch}
-                                className="flex items-center whitespace-nowrap px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100"
+                                className="flex items-center whitespace-nowrap px-5 py-4 hover:bg-gray-50 transition-colors border-b border-gray-100"
                             >
-                                <Trophy className="w-5 h-5 mr-3 text-blue-600" />
+                                <Trophy className="w-6 h-6 mr-3 text-blue-600" />
                                 <span className="text-gray-900 font-medium">새 경기 만들기</span>
                             </button>
                             <button
                                 onClick={handleCreateTeam}
-                                className="flex items-center whitespace-nowrap px-4 py-3 hover:bg-gray-50 transition-colors"
+                                className="flex items-center whitespace-nowrap px-5 py-4 hover:bg-gray-50 transition-colors"
                             >
-                                <Users className="w-5 h-5 mr-3 text-green-600" />
+                                <Users className="w-6 h-6 mr-3 text-green-600" />
                                 <span className="text-gray-900 font-medium">새 팀 만들기</span>
                             </button>
                         </div>
@@ -163,10 +163,10 @@ const MobileNav: React.FC = () => {
                         onClick={() => setShowSubMenu(!showSubMenu)}
                         className={`${
                             showSubMenu ? 'bg-gray-600 rotate-45' : 'bg-blue-600 hover:bg-blue-700'
-                        } text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-200`}
+                        } text-white rounded-full p-5 shadow-lg hover:shadow-xl transition-all duration-200`}
                         aria-label={showSubMenu ? '메뉴 닫기' : '만들기 메뉴'}
                     >
-                        <Plus className="w-6 h-6" />
+                        <Plus className="w-7 h-7" />
                     </button>
                 </div>
             )}

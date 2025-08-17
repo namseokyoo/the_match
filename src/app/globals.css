@@ -2,6 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 타이포그래피 스케일 강화 */
+@layer base {
+    /* 제목 계층 구조 강화 */
+    h1 {
+        @apply text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight;
+        line-height: 1.2;
+    }
+    
+    h2 {
+        @apply text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight;
+        line-height: 1.3;
+    }
+    
+    h3 {
+        @apply text-xl sm:text-2xl lg:text-3xl font-semibold;
+        line-height: 1.4;
+    }
+    
+    h4 {
+        @apply text-lg sm:text-xl lg:text-2xl font-semibold;
+        line-height: 1.5;
+    }
+    
+    h5 {
+        @apply text-base sm:text-lg lg:text-xl font-medium;
+        line-height: 1.5;
+    }
+    
+    /* 본문 텍스트 */
+    p {
+        @apply text-base leading-relaxed;
+    }
+    
+    /* 작은 텍스트 */
+    small {
+        @apply text-sm;
+    }
+    
+    /* 섹션 간격 강화 */
+    section {
+        @apply py-8 sm:py-12 lg:py-16;
+    }
+}
+
 /* 애니메이션 */
 @keyframes fade-in-up {
     from {

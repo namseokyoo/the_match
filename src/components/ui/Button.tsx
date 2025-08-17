@@ -19,11 +19,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             danger: 'bg-error-500 text-white hover:bg-error-600 focus:ring-error-500 shadow-sm hover:shadow-md',
         };
 
-        // Updated sizes with better proportions
+        // Updated sizes with better proportions and touch targets
         const sizes = {
-            sm: 'text-sm px-3 py-1.5 rounded-md',
-            md: 'text-base px-4 py-2 rounded-lg',
-            lg: 'text-lg px-6 py-2.5 rounded-lg',
+            sm: 'text-sm px-4 py-2.5 rounded-md min-h-[44px]',
+            md: 'text-base px-5 py-3 rounded-lg min-h-[48px]',
+            lg: 'text-lg px-6 py-3.5 rounded-lg min-h-[52px]',
         };
 
         const handleClick = () => {

@@ -8,15 +8,35 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
     className?: string;
     hover?: boolean;
     padding?: 'none' | 'sm' | 'md' | 'lg';
+    variant?: 'default' | 'elevated' | 'outlined' | 'ghost';
+    status?: 'default' | 'success' | 'warning' | 'error' | 'info';
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-    ({ className, children, hover = false, padding = 'md', ...props }, ref) => {
-        // Clean, subtle card design with minimal shadows
-        const baseClasses = 'bg-white rounded-lg border border-gray-200 shadow-sm';
+    ({ className, children, hover = false, padding = 'md', variant = 'default', status = 'default', ...props }, ref) => {
+        // Base classes for all cards
+        const baseClasses = 'rounded-lg transition-all duration-200';
 
-        // More subtle hover effect without scale
-        const hoverClasses = hover ? 'hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer' : '';
+        // Variant styles
+        const variantClasses = {
+            default: 'bg-white border border-gray-200 shadow-sm',
+            elevated: 'bg-white shadow-lg hover:shadow-xl',
+            outlined: 'bg-white border-2 border-gray-200',
+            ghost: 'bg-gray-50 border border-transparent'
+        };
+
+        // Status-based border colors
+        const statusClasses = {
+            default: '',
+            success: 'border-l-4 border-l-green-500',
+            warning: 'border-l-4 border-l-yellow-500',
+            error: 'border-l-4 border-l-red-500',
+            info: 'border-l-4 border-l-blue-500'
+        };
+
+        // Enhanced hover effects
+        const hoverClasses = hover ? 
+            'hover:shadow-lg hover:border-gray-300 hover:-translate-y-0.5 cursor-pointer' : '';
 
         const paddingClasses = {
             none: '',
@@ -27,7 +47,14 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
         return (
             <div
-                className={cn(baseClasses, hoverClasses, paddingClasses[padding], className)}
+                className={cn(
+                    baseClasses, 
+                    variantClasses[variant], 
+                    statusClasses[status],
+                    hoverClasses, 
+                    paddingClasses[padding], 
+                    className
+                )}
                 ref={ref}
                 {...props}
             >

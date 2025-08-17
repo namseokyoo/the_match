@@ -118,100 +118,74 @@ const MobileNavbar = () => {
                     </div>
                 </div>
 
-                {/* 모바일 메뉴 */}
-                <div className={`absolute top-full right-0 bottom-0 w-full bg-white transform transition-transform duration-300 z-50 ${
+                {/* 모바일 메뉴 - 사용자 상태 중심 */}
+                <div className={`absolute top-full right-0 bottom-0 w-80 bg-white transform transition-transform duration-300 z-50 shadow-xl ${
                     isMenuOpen ? 'translate-x-0' : 'translate-x-full'
                 }`} style={{ height: 'calc(100vh - 56px)' }}>
                     <div className="h-full overflow-y-auto">
-                        {/* 메인 네비게이션 */}
-                        <div className="border-b border-gray-200 pb-4 pt-2">
-                            <Link 
-                                href="/"
-                                className={isActive('/') && pathname === '/' ? activeMenuItemClass : menuItemClass}
-                            >
-                                <Home className="w-5 h-5" />
-                                <span>홈</span>
-                            </Link>
-                            <Link 
-                                href="/matches"
-                                className={isActive('/matches') ? activeMenuItemClass : menuItemClass}
-                            >
-                                <Trophy className="w-5 h-5" />
-                                <span>경기</span>
-                            </Link>
-                            <Link 
-                                href="/teams"
-                                className={isActive('/teams') ? activeMenuItemClass : menuItemClass}
-                            >
-                                <Users className="w-5 h-5" />
-                                <span>팀</span>
-                            </Link>
-                            {/* 템플릿 메뉴 - 임시 숨김
-                            <Link 
-                                href="/matches/templates"
-                                className={isActive('/matches/templates') ? activeMenuItemClass : menuItemClass}
-                            >
-                                <LayoutTemplate className="w-5 h-5" />
-                                <span>템플릿</span>
-                            </Link>
-                            */}
-                            <Link 
-                                href="/community"
-                                className={isActive('/community') ? activeMenuItemClass : menuItemClass}
-                            >
-                                <MessageSquare className="w-5 h-5" />
-                                <span>커뮤니티</span>
-                            </Link>
-                        </div>
 
                         {showSkeleton ? (
                             // 로딩 중
-                            <div className="p-4 space-y-3">
-                                <div className="animate-pulse h-10 bg-gray-200 rounded"></div>
-                                <div className="animate-pulse h-10 bg-gray-200 rounded"></div>
+                            <div className="p-6 space-y-4">
+                                <div className="animate-pulse h-20 bg-gray-200 rounded-lg"></div>
+                                <div className="animate-pulse h-12 bg-gray-200 rounded-lg"></div>
+                                <div className="animate-pulse h-12 bg-gray-200 rounded-lg"></div>
                             </div>
                         ) : isAuthenticated ? (
                             // 로그인된 상태
                             <>
-                                {/* 사용자 정보 */}
-                                <div className="border-b border-gray-200 p-4">
-                                    <div className="text-sm text-gray-600 mb-3">
-                                        {user?.email?.split('@')[0] || '사용자'}님
+                                {/* 사용자 프로필 카드 */}
+                                <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-b border-gray-200">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
+                                            <User className="w-9 h-9 text-white" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-lg font-semibold text-gray-900">
+                                                {user?.email?.split('@')[0] || '사용자'}
+                                            </div>
+                                            <div className="text-sm text-gray-600">
+                                                {user?.email}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
+                                    <div className="mt-4 grid grid-cols-2 gap-2">
                                         <Link 
                                             href="/dashboard"
-                                            className="block w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-center hover:bg-gray-200 transition-colors"
+                                            className="flex items-center justify-center gap-2 px-3 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                                         >
-                                            <LayoutDashboard className="w-4 h-4 inline mr-2" />
-                                            대시보드
+                                            <LayoutDashboard className="w-5 h-5" />
+                                            <span className="text-sm font-medium">대시보드</span>
                                         </Link>
                                         <Link 
                                             href="/profile"
-                                            className="block w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-center hover:bg-gray-200 transition-colors"
+                                            className="flex items-center justify-center gap-2 px-3 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                                         >
-                                            <User className="w-4 h-4 inline mr-2" />
-                                            프로필
+                                            <User className="w-5 h-5" />
+                                            <span className="text-sm font-medium">프로필</span>
                                         </Link>
                                     </div>
                                 </div>
 
-                                {/* 생성 버튼들 */}
-                                <div className="p-4 space-y-3">
-                                    <Link 
-                                        href="/matches/create"
-                                        className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                                    >
-                                        <PlusCircle className="w-5 h-5" />
-                                        <span className="font-medium">경기 생성</span>
-                                    </Link>
-                                    <Link 
-                                        href="/teams/create"
-                                        className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                                    >
-                                        <PlusCircle className="w-5 h-5" />
-                                        <span className="font-medium">팀 생성</span>
-                                    </Link>
+                                {/* 빠른 액션 */}
+                                <div className="p-6">
+                                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">빠른 액션</h3>
+                                    <div className="space-y-3">
+                                        <Link 
+                                            href="/matches/create"
+                                            className="flex items-center gap-3 w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all hover:shadow-lg"
+                                        >
+                                            <PlusCircle className="w-6 h-6" />
+                                            <span className="font-medium">새 경기 만들기</span>
+                                        </Link>
+                                        <Link 
+                                            href="/teams/create"
+                                            className="flex items-center gap-3 w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-all"
+                                        >
+                                            <Users className="w-6 h-6" />
+                                            <span className="font-medium">팀 생성하기</span>
+                                        </Link>
+                                    </div>
                                 </div>
 
                                 {/* 로그아웃 */}
@@ -225,7 +199,7 @@ const MobileNavbar = () => {
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                         }`}
                                     >
-                                        <LogOut className="w-5 h-5" />
+                                        <LogOut className="w-6 h-6" />
                                         <span className="font-medium">
                                             {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
                                         </span>
@@ -244,14 +218,14 @@ const MobileNavbar = () => {
                                     href="/login"
                                     className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                                 >
-                                    <LogIn className="w-5 h-5" />
+                                    <LogIn className="w-6 h-6" />
                                     <span className="font-medium">로그인</span>
                                 </Link>
                                 <Link 
                                     href="/signup"
                                     className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                                 >
-                                    <UserPlus className="w-5 h-5" />
+                                    <UserPlus className="w-6 h-6" />
                                     <span className="font-medium">회원가입</span>
                                 </Link>
                             </div>
