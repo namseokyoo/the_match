@@ -47,12 +47,15 @@ export default function Home() {
                 setUpcomingMatches(upcomingMatches || []);
                 setRecruitingTeams(recruitingTeams || []);
 
-                // Live 경기 필터링 (오늘 날짜 기준 진행중인 경기 또는 곧 시작할 경기)
+                // Live 경기 필터링 (진행중이거나 앞으로 7일 이내 시작할 경기)
                 const today = new Date();
                 const todayStr = today.toISOString().split('T')[0];
+                const sevenDaysLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
                 
                 const live = [...(activeMatches || []), ...(upcomingMatches || [])]
                     .filter(match => {
+                        if (!match.start_date) return false;
+                        
                         const status = calculateMatchStatus(
                             match.registration_start_date,
                             match.registration_deadline,
@@ -61,12 +64,18 @@ export default function Home() {
                             match.status
                         );
                         
-                        // 오늘 경기이거나 진행중인 경기
-                        const isToday = match.start_date && match.start_date.startsWith(todayStr);
-                        const isInProgress = status === 'in_progress';
-                        const isUpcoming = status === 'registration' || (status as any) === 'registration_closed';
+                        const matchDate = new Date(match.start_date);
                         
-                        return isInProgress || isToday || isUpcoming;
+                        // 진행중인 경기
+                        const isInProgress = status === 'in_progress';
+                        
+                        // 오늘 경기
+                        const isToday = match.start_date.startsWith(todayStr);
+                        
+                        // 7일 이내 시작할 경기
+                        const isUpcomingSoon = matchDate > today && matchDate <= sevenDaysLater;
+                        
+                        return isInProgress || isToday || isUpcomingSoon;
                     })
                     .sort((a, b) => {
                         // 진행중 > 오늘 > 곧 시작 순으로 정렬
@@ -117,7 +126,7 @@ export default function Home() {
                             Live Now
                         </h2>
                         <p className="text-sm text-gray-600">
-                            오늘 진행중이거나 곧 시작될 경기들
+                            진행중이거나 곧 시작될 경기들
                         </p>
                     </div>
 
@@ -140,7 +149,7 @@ export default function Home() {
                     ) : (
                         <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl p-12 text-center">
                             <Trophy className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                            <h3 className="text-xl font-bold text-gray-700 mb-2">오늘은 경기가 없습니다</h3>
+                            <h3 className="text-xl font-bold text-gray-700 mb-2">예정된 경기가 없습니다</h3>
                             <p className="text-gray-600 mb-6">새로운 경기를 만들어보세요!</p>
                             {user ? (
                                 <Link 
