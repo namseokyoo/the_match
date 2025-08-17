@@ -4,26 +4,43 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronRight, Home } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface BreadcrumbItem {
     label: string;
     href?: string;
+    icon?: React.ReactNode;
 }
 
 interface BreadcrumbProps {
     items?: BreadcrumbItem[];
     className?: string;
+    separator?: React.ReactNode;
+    showHome?: boolean;
+    variant?: 'default' | 'minimal' | 'mobile';
 }
 
-export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
+export default function Breadcrumb({ 
+    items, 
+    className,
+    separator = <ChevronRight className="w-4 h-4 text-gray-400" />,
+    showHome = true,
+    variant = 'default'
+}: BreadcrumbProps) {
     const pathname = usePathname();
     
     // 자동 생성 로직 (items가 제공되지 않은 경우)
     const generateItems = (): BreadcrumbItem[] => {
         const paths = pathname.split('/').filter(Boolean);
-        const generated: BreadcrumbItem[] = [
-            { label: '홈', href: '/' }
-        ];
+        const generated: BreadcrumbItem[] = [];
+        
+        if (showHome) {
+            generated.push({ 
+                label: '홈', 
+                href: '/',
+                icon: <Home className="w-4 h-4" />
+            });
+        }
         
         const pathMap: { [key: string]: string } = {
             'matches': '경기',
@@ -34,6 +51,14 @@ export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
             'dashboard': '대시보드',
             'create': '생성',
             'edit': '수정',
+            'bracket': '대진표',
+            'results': '결과',
+            'checkin': '체크인',
+            'calendar': '캘린더',
+            'templates': '템플릿',
+            'chat': '채팅',
+            'stats': '통계',
+            'players': '선수'
         };
         
         let currentPath = '';
@@ -63,35 +88,100 @@ export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
     const breadcrumbItems = items || generateItems();
     
     // 홈 페이지에서는 브레드크럼 표시하지 않음
-    if (pathname === '/') {
+    if (pathname === '/' || breadcrumbItems.length === 0) {
         return null;
     }
     
-    return (
-        <nav aria-label="Breadcrumb" className={`bg-white border-b border-gray-200 ${className}`}>
-            <div className="px-4 py-2">
-                <ol className="flex items-center space-x-2 text-sm">
+    // 모바일 모드: 이전 페이지와 현재 페이지만 표시
+    if (variant === 'mobile' && breadcrumbItems.length > 2) {
+        const prevItem = breadcrumbItems[breadcrumbItems.length - 2];
+        const currentItem = breadcrumbItems[breadcrumbItems.length - 1];
+        
+        return (
+            <nav aria-label="Breadcrumb" className={cn('bg-white border-b border-gray-200', className)}>
+                <div className="px-4 py-2">
+                    <div className="flex items-center space-x-2 text-sm">
+                        {prevItem.href && (
+                            <Link
+                                href={prevItem.href}
+                                className="text-gray-500 hover:text-gray-900 transition-colors flex items-center"
+                            >
+                                ← {prevItem.label}
+                            </Link>
+                        )}
+                        <span className="text-gray-400">/</span>
+                        <span className="text-gray-900 font-medium">
+                            {currentItem.label}
+                        </span>
+                    </div>
+                </div>
+            </nav>
+        );
+    }
+    
+    // 미니멀 모드
+    if (variant === 'minimal') {
+        return (
+            <nav aria-label="Breadcrumb" className={cn('text-sm', className)}>
+                <div className="flex items-center space-x-1">
                     {breadcrumbItems.map((item, index) => {
                         const isLast = index === breadcrumbItems.length - 1;
-                        const isFirst = index === 0;
                         
                         return (
-                            <li key={index} className="flex items-center">
-                                {!isFirst && (
-                                    <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />
+                            <React.Fragment key={index}>
+                                {index > 0 && (
+                                    <span className="text-gray-400">/</span>
                                 )}
-                                
                                 {isLast || !item.href ? (
-                                    <span className="text-gray-900 font-medium flex items-center">
-                                        {isFirst && <Home className="w-4 h-4 mr-1" />}
+                                    <span className="text-gray-900 font-medium">
                                         {item.label}
                                     </span>
                                 ) : (
                                     <Link 
                                         href={item.href}
-                                        className="text-gray-500 hover:text-gray-700 transition-colors flex items-center"
+                                        className="text-gray-500 hover:text-gray-900 transition-colors"
                                     >
-                                        {isFirst && <Home className="w-4 h-4 mr-1" />}
+                                        {item.label}
+                                    </Link>
+                                )}
+                            </React.Fragment>
+                        );
+                    })}
+                </div>
+            </nav>
+        );
+    }
+    
+    // 기본 모드
+    return (
+        <nav aria-label="Breadcrumb" className={cn('bg-white border-b border-gray-200', className)}>
+            <div className="px-4 py-2">
+                <ol className="flex items-center space-x-2 text-sm">
+                    {breadcrumbItems.map((item, index) => {
+                        const isLast = index === breadcrumbItems.length - 1;
+                        
+                        return (
+                            <li key={index} className="flex items-center">
+                                {index > 0 && (
+                                    <span className="mx-2">
+                                        {separator}
+                                    </span>
+                                )}
+                                
+                                {isLast || !item.href ? (
+                                    <span className={cn(
+                                        'flex items-center gap-1',
+                                        isLast ? 'text-gray-900 font-medium' : 'text-gray-500'
+                                    )}>
+                                        {item.icon}
+                                        {item.label}
+                                    </span>
+                                ) : (
+                                    <Link 
+                                        href={item.href}
+                                        className="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1"
+                                    >
+                                        {item.icon}
                                         {item.label}
                                     </Link>
                                 )}

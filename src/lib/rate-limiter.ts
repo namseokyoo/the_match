@@ -120,6 +120,20 @@ export const rateLimiters = {
         message: '로그인 시도가 너무 많습니다. 5분 후 다시 시도해주세요.'
     }),
     
+    // 회원가입: 시간당 3회
+    signup: new RateLimiter({
+        windowMs: 60 * 60 * 1000,
+        maxRequests: 3,
+        message: '회원가입 시도가 너무 많습니다. 1시간 후 다시 시도해주세요.'
+    }),
+    
+    // 비밀번호 재설정: 10분당 3회
+    passwordReset: new RateLimiter({
+        windowMs: 10 * 60 * 1000,
+        maxRequests: 3,
+        message: '비밀번호 재설정 요청이 너무 많습니다. 10분 후 다시 시도해주세요.'
+    }),
+    
     // 생성 API: 분당 10회
     create: new RateLimiter({
         windowMs: 60 * 1000,
@@ -127,22 +141,100 @@ export const rateLimiters = {
         message: '생성 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.'
     }),
     
+    // 수정 API: 분당 30회
+    update: new RateLimiter({
+        windowMs: 60 * 1000,
+        maxRequests: 30,
+        message: '수정 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.'
+    }),
+    
+    // 삭제 API: 분당 5회
+    delete: new RateLimiter({
+        windowMs: 60 * 1000,
+        maxRequests: 5,
+        message: '삭제 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.'
+    }),
+    
+    // 검색 API: 분당 100회
+    search: new RateLimiter({
+        windowMs: 60 * 1000,
+        maxRequests: 100,
+        message: '검색 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.'
+    }),
+    
     // 파일 업로드: 10분당 5회
     upload: new RateLimiter({
         windowMs: 10 * 60 * 1000,
         maxRequests: 5,
         message: '파일 업로드 제한에 도달했습니다. 10분 후 다시 시도해주세요.'
+    }),
+    
+    // 이메일 발송: 시간당 10회
+    email: new RateLimiter({
+        windowMs: 60 * 60 * 1000,
+        maxRequests: 10,
+        message: '이메일 발송 제한에 도달했습니다. 1시간 후 다시 시도해주세요.'
+    }),
+    
+    // 실시간 연결: 분당 5회
+    realtime: new RateLimiter({
+        windowMs: 60 * 1000,
+        maxRequests: 5,
+        message: '실시간 연결 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.'
     })
 };
+
+/**
+ * API 경로에 따른 Rate Limiter 자동 선택
+ */
+export function getRateLimiterByPath(pathname: string, method: string = 'GET'): RateLimiter {
+    // 인증 관련
+    if (pathname.includes('/auth/login')) return rateLimiters.auth;
+    if (pathname.includes('/auth/signup')) return rateLimiters.signup;
+    if (pathname.includes('/auth/reset-password')) return rateLimiters.passwordReset;
+    
+    // 파일 업로드
+    if (pathname.includes('/upload') || pathname.includes('/files')) return rateLimiters.upload;
+    
+    // 이메일
+    if (pathname.includes('/email') || pathname.includes('/send')) return rateLimiters.email;
+    
+    // 실시간
+    if (pathname.includes('/realtime') || pathname.includes('/websocket')) return rateLimiters.realtime;
+    
+    // 검색
+    if (pathname.includes('/search') || pathname.includes('/query')) return rateLimiters.search;
+    
+    // HTTP 메소드별 분류
+    switch (method.toUpperCase()) {
+        case 'POST':
+            return pathname.includes('/create') || pathname.includes('/new') 
+                ? rateLimiters.create 
+                : rateLimiters.general;
+        case 'PUT':
+        case 'PATCH':
+            return rateLimiters.update;
+        case 'DELETE':
+            return rateLimiters.delete;
+        default:
+            return rateLimiters.general;
+    }
+}
 
 /**
  * Rate Limit 미들웨어 헬퍼
  */
 export async function withRateLimit(
     request: NextRequest,
-    limiter: RateLimiter = rateLimiters.general
+    limiter?: RateLimiter
 ): Promise<Response | null> {
-    const result = await limiter.check(request);
+    // limiter가 제공되지 않으면 경로 기반으로 자동 선택
+    const rateLimiter = limiter || getRateLimiterByPath(
+        request.nextUrl.pathname,
+        request.method
+    );
+    
+    const result = await rateLimiter.check(request);
     
     if (!result.success) {
         return new Response(
@@ -155,7 +247,7 @@ export async function withRateLimit(
                 status: 429,
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-RateLimit-Limit': String(limiter['config'].maxRequests),
+                    'X-RateLimit-Limit': String(rateLimiter['config'].maxRequests),
                     'X-RateLimit-Remaining': String(result.remaining),
                     'X-RateLimit-Reset': result.reset.toISOString(),
                     'Retry-After': String(Math.ceil((result.reset.getTime() - Date.now()) / 1000))
