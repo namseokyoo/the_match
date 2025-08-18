@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 스크롤바 숨기기 유틸리티 */
+@layer utilities {
+    .scrollbar-hide {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;  /* Chrome, Safari and Opera */
+    }
+}
+
 /* 타이포그래피 스케일 강화 */
 @layer base {
     /* 제목 계층 구조 강화 */

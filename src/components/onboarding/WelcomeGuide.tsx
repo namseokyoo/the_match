@@ -182,7 +182,7 @@ const WelcomeGuide: React.FC<WelcomeGuideProps> = ({ onClose, isFooterVersion = 
     const Icon = currentStepData.icon;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 animate-fade-in" data-testid="welcome-guide">
             <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden">
                 {/* Header */}
                 <div className={`bg-gradient-to-r from-${currentStepData.color}-500 to-${currentStepData.color}-600 p-6 text-white`}>

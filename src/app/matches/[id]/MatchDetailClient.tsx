@@ -28,7 +28,7 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
     const { user, getAccessToken } = useAuth();
     const [refreshKey, setRefreshKey] = useState(0);
     const [match, setMatch] = useState(initialMatch);
-    const [activeTab, setActiveTab] = useState<'info' | 'bracket' | 'manage'>('info');
+    const [activeTab, setActiveTab] = useState<'overview' | 'participants' | 'bracket' | 'manage'>('overview');
     const [teams, setTeams] = useState<Team[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -216,131 +216,118 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
 
     // 대회 타입에 따라 대진표 탭 표시 여부 결정
     const showBracket = match?.type && ['single_elimination', 'double_elimination', 'round_robin'].includes(match.type);
+    
+    // 탭 정의 - 조건부로 표시
+    const tabs = [
+        { id: 'overview', label: '개요', icon: Trophy, show: true },
+        { id: 'participants', label: '참가팀', icon: Users, show: true },
+        { id: 'bracket', label: '대진표', icon: Calendar, show: showBracket },
+        { id: 'manage', label: '관리', icon: Settings, show: isOwner },
+    ].filter(tab => tab.show);
 
     return (
-        <div className="max-w-7xl mx-auto space-y-6">
-            {/* 생성자 액션 버튼 */}
-            {isOwner && (
-                <div className="bg-white rounded-lg shadow-sm border p-4">
-                    <div className="flex justify-end space-x-2">
+        <div className="space-y-4">
+            {/* 헤더 - 제목과 액션 버튼 */}
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">{match?.title}</h1>
+                        <p className="text-sm text-gray-600 mt-1">
+                            {match?.description || '설명이 없습니다.'}
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {/* 체크인 버튼은 항상 표시 */}
                         <button
-                            onClick={() => match?.id && handleEdit(match.id)}
-                            disabled={!match?.id || isLoading}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={() => match?.id && router.push(`/matches/${match.id}/checkin`)}
+                            disabled={!match?.id}
+                            className="px-4 py-2 text-sm bg-success-500 text-white rounded-lg hover:bg-success-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
-                            {isLoading ? '처리 중...' : '대회 수정'}
+                            <QrCode className="w-4 h-4" />
+                            체크인
                         </button>
-                        <button
-                            onClick={() => match?.id && handleDelete(match.id)}
-                            disabled={!match?.id || isLoading}
-                            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isLoading ? '처리 중...' : '대회 삭제'}
-                        </button>
+                        {isOwner && (
+                            <>
+                                <button
+                                    onClick={() => match?.id && handleEdit(match.id)}
+                                    disabled={!match?.id || isLoading}
+                                    className="px-4 py-2 text-sm bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    수정
+                                </button>
+                                <button
+                                    onClick={() => match?.id && handleDelete(match.id)}
+                                    disabled={!match?.id || isLoading}
+                                    className="px-4 py-2 text-sm bg-error-500 text-white rounded-lg hover:bg-error-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    삭제
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
-            )}
+            </div>
 
-            {/* 탭 네비게이션 */}
+            {/* 탭 네비게이션 - 모바일 최적화 */}
             <div className="bg-white rounded-lg shadow-sm border">
                 <div className="border-b">
-                    <nav className="flex -mb-px">
-                        <button
-                            onClick={() => setActiveTab('info')}
-                            className={`px-6 py-3 text-sm font-medium transition-colors ${
-                                activeTab === 'info'
-                                    ? 'border-b-2 border-blue-600 text-blue-600'
-                                    : 'text-gray-600 hover:text-gray-900'
-                            }`}
-                        >
-                            <div className="flex items-center gap-2">
-                                <Trophy className="w-4 h-4" />
-                                정보
-                            </div>
-                        </button>
-                        
-                        {showBracket && (
-                            <button
-                                onClick={() => setActiveTab('bracket')}
-                                className={`px-6 py-3 text-sm font-medium transition-colors ${
-                                    activeTab === 'bracket'
-                                        ? 'border-b-2 border-blue-600 text-blue-600'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                            >
-                                <div className="flex items-center gap-2">
-                                    <Calendar className="w-4 h-4" />
-                                    대진표
-                                </div>
-                            </button>
-                        )}
-                        
-                        {isOwner && (
-                            <button
-                                onClick={() => setActiveTab('manage')}
-                                className={`px-6 py-3 text-sm font-medium transition-colors ${
-                                    activeTab === 'manage'
-                                        ? 'border-b-2 border-blue-600 text-blue-600'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                            >
-                                <div className="flex items-center gap-2">
-                                    <Settings className="w-4 h-4" />
-                                    관리
-                                </div>
-                            </button>
-                        )}
-                        
-                        {/* 체크인은 별도 링크로 이동 */}
-                        <div className="ml-auto flex items-center px-4">
-                            <button
-                                onClick={() => match?.id && router.push(`/matches/${match.id}/checkin`)}
-                                disabled={!match?.id}
-                                className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <div className="flex items-center gap-2">
-                                    <QrCode className="w-4 h-4" />
-                                    체크인
-                                </div>
-                            </button>
-                        </div>
+                    <nav className="flex overflow-x-auto scrollbar-hide -mb-px">
+                        {tabs.map((tab) => {
+                            const Icon = tab.icon;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id as any)}
+                                    className={`flex-shrink-0 px-4 sm:px-6 py-3 text-sm font-medium transition-colors whitespace-nowrap ${
+                                        activeTab === tab.id
+                                            ? 'border-b-2 border-primary-500 text-primary-600'
+                                            : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <Icon className="w-4 h-4" />
+                                        <span className="hidden sm:inline">{tab.label}</span>
+                                        <span className="sm:hidden">{tab.label}</span>
+                                    </div>
+                                </button>
+                            );
+                        })}
                     </nav>
                 </div>
 
                 {/* 탭 컨텐츠 */}
-                <div className="p-6">
-                    {activeTab === 'info' && (
+                <div className="p-4 sm:p-6">
+                    {/* 개요 탭 */}
+                    {activeTab === 'overview' && (
                         <div className="space-y-6">
-                            {/* 경기 상세 정보 */}
                             <MatchDetail
                                 match={match}
                                 onJoined={handleJoined}
                             />
-                            
-                            {/* 참가팀 목록 */}
-                            <div className="border-t pt-6">
-                                <div className="mb-4">
-                                    <h2 className="text-xl font-bold text-gray-900">참가팀</h2>
-                                    <p className="text-sm text-gray-600 mt-1">
-                                        현재 이 경기에 참가 중인 팀들입니다.
-                                    </p>
-                                </div>
-                                {match?.id ? (
-                                    <ParticipantManagement
-                                        matchId={match.id}
-                                        isCreator={false}
-                                        onUpdate={() => setRefreshKey(prev => prev + 1)}
-                                        key={`info-${refreshKey}`}
-                                    />
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <p className="text-gray-500">참가팀 정보를 불러오는 중입니다...</p>
-                                    </div>
-                                )}
-                            </div>
                         </div>
                     )}
                     
+                    {/* 참가팀 탭 */}
+                    {activeTab === 'participants' && match?.id && (
+                        <div>
+                            <div className="mb-4">
+                                <h2 className="text-lg font-semibold text-gray-900">참가팀 목록</h2>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    {isOwner 
+                                        ? '참가 신청을 검토하고 관리할 수 있습니다.'
+                                        : '현재 이 경기에 참가 중인 팀들입니다.'}
+                                </p>
+                            </div>
+                            <ParticipantManagement
+                                matchId={match.id}
+                                isCreator={isOwner}
+                                onUpdate={() => setRefreshKey(prev => prev + 1)}
+                                key={`participants-${refreshKey}`}
+                            />
+                        </div>
+                    )}
+                    
+                    {/* 대진표 탭 */}
                     {activeTab === 'bracket' && showBracket && match?.id && (
                         <TournamentManager
                             matchId={match.id}
@@ -350,43 +337,35 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                         />
                     )}
                     
-                    {activeTab === 'manage' && isOwner && (
+                    {/* 관리 탭 - 경기 상태와 설정 */}
+                    {activeTab === 'manage' && isOwner && match?.id && (
                         <div className="space-y-6">
-                            {/* 참가 신청 관리 */}
-                            <div>
-                                <div className="mb-4">
-                                    <h2 className="text-xl font-bold text-gray-900">참가 신청 관리</h2>
-                                    <p className="text-sm text-gray-600 mt-1">
-                                        참가 신청을 검토하고 승인/거부할 수 있습니다.
-                                    </p>
-                                </div>
-                                {match?.id ? (
-                                    <ParticipantManagement
-                                        matchId={match.id}
-                                        isCreator={true}
-                                        onUpdate={() => setRefreshKey(prev => prev + 1)}
-                                        key={`manage-${refreshKey}`}
-                                    />
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <p className="text-gray-500">참가 신청 정보를 불러오는 중입니다...</p>
-                                    </div>
-                                )}
-                            </div>
-                            
                             {/* 경기 상태 관리 */}
+                            <MatchStatusManager
+                                match={match}
+                                isCreator={isOwner}
+                                onStatusChange={handleStatusChange}
+                            />
+                            
+                            {/* 추가 관리 기능 */}
                             <div className="border-t pt-6">
-                                {match?.id ? (
-                                    <MatchStatusManager
-                                        match={match}
-                                        isCreator={isOwner}
-                                        onStatusChange={handleStatusChange}
-                                    />
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <p className="text-gray-500">경기 정보를 불러오는 중입니다...</p>
-                                    </div>
-                                )}
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">빠른 작업</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <button
+                                        onClick={() => router.push(`/matches/${match.id}/edit`)}
+                                        className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                                    >
+                                        <div className="font-medium text-gray-900">경기 정보 수정</div>
+                                        <div className="text-sm text-gray-600 mt-1">날짜, 규칙 등을 변경합니다</div>
+                                    </button>
+                                    <button
+                                        onClick={() => router.push(`/matches/${match.id}/checkin`)}
+                                        className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                                    >
+                                        <div className="font-medium text-gray-900">체크인 관리</div>
+                                        <div className="text-sm text-gray-600 mt-1">참가팀 체크인 상태를 확인합니다</div>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}

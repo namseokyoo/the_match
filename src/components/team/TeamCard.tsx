@@ -37,7 +37,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
     };
 
     const cardContent = (
-        <Card className={`hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer ${className}`}>
+        <Card className={`hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer ${className}`} data-testid="team-card">
             <div className="p-6">
                 {/* 팀 헤더 */}
                 <div className="flex items-start justify-between mb-4">
