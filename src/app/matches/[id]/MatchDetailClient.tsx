@@ -13,7 +13,9 @@ import MatchStatusManager from '@/components/match/MatchStatusManager';
 import TournamentManager from '@/components/match/TournamentManager';
 import { showToast } from '@/components/ui/Toast';
 import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
-import { Trophy, Users, Calendar, Settings, QrCode, BarChart3, TrendingUp, UserCheck } from 'lucide-react';
+import { Trophy, Users, Calendar, Settings, QrCode, BarChart3, TrendingUp, UserCheck, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { getMatchStatistics, getTeamStatistics, getRecentResults, getUpcomingGames, getMatchProgress } from '@/lib/match-stats';
+import { formatDate } from '@/lib/utils';
 
 interface MatchDetailClientProps {
     match: Match;
@@ -33,6 +35,13 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
     const [teams, setTeams] = useState<Team[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    
+    // 통계 데이터 state
+    const [matchStats, setMatchStats] = useState<any>(null);
+    const [teamStats, setTeamStats] = useState<any[]>([]);
+    const [recentResults, setRecentResults] = useState<any[]>([]);
+    const [upcomingGames, setUpcomingGames] = useState<any[]>([]);
+    const [matchProgress, setMatchProgress] = useState<any>(null);
 
     // 실시간 업데이트 구독 - 항상 호출하되 match.id가 없으면 빈 문자열 전달
     useMatchRealtime(match?.id || '', {
@@ -97,6 +106,36 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
         
         fetchTeams();
     }, [match?.id, refreshKey]);
+
+    // 통계 데이터 조회
+    useEffect(() => {
+        if (!match?.id) return;
+
+        const fetchStatistics = async () => {
+            try {
+                // 병렬로 모든 통계 데이터 가져오기
+                const [stats, teamStatsData, results, upcoming] = await Promise.all([
+                    getMatchStatistics(match.id),
+                    getTeamStatistics(match.id),
+                    getRecentResults(match.id),
+                    getUpcomingGames(match.id)
+                ]);
+
+                setMatchStats(stats);
+                setTeamStats(teamStatsData);
+                setRecentResults(results);
+                setUpcomingGames(upcoming);
+                
+                // 경기 진행 상태 계산
+                const progress = getMatchProgress(match);
+                setMatchProgress(progress);
+            } catch (error) {
+                console.error('Failed to fetch statistics:', error);
+            }
+        };
+
+        fetchStatistics();
+    }, [match?.id, match?.status, refreshKey]);
 
     const handleJoined = () => {
         // 참가 신청 후 페이지 새로고침
@@ -232,11 +271,11 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
     return (
         <div className="space-y-4">
             {/* 헤더 - 제목과 액션 버튼 */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">{match?.title}</h1>
-                        <p className="text-sm text-gray-600 mt-1">
+            <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{match?.title}</h1>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                             {match?.description || '설명이 없습니다.'}
                         </p>
                     </div>
@@ -252,7 +291,7 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                         <button
                             onClick={() => match?.id && router.push(`/matches/${match.id}/checkin`)}
                             disabled={!match?.id}
-                            className="px-4 py-2 text-sm bg-success-500 text-white rounded-lg hover:bg-success-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="px-3 py-1.5 text-sm bg-success-500 text-white rounded-lg hover:bg-success-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             <QrCode className="w-4 h-4" />
                             체크인
@@ -262,14 +301,14 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                                 <button
                                     onClick={() => match?.id && handleEdit(match.id)}
                                     disabled={!match?.id || isLoading}
-                                    className="px-4 py-2 text-sm bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-3 py-1.5 text-sm bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     수정
                                 </button>
                                 <button
                                     onClick={() => match?.id && handleDelete(match.id)}
                                     disabled={!match?.id || isLoading}
-                                    className="px-4 py-2 text-sm bg-error-500 text-white rounded-lg hover:bg-error-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-3 py-1.5 text-sm bg-error-500 text-white rounded-lg hover:bg-error-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     삭제
                                 </button>
@@ -279,56 +318,39 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                 </div>
             </div>
 
-            {/* 탭 네비게이션 - 모바일 최적화 */}
-            <div className="bg-white rounded-lg shadow-sm border">
-                <div className="border-b">
-                    <nav className="flex overflow-x-auto scrollbar-hide -mb-px">
-                        {tabs.map((tab) => {
-                            const Icon = tab.icon;
-                            return (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id as any)}
-                                    className={`flex-shrink-0 px-4 sm:px-6 py-3 text-sm font-medium transition-colors whitespace-nowrap ${
-                                        activeTab === tab.id
-                                            ? 'border-b-2 border-primary-500 text-primary-600'
-                                            : 'text-gray-600 hover:text-gray-900'
-                                    }`}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <Icon className="w-4 h-4" />
-                                        <span className="hidden sm:inline">{tab.label}</span>
-                                        <span className="sm:hidden">{tab.label}</span>
-                                    </div>
-                                </button>
-                            );
-                        })}
-                    </nav>
+            {/* 카드 섹션들 - 스크롤 가능한 단일 페이지 */}
+            <div className="space-y-4">
+                {/* 개요 카드 */}
+                <div className="bg-white rounded-lg shadow-sm border">
+                    <div className="p-4 border-b bg-gray-50">
+                        <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                            <Trophy className="w-5 h-5 text-primary-600" />
+                            경기 개요
+                        </h2>
+                    </div>
+                    <div className="p-4">
+                        <MatchDetail
+                            match={match}
+                            onJoined={handleJoined}
+                        />
+                    </div>
                 </div>
-
-                {/* 탭 컨텐츠 */}
-                <div className="p-4 sm:p-6">
-                    {/* 개요 탭 - 참가 버튼 제거 */}
-                    {activeTab === 'overview' && (
-                        <div className="space-y-6">
-                            <MatchDetail
-                                match={match}
-                                onJoined={handleJoined}
-                            />
+                
+                {/* 참가팀 카드 */}
+                {match?.id && (
+                    <div className="bg-white rounded-lg shadow-sm border">
+                        <div className="p-4 border-b bg-gray-50">
+                            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                                <Users className="w-5 h-5 text-primary-600" />
+                                참가팀 목록
+                            </h2>
+                            <p className="text-sm text-gray-600 mt-1">
+                                {isOwner 
+                                    ? '참가 신청을 검토하고 관리할 수 있습니다.'
+                                    : '현재 이 경기에 참가 중인 팀들입니다.'}
+                            </p>
                         </div>
-                    )}
-                    
-                    {/* 참가팀 탭 */}
-                    {activeTab === 'participants' && match?.id && (
-                        <div>
-                            <div className="mb-4">
-                                <h2 className="text-lg font-semibold text-gray-900">참가팀 목록</h2>
-                                <p className="text-sm text-gray-600 mt-1">
-                                    {isOwner 
-                                        ? '참가 신청을 검토하고 관리할 수 있습니다.'
-                                        : '현재 이 경기에 참가 중인 팀들입니다.'}
-                                </p>
-                            </div>
+                        <div className="p-4">
                             <ParticipantManagement
                                 matchId={match.id}
                                 isCreator={isOwner}
@@ -336,82 +358,262 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                                 key={`participants-${refreshKey}`}
                             />
                         </div>
-                    )}
-                    
-                    {/* 대진표 탭 */}
-                    {activeTab === 'bracket' && showBracket && match?.id && (
-                        <TournamentManager
-                            matchId={match.id}
-                            matchData={match}
-                            teams={teams}
-                            isCreator={isOwner}
-                        />
-                    )}
-                    
-                    {/* 경기 결과 탭 */}
-                    {activeTab === 'results' && match?.id && (
-                        <div className="space-y-6">
-                            <div className="text-center py-12 bg-gray-50 rounded-lg">
-                                <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">경기 결과</h3>
-                                <p className="text-gray-600 mb-6">경기가 진행되면 결과를 확인할 수 있습니다.</p>
-                                {match.status === 'completed' && (
-                                    <button
-                                        onClick={() => router.push(`/matches/${match.id}/results`)}
-                                        className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
-                                    >
-                                        상세 결과 보기
-                                    </button>
+                    </div>
+                )}
+                
+                {/* 대진표 카드 */}
+                {showBracket && match?.id && (
+                    <div className="bg-white rounded-lg shadow-sm border">
+                        <div className="p-4 border-b bg-gray-50">
+                            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                                <Calendar className="w-5 h-5 text-primary-600" />
+                                대진표
+                            </h2>
+                        </div>
+                        <div className="p-4">
+                            <TournamentManager
+                                matchId={match.id}
+                                matchData={match}
+                                teams={teams}
+                                isCreator={isOwner}
+                            />
+                        </div>
+                    </div>
+                )}
+                
+                {/* 경기 결과 카드 */}
+                {match?.id && (
+                    <div className="bg-white rounded-lg shadow-sm border">
+                        <div className="p-4 border-b bg-gray-50">
+                            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                                <BarChart3 className="w-5 h-5 text-primary-600" />
+                                경기 결과
+                            </h2>
+                        </div>
+                        <div className="p-4">
+                            {recentResults && recentResults.length > 0 ? (
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-semibold text-gray-700 mb-2">최근 경기 결과</h3>
+                                    {recentResults.slice(0, 3).map((game: any) => (
+                                        <div key={game.id} className="bg-gray-50 rounded-lg p-3">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="text-center">
+                                                        <p className="text-sm font-medium text-gray-900">{game.home_team?.name}</p>
+                                                        <p className="text-lg font-bold text-primary-600">{game.home_score || 0}</p>
+                                                    </div>
+                                                    <span className="text-gray-400">vs</span>
+                                                    <div className="text-center">
+                                                        <p className="text-sm font-medium text-gray-900">{game.away_team?.name}</p>
+                                                        <p className="text-lg font-bold text-primary-600">{game.away_score || 0}</p>
+                                                    </div>
+                                                </div>
+                                                {game.winner_id && (
+                                                    <div className="text-right">
+                                                        <span className="text-xs text-gray-500">승리</span>
+                                                        <p className="text-sm font-semibold text-success-600">
+                                                            {game.winner_id === game.home_team_id ? game.home_team?.name : game.away_team?.name}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {game.completed_at && (
+                                                <p className="text-xs text-gray-500 mt-2">
+                                                    {formatDate(game.completed_at)}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                    
+                                    {/* 다음 경기 일정 */}
+                                    {upcomingGames && upcomingGames.length > 0 && (
+                                        <div className="pt-3 border-t">
+                                            <h3 className="text-sm font-semibold text-gray-700 mb-2">다음 경기 일정</h3>
+                                            {upcomingGames.slice(0, 2).map((game: any) => (
+                                                <div key={game.id} className="bg-blue-50 rounded-lg p-3 mb-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            <Clock className="w-4 h-4 text-blue-600" />
+                                                            <span className="text-sm font-medium text-gray-900">
+                                                                {game.home_team?.name} vs {game.away_team?.name}
+                                                            </span>
+                                                        </div>
+                                                        {game.scheduled_at && (
+                                                            <span className="text-xs text-gray-600">
+                                                                {formatDate(game.scheduled_at)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    
+                                    {match.status === 'completed' && (
+                                        <button
+                                            onClick={() => router.push(`/matches/${match.id}/results`)}
+                                            className="w-full px-4 py-2 text-sm bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                                        >
+                                            전체 결과 보기
+                                        </button>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                                    <BarChart3 className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                                    <p className="text-gray-600 text-sm mb-4">
+                                        {matchStats?.totalGames > 0 
+                                            ? '아직 완료된 경기가 없습니다.' 
+                                            : '경기 일정이 아직 생성되지 않았습니다.'}
+                                    </p>
+                                    {match.status === 'in_progress' && (
+                                        <p className="text-xs text-gray-500">경기가 진행되면 결과가 표시됩니다.</p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+                
+                {/* 통계 카드 - 경기 통계와 선수 통계 통합 */}
+                {match?.id && (
+                    <div className="bg-white rounded-lg shadow-sm border">
+                        <div className="p-4 border-b bg-gray-50">
+                            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                                <TrendingUp className="w-5 h-5 text-primary-600" />
+                                통계
+                            </h2>
+                        </div>
+                        <div className="p-4 space-y-4">
+                            {/* 경기 진행 상태 */}
+                            {matchProgress && (
+                                <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-lg p-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-sm font-semibold text-gray-700">경기 진행 상태</span>
+                                        <span className="text-xs text-gray-600">{matchProgress.message}</span>
+                                    </div>
+                                    <div className="w-full bg-white rounded-full h-2">
+                                        <div 
+                                            className="bg-primary-500 h-2 rounded-full transition-all duration-500"
+                                            style={{ width: `${matchProgress.progress}%` }}
+                                        />
+                                    </div>
+                                    {matchProgress.daysUntilStart && (
+                                        <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                                            <Clock className="w-3 h-3" />
+                                            {matchProgress.daysUntilStart}일 후 시작
+                                        </p>
+                                    )}
+                                    {matchProgress.daysRemaining && (
+                                        <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                                            <Clock className="w-3 h-3" />
+                                            {matchProgress.daysRemaining}일 남음
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                            
+                            {/* 경기 통계 섹션 */}
+                            <div>
+                                <h3 className="text-sm font-semibold text-gray-700 mb-3">경기 통계</h3>
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div className="bg-gray-50 p-3 rounded-lg text-center">
+                                        <div className="text-xl font-bold text-primary-600">
+                                            {matchStats?.totalTeams || teams.length}
+                                        </div>
+                                        <div className="text-xs text-gray-600">참가 팀</div>
+                                    </div>
+                                    <div className="bg-gray-50 p-3 rounded-lg text-center">
+                                        <div className="text-xl font-bold text-success-600">
+                                            {matchStats?.completedGames || 0}
+                                        </div>
+                                        <div className="text-xs text-gray-600">완료 경기</div>
+                                    </div>
+                                    <div className="bg-gray-50 p-3 rounded-lg text-center">
+                                        <div className="text-xl font-bold text-info-600">
+                                            {matchStats?.upcomingGames || 0}
+                                        </div>
+                                        <div className="text-xs text-gray-600">예정 경기</div>
+                                    </div>
+                                </div>
+                                
+                                {/* 추가 통계 정보 */}
+                                {matchStats?.totalGames > 0 && (
+                                    <div className="mt-3 grid grid-cols-2 gap-3">
+                                        <div className="bg-gray-50 p-2 rounded-lg text-center">
+                                            <div className="text-lg font-bold text-warning-600">
+                                                {matchStats?.inProgressGames || 0}
+                                            </div>
+                                            <div className="text-xs text-gray-600">진행 중</div>
+                                        </div>
+                                        <div className="bg-gray-50 p-2 rounded-lg text-center">
+                                            <div className="text-lg font-bold text-purple-600">
+                                                {matchStats?.winRate || 0}%
+                                            </div>
+                                            <div className="text-xs text-gray-600">결과 확정률</div>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
-                        </div>
-                    )}
-                    
-                    {/* 경기 통계 탭 */}
-                    {activeTab === 'match-stats' && match?.id && (
-                        <div className="space-y-6">
-                            <div className="text-center py-12 bg-gray-50 rounded-lg">
-                                <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">경기 통계</h3>
-                                <p className="text-gray-600 mb-6">경기 진행 현황과 팀별 통계를 확인할 수 있습니다.</p>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
-                                    <div className="bg-white p-4 rounded-lg border">
-                                        <div className="text-2xl font-bold text-primary-600">{teams.length}</div>
-                                        <div className="text-sm text-gray-600">참가 팀</div>
+                            
+                            {/* 팀 순위 */}
+                            {teamStats && teamStats.length > 0 && (
+                                <div className="pt-3 border-t">
+                                    <h3 className="text-sm font-semibold text-gray-700 mb-3">팀 순위 (상위 3팀)</h3>
+                                    <div className="space-y-2">
+                                        {teamStats.slice(0, 3).map((team, index) => (
+                                            <div key={team.teamId} className="flex items-center justify-between bg-gray-50 rounded-lg p-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-sm font-bold ${
+                                                        index === 0 ? 'text-yellow-600' : 
+                                                        index === 1 ? 'text-gray-500' : 
+                                                        'text-orange-600'
+                                                    }`}>
+                                                        {index + 1}위
+                                                    </span>
+                                                    <span className="text-sm font-medium text-gray-900">{team.teamName}</span>
+                                                </div>
+                                                <div className="flex items-center gap-3 text-xs">
+                                                    <span className="text-success-600">{team.wins}승</span>
+                                                    <span className="text-error-600">{team.losses}패</span>
+                                                    <span className="font-bold text-gray-900">{team.points}점</span>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="bg-white p-4 rounded-lg border">
-                                        <div className="text-2xl font-bold text-success-600">0</div>
-                                        <div className="text-sm text-gray-600">완료된 경기</div>
+                                </div>
+                            )}
+                            
+                            {/* 선수 통계 섹션 */}
+                            <div className="pt-3 border-t">
+                                <h3 className="text-sm font-semibold text-gray-700 mb-3">선수 통계</h3>
+                                <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                                    <div className="flex items-center gap-2">
+                                        <UserCheck className="w-5 h-5 text-gray-400" />
+                                        <span className="text-sm text-gray-600">개인 기록 확인</span>
                                     </div>
-                                    <div className="bg-white p-4 rounded-lg border">
-                                        <div className="text-2xl font-bold text-info-600">0</div>
-                                        <div className="text-sm text-gray-600">예정된 경기</div>
-                                    </div>
+                                    <button
+                                        onClick={() => router.push(`/stats?matchId=${match.id}`)}
+                                        className="px-3 py-1.5 text-xs bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors"
+                                    >
+                                        보기
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                    )}
-                    
-                    {/* 선수 통계 탭 */}
-                    {activeTab === 'player-stats' && match?.id && (
-                        <div className="space-y-6">
-                            <div className="text-center py-12 bg-gray-50 rounded-lg">
-                                <UserCheck className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">선수 통계</h3>
-                                <p className="text-gray-600 mb-6">참가 선수들의 개인 기록과 통계를 확인할 수 있습니다.</p>
-                                <button
-                                    onClick={() => router.push(`/stats?matchId=${match.id}`)}
-                                    className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
-                                >
-                                    선수별 통계 보기
-                                </button>
-                            </div>
+                    </div>
+                )}
+                
+                {/* 관리 카드 - 소유자만 표시 */}
+                {isOwner && match?.id && (
+                    <div className="bg-white rounded-lg shadow-sm border">
+                        <div className="p-4 border-b bg-gray-50">
+                            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                                <Settings className="w-5 h-5 text-primary-600" />
+                                경기 관리
+                            </h2>
                         </div>
-                    )}
-                    
-                    {/* 관리 탭 - 경기 상태와 설정 */}
-                    {activeTab === 'manage' && isOwner && match?.id && (
-                        <div className="space-y-6">
+                        <div className="p-4 space-y-4">
                             {/* 경기 상태 관리 */}
                             <MatchStatusManager
                                 match={match}
@@ -419,29 +621,29 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                                 onStatusChange={handleStatusChange}
                             />
                             
-                            {/* 추가 관리 기능 */}
-                            <div className="border-t pt-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">빠른 작업</h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* 빠른 작업 */}
+                            <div className="pt-3 border-t">
+                                <h3 className="text-sm font-semibold text-gray-700 mb-3">빠른 작업</h3>
+                                <div className="grid grid-cols-2 gap-3">
                                     <button
                                         onClick={() => router.push(`/matches/${match.id}/edit`)}
-                                        className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                                        className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
                                     >
-                                        <div className="font-medium text-gray-900">경기 정보 수정</div>
-                                        <div className="text-sm text-gray-600 mt-1">날짜, 규칙 등을 변경합니다</div>
+                                        <div className="text-sm font-medium text-gray-900">정보 수정</div>
+                                        <div className="text-xs text-gray-600 mt-0.5">날짜, 규칙 변경</div>
                                     </button>
                                     <button
                                         onClick={() => router.push(`/matches/${match.id}/checkin`)}
-                                        className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                                        className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
                                     >
-                                        <div className="font-medium text-gray-900">체크인 관리</div>
-                                        <div className="text-sm text-gray-600 mt-1">참가팀 체크인 상태를 확인합니다</div>
+                                        <div className="text-sm font-medium text-gray-900">체크인</div>
+                                        <div className="text-xs text-gray-600 mt-0.5">참가팀 확인</div>
                                     </button>
                                 </div>
                             </div>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
         </div>
     );
