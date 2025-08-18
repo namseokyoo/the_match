@@ -7,12 +7,13 @@ import { Match, Team } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useMatchRealtime } from '@/hooks/useRealtimeSubscription';
 import { MatchDetail } from '@/components/match';
+import JoinMatchButton from '@/components/match/JoinMatchButton';
 import ParticipantManagement from '@/components/match/ParticipantManagement';
 import MatchStatusManager from '@/components/match/MatchStatusManager';
 import TournamentManager from '@/components/match/TournamentManager';
 import { showToast } from '@/components/ui/Toast';
 import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
-import { Trophy, Users, Calendar, Settings, QrCode } from 'lucide-react';
+import { Trophy, Users, Calendar, Settings, QrCode, BarChart3, TrendingUp, UserCheck } from 'lucide-react';
 
 interface MatchDetailClientProps {
     match: Match;
@@ -28,7 +29,7 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
     const { user, getAccessToken } = useAuth();
     const [refreshKey, setRefreshKey] = useState(0);
     const [match, setMatch] = useState(initialMatch);
-    const [activeTab, setActiveTab] = useState<'overview' | 'participants' | 'bracket' | 'manage'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'participants' | 'bracket' | 'results' | 'match-stats' | 'player-stats' | 'manage'>('overview');
     const [teams, setTeams] = useState<Team[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -222,6 +223,9 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
         { id: 'overview', label: '개요', icon: Trophy, show: true },
         { id: 'participants', label: '참가팀', icon: Users, show: true },
         { id: 'bracket', label: '대진표', icon: Calendar, show: showBracket },
+        { id: 'results', label: '경기 결과', icon: BarChart3, show: true },
+        { id: 'match-stats', label: '경기 통계', icon: TrendingUp, show: true },
+        { id: 'player-stats', label: '선수 통계', icon: UserCheck, show: true },
         { id: 'manage', label: '관리', icon: Settings, show: isOwner },
     ].filter(tab => tab.show);
 
@@ -237,7 +241,14 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                         </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                        {/* 체크인 버튼은 항상 표시 */}
+                        {/* 참가 신청 버튼 */}
+                        {!isOwner && match && (
+                            <JoinMatchButton
+                                match={match}
+                                onJoined={handleJoined}
+                            />
+                        )}
+                        {/* 체크인 버튼 */}
                         <button
                             onClick={() => match?.id && router.push(`/matches/${match.id}/checkin`)}
                             disabled={!match?.id}
@@ -297,7 +308,7 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
 
                 {/* 탭 컨텐츠 */}
                 <div className="p-4 sm:p-6">
-                    {/* 개요 탭 */}
+                    {/* 개요 탭 - 참가 버튼 제거 */}
                     {activeTab === 'overview' && (
                         <div className="space-y-6">
                             <MatchDetail
@@ -335,6 +346,67 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                             teams={teams}
                             isCreator={isOwner}
                         />
+                    )}
+                    
+                    {/* 경기 결과 탭 */}
+                    {activeTab === 'results' && match?.id && (
+                        <div className="space-y-6">
+                            <div className="text-center py-12 bg-gray-50 rounded-lg">
+                                <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">경기 결과</h3>
+                                <p className="text-gray-600 mb-6">경기가 진행되면 결과를 확인할 수 있습니다.</p>
+                                {match.status === 'completed' && (
+                                    <button
+                                        onClick={() => router.push(`/matches/${match.id}/results`)}
+                                        className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                                    >
+                                        상세 결과 보기
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* 경기 통계 탭 */}
+                    {activeTab === 'match-stats' && match?.id && (
+                        <div className="space-y-6">
+                            <div className="text-center py-12 bg-gray-50 rounded-lg">
+                                <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">경기 통계</h3>
+                                <p className="text-gray-600 mb-6">경기 진행 현황과 팀별 통계를 확인할 수 있습니다.</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                                    <div className="bg-white p-4 rounded-lg border">
+                                        <div className="text-2xl font-bold text-primary-600">{teams.length}</div>
+                                        <div className="text-sm text-gray-600">참가 팀</div>
+                                    </div>
+                                    <div className="bg-white p-4 rounded-lg border">
+                                        <div className="text-2xl font-bold text-success-600">0</div>
+                                        <div className="text-sm text-gray-600">완료된 경기</div>
+                                    </div>
+                                    <div className="bg-white p-4 rounded-lg border">
+                                        <div className="text-2xl font-bold text-info-600">0</div>
+                                        <div className="text-sm text-gray-600">예정된 경기</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* 선수 통계 탭 */}
+                    {activeTab === 'player-stats' && match?.id && (
+                        <div className="space-y-6">
+                            <div className="text-center py-12 bg-gray-50 rounded-lg">
+                                <UserCheck className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">선수 통계</h3>
+                                <p className="text-gray-600 mb-6">참가 선수들의 개인 기록과 통계를 확인할 수 있습니다.</p>
+                                <button
+                                    onClick={() => router.push(`/stats?matchId=${match.id}`)}
+                                    className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                                >
+                                    선수별 통계 보기
+                                </button>
+                            </div>
+                        </div>
                     )}
                     
                     {/* 관리 탭 - 경기 상태와 설정 */}

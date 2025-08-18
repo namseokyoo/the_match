@@ -133,37 +133,13 @@ const MatchDetail: React.FC<MatchDetailProps> = ({ match, onJoined }) => {
                         </div>
                     </div>
 
-                    {/* 참가 신청 버튼 */}
-                    <div className="flex-shrink-0 space-y-2">
+                    {/* 참가 신청 버튼만 표시 - 나머지는 탭으로 이동 */}
+                    <div className="flex-shrink-0">
                         <JoinMatchButton
                             match={match}
                             onJoined={onJoined}
                             className="w-full md:w-auto"
                         />
-                        {match.type === 'single_elimination' && match.id && (
-                            <a
-                                href={`/matches/${encodeURIComponent(match.id)}/bracket`}
-                                className="block w-full md:w-auto px-4 py-2 bg-purple-600 text-white text-center rounded-md hover:bg-purple-700 transition-colors"
-                            >
-                                🏆 토너먼트 브라켓 보기
-                            </a>
-                        )}
-                        {match.id && (
-                            <>
-                                <a
-                                    href={`/matches/${encodeURIComponent(match.id)}/results`}
-                                    className="block w-full md:w-auto px-4 py-2 bg-indigo-600 text-white text-center rounded-md hover:bg-indigo-700 transition-colors"
-                                >
-                                    📊 경기 결과 및 통계
-                                </a>
-                                <a
-                                    href={`/stats?matchId=${encodeURIComponent(match.id)}`}
-                                    className="block w-full md:w-auto px-4 py-2 bg-purple-600 text-white text-center rounded-md hover:bg-purple-700 transition-colors"
-                                >
-                                    📈 선수 통계 보기
-                                </a>
-                            </>
-                        )}
                     </div>
                 </div>
             </Card>
