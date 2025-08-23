@@ -10,7 +10,7 @@ import { MatchDetail } from '@/components/match';
 import JoinMatchButton from '@/components/match/JoinMatchButton';
 import ParticipantManagement from '@/components/match/ParticipantManagement';
 import MatchStatusManager from '@/components/match/MatchStatusManager';
-import TournamentManager from '@/components/match/TournamentManager';
+import { TournamentBracket } from '@/components/bracket/TournamentBracket';
 import { showToast } from '@/components/ui/Toast';
 import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { Trophy, Users, Calendar, Settings, QrCode, BarChart3, TrendingUp, UserCheck, Clock, CheckCircle, AlertCircle } from 'lucide-react';
@@ -371,11 +371,9 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                             </h2>
                         </div>
                         <div className="p-4">
-                            <TournamentManager
+                            <TournamentBracket
                                 matchId={match.id}
-                                matchData={match}
-                                teams={teams}
-                                isCreator={isOwner}
+                                isOrganizer={isOwner}
                             />
                         </div>
                     </div>
