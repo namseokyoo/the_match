@@ -14,6 +14,12 @@ const nextConfig = {
                 port: '',
                 pathname: '/storage/v1/object/public/**',
             },
+            {
+                protocol: 'https',
+                hostname: 'picsum.photos',
+                port: '',
+                pathname: '/**',
+            },
         ],
     },
     eslint: {
@@ -38,7 +44,7 @@ const nextConfig = {
             script-src 'self' 'unsafe-eval' 'unsafe-inline' *.supabase.co *.supabase.com https://cdn.jsdelivr.net;
             style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
             font-src 'self' https://fonts.gstatic.com data:;
-            img-src 'self' *.supabase.co *.supabase.com data: blob: https:;
+            img-src 'self' *.supabase.co *.supabase.com picsum.photos data: blob: https:;
             media-src 'self' *.supabase.co *.supabase.com;
             connect-src 'self' *.supabase.co *.supabase.com wss://*.supabase.co wss://*.supabase.com https://api.github.com;
             frame-src 'self' *.supabase.co *.supabase.com;

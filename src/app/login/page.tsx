@@ -17,6 +17,23 @@ function LoginContent() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    
+    // 리디렉션 이유 메시지
+    const redirectTo = searchParams.get('redirectTo') || searchParams.get('returnUrl');
+    const getRedirectMessage = () => {
+        if (!redirectTo) return null;
+        
+        if (redirectTo.includes('/matches/create')) {
+            return '경기를 생성하려면 로그인이 필요합니다.';
+        } else if (redirectTo.includes('/teams/create')) {
+            return '팀을 생성하려면 로그인이 필요합니다.';
+        } else if (redirectTo.includes('/profile')) {
+            return '프로필을 보려면 로그인이 필요합니다.';
+        } else if (redirectTo.includes('/dashboard')) {
+            return '대시보드에 접근하려면 로그인이 필요합니다.';
+        }
+        return '이 페이지에 접근하려면 로그인이 필요합니다.';
+    };
 
     // Redirect if already logged in
     useEffect(() => {
@@ -104,6 +121,15 @@ function LoginContent() {
                         <CardTitle className="text-center">로그인</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                        {/* Redirect Reason Message */}
+                        {redirectTo && (
+                            <div className="rounded-md bg-blue-50 border border-blue-200 p-4">
+                                <p className="text-sm text-blue-800">
+                                    <span className="font-medium">안내:</span> {getRedirectMessage()}
+                                </p>
+                            </div>
+                        )}
+                        
                         {/* Error Message */}
                         {error && (
                             <div className="rounded-md bg-red-50 p-4">

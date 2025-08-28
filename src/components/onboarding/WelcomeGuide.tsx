@@ -19,8 +19,16 @@ const WelcomeGuide: React.FC<WelcomeGuideProps> = ({ onClose, isFooterVersion = 
         // 푸터 버전이 아닌 경우에만 자동 표시 로직 실행
         if (!isFooterVersion) {
             const hasSeenGuide = localStorage.getItem('hasSeenWelcomeGuide');
-            if (!hasSeenGuide) {
-                setIsVisible(true);
+            const dontShowAgain = localStorage.getItem('dontShowWelcomeGuide');
+            
+            // "다시 보지 않기"를 선택하지 않았고, 한번도 본 적이 없는 경우에만 표시
+            // 하지만 더 부드러운 UX를 위해 3초 후에 표시
+            if (!dontShowAgain && !hasSeenGuide) {
+                const timer = setTimeout(() => {
+                    setIsVisible(true);
+                }, 3000); // 3초 후에 표시
+                
+                return () => clearTimeout(timer);
             }
         } else {
             // 푸터에서 호출된 경우 항상 표시
@@ -38,6 +46,7 @@ const WelcomeGuide: React.FC<WelcomeGuideProps> = ({ onClose, isFooterVersion = 
 
     const handleDontShowAgain = () => {
         localStorage.setItem('hasSeenWelcomeGuide', 'true');
+        localStorage.setItem('dontShowWelcomeGuide', 'true'); // 다시 보지 않기 플래그 추가
         handleClose();
     };
 
@@ -230,14 +239,27 @@ const WelcomeGuide: React.FC<WelcomeGuideProps> = ({ onClose, isFooterVersion = 
                 {/* Footer */}
                 <div className="border-t border-gray-200 px-6 py-4 bg-gray-50">
                     <div className="flex justify-between items-center">
-                        <div>
-                            {!isFooterVersion && currentStep === 0 && (
-                                <button
-                                    onClick={handleDontShowAgain}
-                                    className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-                                >
-                                    다시 보지 않기
-                                </button>
+                        <div className="flex items-center gap-3">
+                            {!isFooterVersion && (
+                                <>
+                                    <button
+                                        onClick={handleClose}
+                                        className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                                    >
+                                        건너뛰기
+                                    </button>
+                                    {currentStep === 0 && (
+                                        <>
+                                            <span className="text-gray-300">|</span>
+                                            <button
+                                                onClick={handleDontShowAgain}
+                                                className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                                            >
+                                                다시 보지 않기
+                                            </button>
+                                        </>
+                                    )}
+                                </>
                             )}
                         </div>
                         <div className="flex gap-2">
