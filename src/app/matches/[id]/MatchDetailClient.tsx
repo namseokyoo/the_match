@@ -10,7 +10,7 @@ import { MatchDetail } from '@/components/match';
 import JoinMatchButton from '@/components/match/JoinMatchButton';
 import ParticipantManagement from '@/components/match/ParticipantManagement';
 import MatchStatusManager from '@/components/match/MatchStatusManager';
-import { TournamentBracket } from '@/components/bracket/TournamentBracket';
+import { MatchVisualization } from '@/components/match/MatchVisualization';
 import { showToast } from '@/components/ui/Toast';
 import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { Trophy, Users, Calendar, Settings, QrCode, BarChart3, TrendingUp, UserCheck, Clock, CheckCircle, AlertCircle } from 'lucide-react';
@@ -254,8 +254,8 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
         );
     }
 
-    // 대회 타입에 따라 대진표 탭 표시 여부 결정
-    const showBracket = match?.type && ['single_elimination', 'double_elimination', 'round_robin'].includes(match.type);
+    // 모든 경기 타입에서 대진표/시각화 표시
+    const showBracket = true; // 모든 경기 방식에서 시각화 제공
     
     // 탭 정의 - 조건부로 표시
     const tabs = [
@@ -367,13 +367,16 @@ export default function MatchDetailClient({ match: initialMatch }: MatchDetailCl
                         <div className="p-4 border-b bg-gray-50">
                             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
                                 <Calendar className="w-5 h-5 text-primary-600" />
-                                대진표
+                                {match.type === 'single_elimination' || match.type === 'double_elimination' ? '대진표' :
+                                 match.type === 'round_robin' || match.type === 'league' ? '순위표 & 일정' :
+                                 match.type === 'swiss' ? '라운드별 대진' : '경기 일정'}
                             </h2>
                         </div>
                         <div className="p-4">
-                            <TournamentBracket
-                                matchId={match.id}
-                                isOrganizer={isOwner}
+                            <MatchVisualization
+                                match={match}
+                                participants={[]} // TODO: 실제 participants 데이터 연동
+                                games={[]} // TODO: 실제 games 데이터 연동
                             />
                         </div>
                     </div>
