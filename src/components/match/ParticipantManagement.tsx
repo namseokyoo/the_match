@@ -47,6 +47,10 @@ export default function ParticipantManagement({
     const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
     const [applying, setApplying] = useState(false);
     const [userTeams, setUserTeams] = useState<any[]>([]);
+    const [batchProcessing, setBatchProcessing] = useState(false);
+
+    // 개발 환경에서는 항상 관리자 기능 활성화 (테스트용)
+    const isDevelopment = process.env.NODE_ENV === 'development';
 
     const fetchParticipants = useCallback(async () => {
         setLoading(true);
@@ -134,6 +138,57 @@ export default function ParticipantManagement({
         }
     };
 
+    // 일괄 승인 함수
+    const handleBatchApprove = async () => {
+        if (!user) {
+            setError('로그인이 필요합니다.');
+            return;
+        }
+        
+        setBatchProcessing(true);
+        setError(null);
+        
+        try {
+            const pendingParticipants = participants.filter(p => p.status === 'pending');
+            
+            if (pendingParticipants.length === 0) {
+                showToast('승인 대기 중인 팀이 없습니다.', 'info');
+                return;
+            }
+            
+            // 모든 pending 팀을 순차적으로 승인
+            for (const participant of pendingParticipants) {
+                const response = await fetch(
+                    `/api/matches/${matchId}/participants/${participant.id}`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            status: 'approved',
+                            reviewed_by: user.id,
+                        }),
+                    }
+                );
+                
+                if (!response.ok) {
+                    console.error(`Failed to approve team ${participant.team.name}`);
+                }
+            }
+            
+            showToast(`${pendingParticipants.length}개 팀을 모두 승인했습니다.`, 'success');
+            await fetchParticipants();
+            onUpdate?.();
+        } catch (error) {
+            console.error('Batch approval error:', error);
+            setError('일괄 승인 중 오류가 발생했습니다.');
+            showToast('일괄 승인에 실패했습니다.', 'error');
+        } finally {
+            setBatchProcessing(false);
+        }
+    };
+    
     const handleStatusUpdate = async (participantId: string, newStatus: 'approved' | 'rejected', reason?: string) => {
         if (!user) {
             setError('로그인이 필요합니다.');
@@ -334,6 +389,37 @@ export default function ParticipantManagement({
             {error && (
                 <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
                     {error}
+                </div>
+            )}
+
+            {/* 관리자 액션 버튼 */}
+            {(isCreator || isDevelopment) && counts.pending > 0 && activeTab === 'pending' && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-medium text-gray-700">
+                                대기중인 참가 신청: {counts.pending}팀
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                                모든 대기중인 팀을 한 번에 승인할 수 있습니다.
+                            </p>
+                        </div>
+                        <Button
+                            onClick={handleBatchApprove}
+                            disabled={batchProcessing}
+                            variant="primary"
+                            size="sm"
+                        >
+                            {batchProcessing ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                    처리 중...
+                                </>
+                            ) : (
+                                <>일괄 승인 ({counts.pending}팀)</>
+                            )}
+                        </Button>
+                    </div>
                 </div>
             )}
 

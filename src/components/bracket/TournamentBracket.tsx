@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Game, getBracket, createSingleEliminationBracket, createRoundRobinSchedule } from '@/lib/tournament';
+import { Game, getBracket, createSingleEliminationBracket, createRoundRobinSchedule, createSwissBracket, createLeagueBracket } from '@/lib/tournament';
 import { Trophy, Calendar, MapPin, Plus } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui';
@@ -23,6 +23,10 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
     const [creating, setCreating] = useState(false);
     const [approvedTeams, setApprovedTeams] = useState<any[]>([]);
     const [matchType, setMatchType] = useState<string>('');
+    
+    // 개발 환경에서는 항상 대진표 생성 버튼 표시 (테스트용)
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const canCreateBracket = isOrganizer || isDevelopment;
 
     const fetchBracket = useCallback(async () => {
         try {
@@ -85,6 +89,10 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
                 await createSingleEliminationBracket(matchId, teamIds);
             } else if (matchType === 'round_robin') {
                 await createRoundRobinSchedule(matchId, teamIds, false);
+            } else if (matchType === 'swiss') {
+                await createSwissBracket(matchId, teamIds, 5); // 5라운드 스위스
+            } else if (matchType === 'league') {
+                await createLeagueBracket(matchId, teamIds, false); // 싱글 라운드 로빈
             } else {
                 alert('이 대회 유형은 아직 지원되지 않습니다.');
                 return;
@@ -115,6 +123,12 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
     };
 
     const getRoundName = (round: number, totalRounds: number) => {
+        // Swiss와 League는 라운드 표시만
+        if (matchType === 'swiss' || matchType === 'league' || matchType === 'round_robin') {
+            return `${round}라운드`;
+        }
+        
+        // Elimination 토너먼트는 강 표시
         const roundsFromFinal = totalRounds - round;
         
         switch (roundsFromFinal) {
@@ -147,11 +161,16 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
             <div className="text-center p-8">
                 <Trophy className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 mb-4">아직 대진표가 생성되지 않았습니다.</p>
-                {isOrganizer && (
+                {canCreateBracket && (
                     <div className="space-y-4">
                         <p className="text-sm text-gray-500">
                             승인된 팀: {approvedTeams.length}개
                         </p>
+                        {isDevelopment && !isOrganizer && (
+                            <p className="text-xs text-orange-500">
+                                ⚠️ 개발 모드: 테스트를 위해 대진표 생성 가능
+                            </p>
+                        )}
                         <Button 
                             variant="primary"
                             onClick={handleCreateBracket}
@@ -183,9 +202,26 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({
     const rounds = groupGamesByRound();
     const totalRounds = Math.max(...Object.keys(rounds).map(Number));
 
+    const getBracketTitle = () => {
+        switch (matchType) {
+            case 'single_elimination':
+                return '싱글 엘리미네이션 대진표';
+            case 'double_elimination':
+                return '더블 엘리미네이션 대진표';
+            case 'round_robin':
+                return '라운드 로빈 일정';
+            case 'swiss':
+                return '스위스 토너먼트 대진표';
+            case 'league':
+                return '리그 일정표';
+            default:
+                return '토너먼트 대진표';
+        }
+    };
+
     return (
         <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">토너먼트 대진표</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">{getBracketTitle()}</h2>
             
             {/* 모바일 뷰 */}
             <div className="md:hidden space-y-6">

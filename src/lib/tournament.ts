@@ -41,6 +41,145 @@ export interface TournamentBracket {
 }
 
 /**
+ * 스위스 토너먼트 대진표 생성
+ * Swiss system: 각 라운드마다 비슷한 점수의 팀들끼리 매칭
+ */
+export async function createSwissBracket(
+    matchId: string,
+    teamIds: string[],
+    rounds: number = 5 // 일반적으로 5라운드
+): Promise<void> {
+    const games: Game[] = [];
+    
+    // 첫 라운드는 랜덤 매칭
+    const shuffledTeams = [...teamIds].sort(() => Math.random() - 0.5);
+    let gameNumber = 1;
+    
+    // 첫 라운드 생성
+    for (let i = 0; i < Math.floor(shuffledTeams.length / 2); i++) {
+        const game: Game = {
+            match_id: matchId,
+            round: 1,
+            game_number: gameNumber++,
+            team1_id: shuffledTeams[i * 2],
+            team2_id: shuffledTeams[i * 2 + 1],
+            status: 'scheduled',
+        };
+        games.push(game);
+    }
+    
+    // 홀수 팀인 경우 마지막 팀은 부전승
+    if (shuffledTeams.length % 2 === 1) {
+        const game: Game = {
+            match_id: matchId,
+            round: 1,
+            game_number: gameNumber++,
+            team1_id: shuffledTeams[shuffledTeams.length - 1],
+            team2_id: undefined,
+            status: 'completed',
+            is_bye: true,
+            winner_id: shuffledTeams[shuffledTeams.length - 1],
+            team1_score: 1,
+            team2_score: 0,
+        };
+        games.push(game);
+    }
+    
+    // 나머지 라운드는 점수 기반 매칭 (향후 구현)
+    // Swiss system은 각 라운드가 끝난 후 점수를 계산하고 다음 라운드를 생성하므로
+    // 초기에는 첫 라운드만 생성
+    
+    // DB에 게임 저장
+    if (games.length > 0) {
+        const { error } = await supabase
+            .from('games')
+            .insert(games);
+        
+        if (error) {
+            console.error('Error creating Swiss bracket:', error);
+            throw error;
+        }
+    }
+}
+
+/**
+ * 리그 토너먼트 일정 생성
+ * League system: 모든 팀이 서로 한 번씩 경기 (더블 라운드 로빈 옵션 포함)
+ */
+export async function createLeagueBracket(
+    matchId: string,
+    teamIds: string[],
+    doubleRound: boolean = false // true면 홈/어웨이 각 1번씩
+): Promise<void> {
+    const games: Game[] = [];
+    let gameNumber = 1;
+    
+    // Round Robin 알고리즘 사용
+    const n = teamIds.length;
+    const isOdd = n % 2 === 1;
+    const teams = isOdd ? [...teamIds, ''] : [...teamIds]; // 홀수면 빈 팀 추가
+    const totalTeams = teams.length;
+    const rounds = doubleRound ? (totalTeams - 1) * 2 : totalTeams - 1;
+    
+    for (let r = 0; r < rounds; r++) {
+        const isSecondHalf = doubleRound && r >= (totalTeams - 1);
+        const actualRound = isSecondHalf ? r - (totalTeams - 1) : r;
+        
+        for (let i = 0; i < totalTeams / 2; i++) {
+            const home = (totalTeams - 1 - i + actualRound) % (totalTeams - 1);
+            const away = i === 0 ? totalTeams - 1 : (i + actualRound) % (totalTeams - 1);
+            
+            let team1Id = teams[home];
+            let team2Id = teams[away];
+            
+            // 더블 라운드의 두 번째 하프에서는 홈/어웨이 바꾸기
+            if (isSecondHalf) {
+                [team1Id, team2Id] = [team2Id, team1Id];
+            }
+            
+            // 빈 팀과의 경기는 부전승
+            if (team1Id && team2Id) {
+                const game: Game = {
+                    match_id: matchId,
+                    round: r + 1,
+                    game_number: gameNumber++,
+                    team1_id: team1Id,
+                    team2_id: team2Id,
+                    status: 'scheduled',
+                };
+                games.push(game);
+            } else if (team1Id || team2Id) {
+                const game: Game = {
+                    match_id: matchId,
+                    round: r + 1,
+                    game_number: gameNumber++,
+                    team1_id: team1Id || undefined,
+                    team2_id: team2Id || undefined,
+                    status: 'completed',
+                    is_bye: true,
+                    winner_id: team1Id || team2Id,
+                    team1_score: team1Id ? 1 : 0,
+                    team2_score: team2Id ? 1 : 0,
+                };
+                games.push(game);
+            }
+        }
+    }
+    
+    // DB에 게임 저장
+    if (games.length > 0) {
+        const { error } = await supabase
+            .from('games')
+            .insert(games);
+        
+        if (error) {
+            console.error('Error creating League bracket:', error);
+            throw error;
+        }
+    }
+}
+
+/**
  * 싱글 엘리미네이션 토너먼트 대진표 생성
  */
 export async function createSingleEliminationBracket(
