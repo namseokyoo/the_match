@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Match, MatchType, MatchStatus } from '@/types';
-import { MatchCard } from './MatchCard';
+import { CompactMatchCard } from './CompactMatchCard';
 import { Button, Input, EmptyState } from '@/components/ui';
 import { Trophy } from 'lucide-react';
 import { debounce } from '@/lib/utils';
@@ -245,15 +245,12 @@ export const MatchList: React.FC<MatchListProps> = ({
                     }
                 />
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-3">
                     {filteredMatches.map((match) => (
-                        <MatchCard
+                        <CompactMatchCard
                             key={match.id}
                             match={match}
                             onView={onView}
-                            onEdit={onEdit}
-                            onDelete={onDelete}
-                            isOwner={currentUserId === match.creator_id}
                         />
                     ))}
                 </div>

@@ -277,12 +277,16 @@ export function ProtectedRoute({
 
 ## Design System Guidelines
 
-### Core Design Principles
-1. **Minimalism**: Less is more - focus on content and functionality
-2. **Consistency**: Uniform design patterns across all pages
-3. **Hierarchy**: Clear visual hierarchy through spacing and typography
-4. **Accessibility**: WCAG 2.1 AA compliance minimum
-5. **Performance**: Optimize for mobile-first experience
+**📐 Comprehensive design system documentation is available in [DESIGN_GUIDE.md](./DESIGN_GUIDE.md)**
+
+The Match follows a **Mobile-First Minimalist Design System** optimized for information density and usability. The design system has been carefully crafted to display 6-8 items per mobile screen while maintaining excellent readability and touch accessibility.
+
+### Quick Reference - Core Principles
+1. **Information Density**: 6-8 cards visible per mobile screen (vs previous 2-3)
+2. **Compact Components**: Card heights reduced from 240px to 120px 
+3. **Optimized Spacing**: 8px grid system with 12px padding for cards
+4. **Visual Hierarchy**: Clear status indicators via left-border colors
+5. **Progressive Disclosure**: Show essential info first, details on interaction
 
 ### Color Palette
 **Primary Colors** (Limited, purposeful use)
@@ -353,7 +357,16 @@ lg:py-8 (32px) - Desktop section padding
 
 ### Component Design Standards
 
-#### Cards
+#### Compact Cards (NEW - Optimized for Mobile)
+The application now uses **CompactMatchCard** and **CompactTeamCard** components for list views:
+- **Height**: ~120px (50% reduction from original)
+- **Padding**: 12px (p-3)
+- **Layout**: Single row with space-y-3 between cards
+- **Information**: Icon-based with essential data only
+- **Status**: Visual indication via left border color
+- **Interaction**: Entire card is clickable
+
+#### Traditional Cards (Detail Views)
 ```css
 /* Base Card */
 - Background: white

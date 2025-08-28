@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { Team, Player, PaginatedResponse } from '@/types';
-import { TeamCard } from './TeamCard';
+import { CompactTeamCard } from './CompactTeamCard';
 import { Button, Input } from '@/components/ui';
 
 interface TeamListProps {
@@ -152,18 +152,14 @@ export const TeamList: React.FC<TeamListProps> = ({
                     </div>
                 )}
 
-                {/* 팀 카드 그리드 */}
+                {/* 팀 카드 목록 - 컴팩트 디자인 */}
                 {teams.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="space-y-3">
                         {teams.map((team) => (
-                            <TeamCard
+                            <CompactTeamCard
                                 key={team.id}
                                 team={team}
-                                players={players[team.id] || []}
-                                onClick={onTeamClick ? () => handleTeamClick(team) : undefined}
-                                onEdit={onEdit ? () => onEdit(team) : undefined}
-                                onDelete={onDelete ? () => onDelete(team) : undefined}
-                                isOwner={currentUserId === team.captain_id}
+                                onView={onTeamClick ? () => handleTeamClick(team) : undefined}
                             />
                         ))}
                     </div>
