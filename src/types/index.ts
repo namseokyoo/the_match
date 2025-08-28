@@ -62,6 +62,7 @@ export interface Match {
     status: MatchStatus | string;
     creator_id: string;
     max_participants?: number;
+    current_participants?: number; // 승인된 참가자 수
     registration_start_date?: string;
     registration_deadline?: string;
     start_date?: string;
@@ -90,6 +91,7 @@ export interface Team {
     match_id?: string; // tournament_id에서 match_id로 변경
     recruitment_count?: number; // 모집 인원
     current_members?: number; // 현재 인원
+    member_count?: number; // 실제 멤버 수 (players 테이블 기준)
     created_at: string;
     updated_at: string;
 }

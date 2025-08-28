@@ -65,8 +65,8 @@ export const CompactMatchCard: React.FC<CompactMatchCardProps> = ({ match, onVie
         }
     };
     
-    // 참가 현황 계산 (추후 실제 참가자 데이터 연동)
-    const participantsCount = 0; // TODO: 실제 참가자 수 데이터 연동
+    // 참가 현황 계산
+    const participantsCount = match.current_participants || 0;
     const maxParticipants = match.max_participants || 0;
     const participantPercentage = maxParticipants > 0 ? (participantsCount / maxParticipants) * 100 : 0;
 

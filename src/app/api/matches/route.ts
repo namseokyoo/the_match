@@ -60,6 +60,26 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        // 각 매치의 승인된 참가자 수 별도 조회
+        const matchesWithParticipantCount = await Promise.all(
+            (matches || []).map(async (match: any) => {
+                const { data: participants, error: participantsError } = await supabaseAdmin
+                    .from('match_participants')
+                    .select('status')
+                    .eq('match_id', match.id)
+                    .eq('status', 'approved');
+                
+                if (participantsError) {
+                    console.error(`Failed to fetch participants for match ${match.id}:`, participantsError);
+                }
+                
+                return {
+                    ...match,
+                    current_participants: participants?.length || 0
+                };
+            })
+        );
+
         // 전체 개수 조회 (페이지네이션용)
         let countQuery = supabaseAdmin
             .from('matches')
@@ -84,7 +104,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            data: matches,
+            data: matchesWithParticipantCount || [],
             pagination: {
                 page,
                 limit,

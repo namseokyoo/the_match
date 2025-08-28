@@ -35,12 +35,31 @@ export async function GET() {
             }, { status: 500 });
         }
 
-        console.log('Teams query successful, found:', teams?.length || 0, 'teams');
+        // 각 팀의 멤버 수 별도 조회
+        const teamsWithMemberCount = await Promise.all(
+            (teams || []).map(async (team: any) => {
+                const { data: players, error: playersError } = await supabaseAdmin
+                    .from('players')
+                    .select('id')
+                    .eq('team_id', team.id);
+                
+                if (playersError) {
+                    console.error(`Failed to fetch players for team ${team.id}:`, playersError);
+                }
+                
+                return {
+                    ...team,
+                    member_count: players?.length || 0
+                };
+            })
+        );
+
+        console.log('Teams query successful, found:', teamsWithMemberCount?.length || 0, 'teams');
 
         return NextResponse.json({
             success: true,
-            data: teams || [],
-            count: teams?.length || 0,
+            data: teamsWithMemberCount || [],
+            count: teamsWithMemberCount?.length || 0,
             envCheck
         });
     } catch (error) {

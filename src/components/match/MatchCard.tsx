@@ -113,8 +113,10 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                 <div className="space-y-2 mb-4">
                     {match.max_participants && (
                         <div className="text-sm flex items-center">
-                            <span className="text-gray-500 whitespace-nowrap">최대 참가:</span>
-                            <span className="font-medium ml-1 whitespace-nowrap">{match.max_participants}팀</span>
+                            <span className="text-gray-500 whitespace-nowrap">참가 현황:</span>
+                            <span className="font-medium ml-1 whitespace-nowrap">
+                                {match.current_participants || 0}/{match.max_participants}팀
+                            </span>
                         </div>
                     )}
                     {match.start_date && (

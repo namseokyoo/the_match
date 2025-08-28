@@ -26,7 +26,7 @@ const getSportIcon = (teamName: string): string => {
 
 export const CompactTeamCard: React.FC<CompactTeamCardProps> = ({ team, onView }) => {
     const sportIcon = getSportIcon(team.name);
-    const memberCount = team.current_members || 0;
+    const memberCount = team.member_count || team.current_members || 0;
     const maxMembers = team.recruitment_count || 30;
     const memberPercentage = maxMembers > 0 ? (memberCount / maxMembers) * 100 : 0;
     
