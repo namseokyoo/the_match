@@ -53,15 +53,15 @@ export const CompactMatchCard: React.FC<CompactMatchCardProps> = ({ match, onVie
     const getStatusColor = () => {
         switch(calculatedStatus) {
             case MatchStatus.REGISTRATION:
-                return 'border-l-4 border-green-500 bg-green-50';
+                return 'border-l-4 border-l-green-500';
             case MatchStatus.IN_PROGRESS:
-                return 'border-l-4 border-blue-500 bg-blue-50';
+                return 'border-l-4 border-l-blue-500';
             case MatchStatus.COMPLETED:
-                return 'border-l-4 border-gray-400 bg-gray-50 opacity-75';
+                return 'border-l-4 border-l-gray-400';
             case MatchStatus.CANCELLED:
-                return 'border-l-4 border-red-500 bg-red-50';
+                return 'border-l-4 border-l-red-500';
             default:
-                return 'border-l-4 border-gray-300';
+                return 'border-l-4 border-l-gray-300';
         }
     };
     
@@ -73,13 +73,13 @@ export const CompactMatchCard: React.FC<CompactMatchCardProps> = ({ match, onVie
     return (
         <div 
             className={`
-                bg-white rounded-lg p-3 hover:shadow-md transition-all cursor-pointer
+                bg-white rounded-lg border border-gray-200 p-4 hover:shadow-lg transition-all cursor-pointer
                 ${getStatusColor()}
             `}
             onClick={() => onView?.(match.id)}
             data-testid="compact-match-card"
         >
-            <div className="flex justify-between items-start gap-3">
+            <div className="flex justify-between items-center gap-4">
                 {/* 왼쪽: 핵심 정보 */}
                 <div className="flex-1 min-w-0">
                     {/* 제목과 상태 */}
@@ -112,7 +112,7 @@ export const CompactMatchCard: React.FC<CompactMatchCardProps> = ({ match, onVie
                         {match.venue && (
                             <div className="flex items-center gap-1">
                                 <MapPin className="w-3 h-3" />
-                                <span className="truncate max-w-[80px]">{match.venue}</span>
+                                <span className="truncate max-w-[100px]">{match.venue}</span>
                             </div>
                         )}
                         <div className="flex items-center gap-1">
@@ -123,7 +123,7 @@ export const CompactMatchCard: React.FC<CompactMatchCardProps> = ({ match, onVie
                     
                     {/* 참가 진행률 바 (선택적) */}
                     {maxParticipants > 0 && (
-                        <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
+                        <div className="mt-2 bg-gray-200 rounded-full h-1.5 overflow-hidden">
                             <div 
                                 className={`h-1.5 rounded-full transition-all ${
                                     participantPercentage >= 100 ? 'bg-red-500' :
@@ -137,13 +137,19 @@ export const CompactMatchCard: React.FC<CompactMatchCardProps> = ({ match, onVie
                 </div>
                 
                 {/* 오른쪽: 액션 */}
-                <div className="flex items-center">
+                <div className="flex items-center flex-shrink-0">
                     {calculatedStatus === MatchStatus.REGISTRATION ? (
-                        <button className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors">
+                        <button 
+                            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                // 참가 로직 추가 예정
+                            }}
+                        >
                             참가
                         </button>
                     ) : (
-                        <ChevronRight className="w-4 h-4 text-gray-400" />
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
                     )}
                 </div>
             </div>

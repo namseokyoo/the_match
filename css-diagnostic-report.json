@@ -1,0 +1,135 @@
+[
+  {
+    "url": "https://the-match-five.vercel.app",
+    "pageName": "homepage",
+    "screenshotPath": "vercel-homepage-broken.png",
+    "pageTitle": "The Match - Tournament Management Platform",
+    "hasNavigation": true,
+    "cssFiles": [
+      {
+        "url": "https://the-match-five.vercel.app/_next/static/css/d536f0c14e80f721.css",
+        "status": 200,
+        "contentType": "text/css; charset=utf-8"
+      }
+    ],
+    "jsErrors": [],
+    "consoleErrors": [],
+    "networkErrors": [],
+    "tailwindClassesPresent": true,
+    "inlineStylesPresent": true,
+    "responseHeaders": {}
+  },
+  {
+    "url": "https://the-match-five.vercel.app/matches",
+    "pageName": "matches",
+    "screenshotPath": "vercel-matches-broken.png",
+    "pageTitle": "The Match - Tournament Management Platform",
+    "hasNavigation": true,
+    "cssFiles": [
+      {
+        "url": "https://the-match-five.vercel.app/_next/static/css/d536f0c14e80f721.css",
+        "status": 200,
+        "contentType": "text/css; charset=utf-8"
+      }
+    ],
+    "jsErrors": [],
+    "consoleErrors": [],
+    "networkErrors": [],
+    "tailwindClassesPresent": true,
+    "inlineStylesPresent": true,
+    "responseHeaders": {
+      "access-control-allow-origin": "*",
+      "age": "1859",
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-disposition": "inline",
+      "content-encoding": "br",
+      "content-type": "text/html; charset=utf-8",
+      "date": "Fri, 29 Aug 2025 11:30:15 GMT",
+      "etag": "W/\"aa1be64a2c35f32d2f8dccf299d0e311\"",
+      "server": "Vercel",
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+      "vary": "RSC, Next-Router-State-Tree, Next-Router-Prefetch",
+      "x-matched-path": "/matches",
+      "x-vercel-cache": "HIT",
+      "x-vercel-id": "kix1::l2pn6-1756467015731-80d622591f96"
+    }
+  },
+  {
+    "url": "https://the-match-five.vercel.app/teams",
+    "pageName": "teams",
+    "screenshotPath": "vercel-teams-broken.png",
+    "pageTitle": "The Match - Tournament Management Platform",
+    "hasNavigation": true,
+    "cssFiles": [
+      {
+        "url": "https://the-match-five.vercel.app/_next/static/css/d536f0c14e80f721.css",
+        "status": 200,
+        "contentType": "text/css; charset=utf-8"
+      }
+    ],
+    "jsErrors": [],
+    "consoleErrors": [],
+    "networkErrors": [],
+    "tailwindClassesPresent": true,
+    "inlineStylesPresent": true,
+    "responseHeaders": {
+      "access-control-allow-origin": "*",
+      "age": "0",
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-disposition": "inline",
+      "content-encoding": "br",
+      "content-type": "text/html; charset=utf-8",
+      "date": "Fri, 29 Aug 2025 11:30:24 GMT",
+      "etag": "W/\"913b96648ffbc4d42c8dcafce9fd9008\"",
+      "server": "Vercel",
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+      "vary": "RSC, Next-Router-State-Tree, Next-Router-Prefetch",
+      "x-matched-path": "/teams",
+      "x-vercel-cache": "PRERENDER",
+      "x-vercel-id": "kix1::cz8pb-1756467023970-7e85e02e98f6"
+    }
+  },
+  {
+    "url": "https://the-match-five.vercel.app/login",
+    "pageName": "login",
+    "screenshotPath": "vercel-login-broken.png",
+    "pageTitle": "The Match - Tournament Management Platform",
+    "hasNavigation": true,
+    "cssFiles": [
+      {
+        "url": "https://the-match-five.vercel.app/_next/static/css/d536f0c14e80f721.css",
+        "status": 200,
+        "contentType": "text/css; charset=utf-8"
+      }
+    ],
+    "jsErrors": [],
+    "consoleErrors": [
+      "[error] Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "networkErrors": [
+      {
+        "url": "https://the-match-five.vercel.app/forgot-password?_rsc=16djb",
+        "status": 404,
+        "statusText": ""
+      }
+    ],
+    "tailwindClassesPresent": true,
+    "inlineStylesPresent": true,
+    "responseHeaders": {
+      "access-control-allow-origin": "*",
+      "age": "0",
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-disposition": "inline",
+      "content-encoding": "br",
+      "content-type": "text/html; charset=utf-8",
+      "date": "Fri, 29 Aug 2025 11:30:32 GMT",
+      "etag": "W/\"d9d3bcec73156dddb7247f4839583b23\"",
+      "server": "Vercel",
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+      "vary": "RSC, Next-Router-State-Tree, Next-Router-Prefetch",
+      "x-matched-path": "/login",
+      "x-vercel-cache": "PRERENDER",
+      "x-vercel-id": "kix1::h4kzd-1756467032906-c70d42130bc7"
+    }
+  }
+]

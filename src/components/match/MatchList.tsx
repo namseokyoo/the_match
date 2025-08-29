@@ -153,74 +153,8 @@ export const MatchList: React.FC<MatchListProps> = ({
     }
 
     return (
-        <div className="space-y-6">
-            {/* 필터 및 검색 */}
-            <div className="bg-white rounded-lg shadow-sm border p-4">
-                <div className="space-y-4">
-                    {/* 검색 */}
-                    <div>
-                        <Input
-                            type="text"
-                            placeholder="경기 제목 또는 설명 검색..."
-                            defaultValue={filters.search}
-                            onChange={(value) => debouncedSearchChange(value)}
-                            className="w-full"
-                        />
-                    </div>
-
-                    {/* 필터 옵션 */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        {/* 상태 필터 */}
-                        <select
-                            value={filters.status}
-                            onChange={(e) => handleFilterChange('status', e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent"
-                        >
-                            {statusOptions.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-
-                        {/* 타입 필터 */}
-                        <select
-                            value={filters.type}
-                            onChange={(e) => handleFilterChange('type', e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-match-blue focus:border-transparent"
-                        >
-                            {typeOptions.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-
-                        {/* 내 경기 필터 */}
-                        <label className="flex items-center space-x-2">
-                            <input
-                                type="checkbox"
-                                checked={filters.myMatches}
-                                onChange={(e) => handleFilterChange('myMatches', e.target.checked)}
-                                className="rounded border-gray-300 text-match-blue focus:ring-match-blue"
-                            />
-                            <span className="text-sm text-gray-700">내 경기만</span>
-                        </label>
-
-                        {/* 필터 초기화 */}
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={clearFilters}
-                            className="whitespace-nowrap"
-                        >
-                            필터 초기화
-                        </Button>
-                    </div>
-                </div>
-            </div>
-
-            {/* 경기 목록 */}
+        <div>
+            {/* 경기 목록 - 필터 UI 제거하고 목록만 표시 */}
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[...Array(6)].map((_, i) => (
@@ -245,7 +179,7 @@ export const MatchList: React.FC<MatchListProps> = ({
                     }
                 />
             ) : (
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 gap-4">
                     {filteredMatches.map((match) => (
                         <CompactMatchCard
                             key={match.id}
