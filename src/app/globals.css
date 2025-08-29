@@ -122,11 +122,11 @@
 
 @layer base {
     * {
-        @apply border-border;
+        @apply border-gray-200;
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-white text-gray-900;
     }
 }
 
@@ -234,27 +234,27 @@
 /* Brand-specific utilities */
 @layer utilities {
   .gradient-primary {
-    @apply bg-gradient-to-r from-match-blue to-match-purple;
+    @apply bg-gradient-to-r from-blue-600 to-purple-600;
   }
   
   .gradient-secondary {
-    @apply bg-gradient-to-r from-match-green to-match-blue;
+    @apply bg-gradient-to-r from-green-600 to-blue-600;
   }
   
   .text-gradient {
-    @apply bg-gradient-to-r from-match-blue to-match-purple bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
   }
   
   .shadow-match {
-    @apply shadow-lg shadow-match-blue/20;
+    @apply shadow-lg shadow-blue-600/20;
   }
   
   .border-match {
-    @apply border border-match-blue/20;
+    @apply border border-blue-600/20;
   }
   
   .btn-match {
-    @apply gradient-primary text-white font-semibold px-6 py-3 rounded-lg shadow-match hover:shadow-xl transition-all duration-200 transform hover:scale-105;
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105;
   }
 }
 
