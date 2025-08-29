@@ -56,11 +56,42 @@ export async function GET() {
             console.warn('Stats fetch errors:', { matchCountError, teamCountError, playerCountError });
         }
 
+        // 각 경기의 승인된 참가자 수 조회
+        const matchesWithParticipants = await Promise.all(
+            (matches || []).map(async (match: any) => {
+                const { data: participants } = await supabaseAdmin
+                    .from('match_participants')
+                    .select('status')
+                    .eq('match_id', match.id)
+                    .eq('status', 'approved');
+                
+                return {
+                    ...match,
+                    current_participants: participants?.length || 0
+                };
+            })
+        );
+
+        // 각 팀의 실제 멤버 수 조회
+        const teamsWithMembers = await Promise.all(
+            (teams || []).map(async (team: any) => {
+                const { data: players } = await supabaseAdmin
+                    .from('players')
+                    .select('id')
+                    .eq('team_id', team.id);
+                
+                return {
+                    ...team,
+                    member_count: players?.length || 0
+                };
+            })
+        );
+
         // 데이터 처리 및 분류
         const now = new Date();
         
         // 활성 경기들 (진행 중 + 등록 중)
-        const activeMatches = (matches || [])
+        const activeMatches = matchesWithParticipants
             .filter(match => 
                 match.status === 'in_progress' || 
                 match.status === 'registration'
@@ -68,7 +99,7 @@ export async function GET() {
             .slice(0, 6);
 
         // 곧 시작될 경기들 (draft와 registration 상태 모두 포함)
-        const upcomingMatches = (matches || [])
+        const upcomingMatches = matchesWithParticipants
             .filter(match => {
                 // draft, registration 상태의 경기들 포함
                 if (!['registration', 'draft'].includes(match.status as string)) {
@@ -95,7 +126,7 @@ export async function GET() {
             .slice(0, 4);
 
         // 팀원 모집 중인 팀들 (recruitment_count가 있고 현재 멤버수보다 많은 팀)
-        const recruitingTeams = (teams || [])
+        const recruitingTeams = teamsWithMembers
             .filter(team => {
                 const recruitmentCount = team.recruitment_count as number;
                 const currentMembers = team.current_members as number || 0;

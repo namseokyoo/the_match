@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Calendar, Clock, ArrowRight, UserPlus, Users, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { OnboardingTour } from '@/components/onboarding';
 import WelcomeGuide from '@/components/onboarding/WelcomeGuide';
@@ -13,9 +14,12 @@ import { calculateMatchStatus, getMatchStatusLabel, getMatchStatusColor } from '
 import Carousel from '@/components/ui/Carousel';
 import LiveMatchCard from '@/components/home/LiveMatchCard';
 import CommunitySection from '@/components/home/CommunitySection';
+import { CompactMatchCard } from '@/components/match/CompactMatchCard';
+import { CompactTeamCard } from '@/components/team/CompactTeamCard';
 
 export default function Home() {
     const { user } = useAuth();
+    const router = useRouter();
     const [recruitingTeams, setRecruitingTeams] = useState<Team[]>([]);
     const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
     const [loading, setLoading] = useState(true);
@@ -230,59 +234,18 @@ export default function Home() {
                     ) : upcomingMatches.filter(match => {
                         // DB의 status가 registration인 경기만 표시 (calculateMatchStatus 대신 실제 status 사용)
                         return match.status === 'registration';
-                    }).slice(0, 6).length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    }).slice(0, 4).length > 0 ? (
+                        <div className="space-y-3">
                             {upcomingMatches.filter(match => {
                                 // DB의 status가 registration인 경기만 표시
                                 return match.status === 'registration';
-                            }).slice(0, 6).map(match => {
-                                const calculatedStatus = calculateMatchStatus(
-                                    match.registration_start_date,
-                                    match.registration_deadline,
-                                    match.start_date,
-                                    match.end_date,
-                                    match.status
-                                );
-                                const statusLabel = getMatchStatusLabel(calculatedStatus);
-                                const statusColor = getMatchStatusColor(calculatedStatus);
-
-                                return (
-                                    <Link key={match.id} href={`/matches/${match.id}`}>
-                                        <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-150 cursor-pointer h-full">
-                                            <div className="flex justify-between items-start mb-3">
-                                                <h3 className="font-semibold text-gray-900 text-base line-clamp-1 flex-1">
-                                                    {match.title}
-                                                </h3>
-                                                <span className={`px-2 py-0.5 text-xs rounded font-medium ${statusColor} ml-2`}>
-                                                    {statusLabel}
-                                                </span>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <div className="flex items-center gap-2">
-                                                    <Calendar className="w-4 h-4 text-gray-400" />
-                                                    <span className="text-sm text-gray-700">{formatDate(match.start_date || '')}</span>
-                                                </div>
-                                                {match.registration_deadline && (
-                                                    <div className="flex items-center gap-2">
-                                                        <Clock className="w-4 h-4 text-amber-500" />
-                                                        <span className="text-xs text-gray-500">
-                                                            마감 {formatDate(match.registration_deadline)}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                                {match.max_participants && (
-                                                    <div className="flex items-center gap-2">
-                                                        <Users className="w-4 h-4 text-gray-400" />
-                                                        <span className="text-xs text-gray-500">
-                                                            {(match as any).current_participants || 0}/{match.max_participants} 팀
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </Link>
-                                );
-                            })}
+                            }).slice(0, 4).map(match => (
+                                <CompactMatchCard 
+                                    key={match.id} 
+                                    match={match}
+                                    onView={(matchId) => router.push(`/matches/${matchId}`)}
+                                />
+                            ))}
                         </div>
                     ) : (
                         <div className="text-center py-8 bg-gray-100 rounded-lg">
@@ -336,30 +299,14 @@ export default function Home() {
                                 </div>
                             ))}
                         </div>
-                    ) : recruitingTeams.slice(0, 6).length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {recruitingTeams.slice(0, 6).map(team => (
-                                <Link key={team.id} href={`/teams/${team.id}`}>
-                                    <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-150 cursor-pointer h-full">
-                                        <div className="flex justify-between items-start mb-3">
-                                            <h3 className="font-semibold text-gray-900 text-base line-clamp-1 flex-1">
-                                                {team.name}
-                                            </h3>
-                                            <span className="px-2 py-0.5 text-xs rounded font-medium bg-emerald-100 text-emerald-700 ml-2">
-                                                모집중
-                                            </span>
-                                        </div>
-                                        <p className="text-sm text-gray-500 line-clamp-2 mb-3">
-                                            {team.description || '팀 설명이 없습니다'}
-                                        </p>
-                                        <div className="flex items-center gap-2">
-                                            <UserPlus className="w-4 h-4 text-gray-400" />
-                                            <span className="text-xs text-gray-500">
-                                                {(team as any).current_members || 0} / {(team as any).recruitment_count || '?'} 명
-                                            </span>
-                                        </div>
-                                    </div>
-                                </Link>
+                    ) : recruitingTeams.slice(0, 4).length > 0 ? (
+                        <div className="space-y-3">
+                            {recruitingTeams.slice(0, 4).map(team => (
+                                <CompactTeamCard 
+                                    key={team.id} 
+                                    team={team}
+                                    onView={(teamId) => router.push(`/teams/${teamId}`)}
+                                />
                             ))}
                         </div>
                     ) : (
